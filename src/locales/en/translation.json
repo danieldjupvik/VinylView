@@ -1,0 +1,60 @@
+{
+  "app": {
+    "name": "VinylView",
+    "description": "Browse your Discogs vinyl collection"
+  },
+  "nav": {
+    "collection": "Collection",
+    "wantlist": "Wantlist",
+    "settings": "Settings",
+    "browse": "Browse",
+    "backHome": "Go back home"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "username": "Username",
+    "token": "Personal Access Token",
+    "tokenPlaceholder": "Enter your Discogs PAT",
+    "usernamePlaceholder": "Enter your Discogs username",
+    "loginButton": "Sign In",
+    "loggingIn": "Signing in...",
+    "loginSuccess": "Successfully logged in",
+    "loginError": "Invalid username or token",
+    "logoutSuccess": "Successfully logged out"
+  },
+  "collection": {
+    "title": "My Collection",
+    "empty": "No vinyl records found",
+    "loading": "Loading collection...",
+    "search": "Search by artist or title...",
+    "sort": {
+      "label": "Sort by",
+      "artist": "Artist",
+      "title": "Title",
+      "dateAdded": "Date Added"
+    },
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "page": "Page {{current}} of {{total}}"
+    },
+    "vinyl": "Vinyl",
+    "records": "{{count}} record",
+    "records_other": "{{count}} records"
+  },
+  "settings": {
+    "title": "Settings",
+    "version": "Version",
+    "theme": "Theme",
+    "dark": "Dark",
+    "light": "Light"
+  },
+  "errors": {
+    "generic": "Something went wrong",
+    "network": "Network error. Please try again.",
+    "rateLimit": "Rate limit exceeded. Please wait a moment.",
+    "unauthorized": "Session expired. Please log in again.",
+    "notFound": "Page not found"
+  }
+}

@@ -1,9 +1,11 @@
 # VinylView MVP Implementation Plan
 
 ## Overview
+
 A modern web application for browsing Discogs vinyl collections. The MVP focuses on authentication and the Collection view, with architecture designed for future expansion.
 
 ## MVP Scope
+
 - **In scope**: Login (Username + PAT), View Collection (vinyl-only grid), Logout, Dark theme, PWA
 - **Out of scope (future)**: Wantlist, Collection Value/Stats, OAuth, Light theme
 
@@ -12,17 +14,21 @@ A modern web application for browsing Discogs vinyl collections. The MVP focuses
 ## Architecture Decisions
 
 ### Navigation: Collapsible Sidebar
+
 Recommended for scalability (5+ future pages), mobile-friendly collapse, and maximum content width for the vinyl grid.
 
 ### State Management
+
 - **Server state**: TanStack Query (collection data, user identity)
 - **Client state**: React Context (auth only)
 - **Persistence**: localStorage (token, username)
 
 ### Vinyl Filtering
+
 Client-side filtering by `formats[].name === "Vinyl"` since Discogs API doesn't support server-side format filtering.
 
 ### Rate Limiting
+
 Token bucket pattern respecting 60 req/min with buffer, tracking via response headers.
 
 ---
@@ -121,6 +127,7 @@ bunx shadcn add button input card skeleton sidebar sonner scroll-area dropdown-m
 ## Implementation Phases
 
 ### Phase 1: Foundation
+
 1. Install all dependencies
 2. Add shadcn components
 3. Create folder structure
@@ -130,10 +137,12 @@ bunx shadcn add button input card skeleton sidebar sonner scroll-area dropdown-m
 7. Create `.nvmrc` file
 
 **Files to modify:**
+
 - `vite.config.ts` - Add router and PWA plugins
 - `package.json` - Dependencies added via bun
 
 ### Phase 2: Core Infrastructure
+
 1. Create `src/lib/constants.ts` - App version, API base URL
 2. Create `src/lib/storage.ts` - Token/username persistence
 3. Create `src/api/rate-limiter.ts` - Rate limit tracking class
@@ -142,10 +151,12 @@ bunx shadcn add button input card skeleton sidebar sonner scroll-area dropdown-m
 6. Create `src/types/discogs.ts` - TypeScript interfaces
 
 **Key API Endpoints:**
+
 - `GET /oauth/identity` - Validate token, get username
 - `GET /users/{username}/collection/folders/0/releases` - Collection items
 
 ### Phase 3: State & Providers
+
 1. Create `src/providers/query-provider.tsx`
 2. Create `src/providers/auth-provider.tsx`
 3. Create `src/providers/i18n-provider.tsx`
@@ -153,6 +164,7 @@ bunx shadcn add button input card skeleton sidebar sonner scroll-area dropdown-m
 5. Update `src/main.tsx` - Wrap with providers
 
 ### Phase 4: Routing
+
 1. Create `src/routes/__root.tsx` - Dark mode, toaster
 2. Create `src/routes/login.tsx` - Public login page
 3. Create `src/routes/_authenticated.tsx` - Auth guard + layout
@@ -162,22 +174,26 @@ bunx shadcn add button input card skeleton sidebar sonner scroll-area dropdown-m
 7. Update `src/App.tsx` - Router integration
 
 ### Phase 5: Layout Components
+
 1. Create `src/components/layout/app-layout.tsx`
 2. Create `src/components/layout/app-sidebar.tsx`
 3. Create `src/components/layout/sidebar-user.tsx`
 
 **Sidebar Structure:**
+
 - Header: Logo placeholder + "VinylView"
 - Browse section: Collection (active), Wantlist (future, disabled)
 - Settings at bottom
 - Footer: User avatar, username, logout dropdown
 
 ### Phase 6: Auth Components
+
 1. Create `src/components/auth/login-form.tsx`
 2. Wire up validation via `/oauth/identity`
 3. Add toast notifications (sonner)
 
 ### Phase 7: Collection Components
+
 1. Create `src/hooks/use-collection.ts` - TanStack Query hook
 2. Create `src/components/collection/vinyl-card.tsx`
 3. Create `src/components/collection/vinyl-card-skeleton.tsx`
@@ -186,6 +202,7 @@ bunx shadcn add button input card skeleton sidebar sonner scroll-area dropdown-m
 6. Create `src/components/collection/pagination-controls.tsx`
 
 **Collection Features:**
+
 - Grid view with cover art focus
 - Client-side vinyl filtering
 - Sort: Artist, Title, Date Added
@@ -193,6 +210,7 @@ bunx shadcn add button input card skeleton sidebar sonner scroll-area dropdown-m
 - Pagination with 100 items/page
 
 ### Phase 8: Animations & Polish
+
 1. Add motion animations:
    - Page transitions (fade/slide)
    - Card hover effects (scale, shadow)
@@ -203,6 +221,7 @@ bunx shadcn add button input card skeleton sidebar sonner scroll-area dropdown-m
 5. Clean up demo files (App.css, placeholder content)
 
 ### Phase 9: Testing
+
 1. Configure Vitest in `vite.config.ts`
 2. Create test setup file with global mocks
 3. Set up MSW for API mocking
@@ -212,6 +231,7 @@ bunx shadcn add button input card skeleton sidebar sonner scroll-area dropdown-m
 7. Add test script to `package.json`
 
 **Test Coverage Goals:**
+
 - API layer: Rate limiter, Discogs API client
 - Hooks: useAuth, useCollection
 - Components: LoginForm, VinylCard, VinylGrid
@@ -222,6 +242,7 @@ bunx shadcn add button input card skeleton sidebar sonner scroll-area dropdown-m
 ## Testing Strategy
 
 ### Testing Stack
+
 - **Vitest**: Fast, Vite-native test runner
 - **React Testing Library**: Component testing with user-centric approach
 - **MSW (Mock Service Worker)**: API mocking for realistic testing
@@ -244,6 +265,7 @@ src/__tests__/
 ### Test Categories
 
 #### 1. Unit Tests (API Layer)
+
 ```typescript
 // rate-limiter.test.ts
 - Should track remaining requests from headers
@@ -257,6 +279,7 @@ src/__tests__/
 ```
 
 #### 2. Hook Tests
+
 ```typescript
 // use-auth.test.ts
 - Should return isAuthenticated: false when no token
@@ -272,6 +295,7 @@ src/__tests__/
 ```
 
 #### 3. Component Tests
+
 ```typescript
 // login-form.test.tsx
 - Should render username and token inputs
@@ -293,6 +317,7 @@ src/__tests__/
 ```
 
 #### 4. Integration Tests
+
 ```typescript
 // auth-flow.test.tsx
 - Complete login flow: form submit → API call → redirect
@@ -316,18 +341,22 @@ export const handlers = [
   }),
 
   // Collection endpoint
-  http.get('https://api.discogs.com/users/:username/collection/folders/0/releases', () => {
-    return HttpResponse.json({
-      pagination: { pages: 2, page: 1, per_page: 100, items: 150 },
-      releases: mockReleases,
-    })
-  }),
+  http.get(
+    'https://api.discogs.com/users/:username/collection/folders/0/releases',
+    () => {
+      return HttpResponse.json({
+        pagination: { pages: 2, page: 1, per_page: 100, items: 150 },
+        releases: mockReleases
+      })
+    }
+  )
 ]
 ```
 
 ### Test Scripts
 
 Add to `package.json`:
+
 ```json
 {
   "scripts": {
@@ -342,6 +371,7 @@ Add to `package.json`:
 ### Vitest Configuration
 
 Add to `vite.config.ts`:
+
 ```typescript
 export default defineConfig({
   test: {
@@ -352,13 +382,14 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html'],
-      exclude: ['src/__tests__/**', 'src/components/ui/**'],
-    },
-  },
+      exclude: ['src/__tests__/**', 'src/components/ui/**']
+    }
+  }
 })
 ```
 
 ### Coverage Targets
+
 - Statements: 70%+
 - Branches: 70%+
 - Functions: 70%+
@@ -371,6 +402,7 @@ Exclude from coverage: shadcn/ui components (third-party), test files, type defi
 ## Key Technical Details
 
 ### Authentication Flow
+
 ```
 App Load → Check localStorage for token
   ├─ No token → Redirect to /login
@@ -384,6 +416,7 @@ Login Submit → Call /oauth/identity with PAT
 ```
 
 ### Rate Limiting Strategy
+
 ```typescript
 // Track via response headers
 X-Discogs-Ratelimit: 60
@@ -395,12 +428,14 @@ X-Discogs-Ratelimit-Remaining: 48
 ```
 
 ### Vinyl Filtering Logic
+
 ```typescript
 const isVinyl = (release) =>
-  release.basic_information.formats.some(f => f.name === "Vinyl")
+  release.basic_information.formats.some((f) => f.name === 'Vinyl')
 ```
 
 ### Large Collection Strategy
+
 - Fetch 100 items per page (API max)
 - Cache pages in TanStack Query
 - Show skeletons during loading
@@ -411,6 +446,7 @@ const isVinyl = (release) =>
 ## Verification Plan
 
 ### Manual Testing Checklist
+
 1. **Login Flow**
    - [ ] Invalid credentials show error toast
    - [ ] Valid credentials redirect to collection
@@ -440,6 +476,7 @@ const isVinyl = (release) =>
    - [ ] Throttling prevents API limit exceeded
 
 ### Build & Test Verification
+
 ```bash
 bun run lint       # No ESLint errors
 bun run test:run   # All tests pass
@@ -452,17 +489,17 @@ bun run preview    # Production build works locally
 
 ## Files to Modify (Existing)
 
-| File | Changes |
-|------|---------|
-| `vite.config.ts` | Add TanStack Router plugin, PWA plugin |
-| `src/main.tsx` | Wrap app with providers, add router |
-| `src/App.tsx` | Replace demo content with RouterProvider |
-| `src/index.css` | Ensure dark mode variables active |
-| `src/lib/utils.ts` | Keep as-is, extend if needed |
+| File               | Changes                                  |
+| ------------------ | ---------------------------------------- |
+| `vite.config.ts`   | Add TanStack Router plugin, PWA plugin   |
+| `src/main.tsx`     | Wrap app with providers, add router      |
+| `src/App.tsx`      | Replace demo content with RouterProvider |
+| `src/index.css`    | Ensure dark mode variables active        |
+| `src/lib/utils.ts` | Keep as-is, extend if needed             |
 
 ## Files to Create (New)
 
-~45 new files across api/, components/, hooks/, lib/, locales/, providers/, routes/, types/, __tests__/, and public/
+~45 new files across api/, components/, hooks/, lib/, locales/, providers/, routes/, types/, **tests**/, and public/
 
 ---
 
