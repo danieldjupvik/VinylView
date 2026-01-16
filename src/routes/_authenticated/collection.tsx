@@ -28,6 +28,9 @@ function CollectionPage() {
     sortOrder,
     setSortOrder
   } = useCollection({ page })
+  const visibleCount = filteredReleases.length
+  const rangeStart = visibleCount > 0 ? 1 : 0
+  const rangeEnd = visibleCount
 
   // Reset to page 1 when sort changes
   const handleSortChange = (newSort: typeof sort) => {
@@ -56,6 +59,14 @@ function CollectionPage() {
     <div className="flex flex-col gap-6 p-6">
       <div>
         <h1 className="text-2xl font-bold">{t('collection.title')}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {t('collection.showing', {
+            count: visibleCount,
+            start: rangeStart,
+            end: rangeEnd,
+            total: visibleCount
+          })}
+        </p>
       </div>
 
       <CollectionToolbar
@@ -65,7 +76,6 @@ function CollectionPage() {
         onSortChange={handleSortChange}
         sortOrder={sortOrder}
         onSortOrderChange={handleSortOrderChange}
-        totalCount={filteredReleases.length}
       />
 
       <VinylGrid releases={filteredReleases} isLoading={isLoading} />

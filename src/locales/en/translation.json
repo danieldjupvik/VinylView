@@ -29,10 +29,29 @@
     "loading": "Loading collection...",
     "search": "Search by artist or title...",
     "sort": {
-      "label": "Sort by",
+      "placeholder": "Sort by",
       "artist": "Artist",
-      "title": "Title",
-      "dateAdded": "Date Added"
+      "title": "Album",
+      "dateAdded": "Date Added",
+      "releaseYear": "Release Year",
+      "label": "Label",
+      "format": "Format",
+      "genre": "Genre",
+      "random": "Random"
+    },
+    "sortGroup": {
+      "timeline": "Timeline",
+      "albumInfo": "Album Info",
+      "other": "Other"
+    },
+    "sortOrder": {
+      "shuffle": "Shuffle",
+      "newest": "Newest",
+      "oldest": "Oldest",
+      "az": "A-Z",
+      "za": "Z-A",
+      "asc": "Ascending",
+      "desc": "Descending"
     },
     "pagination": {
       "previous": "Previous",
@@ -41,7 +60,9 @@
     },
     "vinyl": "Vinyl",
     "records": "{{count}} record",
-    "records_other": "{{count}} records"
+    "records_other": "{{count}} records",
+    "showing": "Showing {{start}}-{{end}} of {{total}} album",
+    "showing_other": "Showing {{start}}-{{end}} of {{total}} albums"
   },
   "settings": {
     "title": "Settings",

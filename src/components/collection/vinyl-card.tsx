@@ -208,11 +208,20 @@ export function VinylCard({ release, className }: VinylCardProps) {
   const artistName = info.artists.map((a) => a.name).join(', ')
   const coverImage = info.cover_image || info.thumb
   const year = info.year > 0 ? info.year : null
-  const formatDesc = info.formats
-    .flatMap((f) => f.descriptions ?? [])
+  const genreList =
+    info.genres && info.genres.length > 0
+      ? (() => {
+          const parts = info.genres
+            .flatMap((genre) => genre.split(',').map((part) => part.trim()))
+            .filter(Boolean)
+          const limited = parts.slice(0, 2)
+          if (limited.length === 2) return `${limited[0]} & ${limited[1]}`
+          return limited.join(', ')
+        })()
+      : null
+  const metaLine = [year ? String(year) : null, genreList]
     .filter(Boolean)
-    .slice(0, 2)
-    .join(', ')
+    .join(' · ')
   const vinylInfo = extractVinylInfo(info.formats)
   const colorStyles = vinylInfo.color ? getColorStyles(vinylInfo.color) : null
 
@@ -278,11 +287,11 @@ export function VinylCard({ release, className }: VinylCardProps) {
           >
             {artistName}
           </p>
-          <div className="mt-2 flex items-center gap-2 text-xs text-gray-300">
-            {year && <span>{year}</span>}
-            {year && formatDesc && <span>·</span>}
-            {formatDesc && <span className="line-clamp-1">{formatDesc}</span>}
-          </div>
+          {metaLine && (
+            <div className="mt-2 text-xs text-gray-300">
+              <span className="line-clamp-1">{metaLine}</span>
+            </div>
+          )}
         </div>
       </div>
 

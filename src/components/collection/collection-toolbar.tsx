@@ -1,10 +1,13 @@
-import { Search, ArrowUpDown } from 'lucide-react'
+import { Search, ArrowDown, ArrowUp, Shuffle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
+  SelectSeparator,
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
@@ -18,7 +21,6 @@ interface CollectionToolbarProps {
   onSortChange: (sort: CollectionSortKey) => void
   sortOrder: CollectionSortOrder
   onSortOrderChange: (order: CollectionSortOrder) => void
-  totalCount?: number
 }
 
 export function CollectionToolbar({
@@ -27,14 +29,35 @@ export function CollectionToolbar({
   sort,
   onSortChange,
   sortOrder,
-  onSortOrderChange,
-  totalCount
+  onSortOrderChange
 }: CollectionToolbarProps) {
   const { t } = useTranslation()
 
   const toggleSortOrder = () => {
     onSortOrderChange(sortOrder === 'asc' ? 'desc' : 'asc')
   }
+
+  const isTimelineSort = sort === 'added' || sort === 'releaseYear'
+  const isAlphaSort =
+    sort === 'artist' ||
+    sort === 'title' ||
+    sort === 'label' ||
+    sort === 'format' ||
+    sort === 'genre'
+  const isRandomSort = sort === 'random'
+  const sortOrderLabel = isRandomSort
+    ? t('collection.sortOrder.shuffle')
+    : isTimelineSort
+      ? sortOrder === 'asc'
+        ? t('collection.sortOrder.oldest')
+        : t('collection.sortOrder.newest')
+      : isAlphaSort
+        ? sortOrder === 'asc'
+          ? t('collection.sortOrder.az')
+          : t('collection.sortOrder.za')
+        : sortOrder === 'asc'
+          ? t('collection.sortOrder.asc')
+          : t('collection.sortOrder.desc')
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -48,36 +71,63 @@ export function CollectionToolbar({
         />
       </div>
       <div className="flex items-center gap-2">
-        {totalCount !== undefined && (
-          <span className="text-sm text-muted-foreground">
-            {t('collection.records', { count: totalCount })}
-          </span>
-        )}
         <Select value={sort} onValueChange={onSortChange}>
           <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder={t('collection.sort.label')} />
+            <SelectValue placeholder={t('collection.sort.placeholder')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="artist">
-              {t('collection.sort.artist')}
-            </SelectItem>
-            <SelectItem value="title">{t('collection.sort.title')}</SelectItem>
-            <SelectItem value="added">
-              {t('collection.sort.dateAdded')}
-            </SelectItem>
+            <SelectGroup>
+              <SelectLabel>{t('collection.sortGroup.timeline')}</SelectLabel>
+              <SelectItem value="added">
+                {t('collection.sort.dateAdded')}
+              </SelectItem>
+              <SelectItem value="releaseYear">
+                {t('collection.sort.releaseYear')}
+              </SelectItem>
+            </SelectGroup>
+            <SelectSeparator />
+            <SelectGroup>
+              <SelectLabel>{t('collection.sortGroup.albumInfo')}</SelectLabel>
+              <SelectItem value="artist">
+                {t('collection.sort.artist')}
+              </SelectItem>
+              <SelectItem value="title">
+                {t('collection.sort.title')}
+              </SelectItem>
+              <SelectItem value="label">
+                {t('collection.sort.label')}
+              </SelectItem>
+              <SelectItem value="format">
+                {t('collection.sort.format')}
+              </SelectItem>
+              <SelectItem value="genre">
+                {t('collection.sort.genre')}
+              </SelectItem>
+            </SelectGroup>
+            <SelectSeparator />
+            <SelectGroup>
+              <SelectLabel>{t('collection.sortGroup.other')}</SelectLabel>
+              <SelectItem value="random">
+                {t('collection.sort.random')}
+              </SelectItem>
+            </SelectGroup>
           </SelectContent>
         </Select>
         <Button
           variant="outline"
-          size="icon"
+          size="sm"
           onClick={toggleSortOrder}
-          title={sortOrder === 'asc' ? 'Ascending' : 'Descending'}
+          title={sortOrderLabel}
+          className="gap-2"
         >
-          <ArrowUpDown
-            className={`h-4 w-4 transition-transform ${
-              sortOrder === 'desc' ? 'rotate-180' : ''
-            }`}
-          />
+          {isRandomSort ? (
+            <Shuffle className="h-4 w-4" />
+          ) : sortOrder === 'asc' ? (
+            <ArrowUp className="h-4 w-4" />
+          ) : (
+            <ArrowDown className="h-4 w-4" />
+          )}
+          <span className="text-xs font-medium">{sortOrderLabel}</span>
         </Button>
       </div>
     </div>

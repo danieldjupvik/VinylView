@@ -21,6 +21,7 @@ export interface DiscogsLabel {
   catno: string
   resource_url?: string
   entity_type?: string
+  entity_type_name?: string
 }
 
 export interface DiscogsFormat {
@@ -77,12 +78,28 @@ export interface DiscogsCollectionResponse {
   releases: DiscogsCollectionRelease[]
 }
 
-export type CollectionSortKey = 'artist' | 'title' | 'added'
+export type CollectionSortKey =
+  | 'artist'
+  | 'title'
+  | 'added'
+  | 'genre'
+  | 'releaseYear'
+  | 'label'
+  | 'format'
+  | 'random'
+
+export type DiscogsCollectionSortKey =
+  | 'artist'
+  | 'title'
+  | 'added'
+  | 'year'
+  | 'label'
+  | 'format'
 export type CollectionSortOrder = 'asc' | 'desc'
 
 export interface CollectionParams {
   page?: number
   perPage?: number
-  sort?: CollectionSortKey
+  sort?: DiscogsCollectionSortKey
   sortOrder?: CollectionSortOrder
 }
