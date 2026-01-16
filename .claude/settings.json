@@ -6,16 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "prettier --write \"$CLAUDE_FILE_PATHS\""
-          }
-        ]
-      },
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "eslint --fix \"$CLAUDE_FILE_PATHS\" || echo '⚠️ ESLint errors detected - please review'"
+            "command": "npx prettier --write \"$CLAUDE_FILE_PATHS\""
           }
         ]
       },
@@ -25,6 +16,15 @@
           {
             "type": "command",
             "command": "npx tsc --noEmit || echo '⚠️ TypeScript errors detected - please review'"
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "npx eslint --fix \"$CLAUDE_FILE_PATHS\" || echo '⚠️ ESLint errors detected - please review'"
           }
         ]
       }
