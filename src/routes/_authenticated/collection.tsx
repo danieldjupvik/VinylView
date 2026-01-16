@@ -45,9 +45,7 @@ function CollectionPage() {
   const currentPage = pagination?.page ?? page
   const rangeStart = visibleCount > 0 ? (currentPage - 1) * perPage + 1 : 0
   const rangeEnd =
-    visibleCount > 0
-      ? Math.min(rangeStart + visibleCount - 1, totalCount)
-      : 0
+    visibleCount > 0 ? Math.min(rangeStart + visibleCount - 1, totalCount) : 0
 
   // Reset to page 1 when sort changes
   const handleSortChange = (newSort: typeof sort) => {

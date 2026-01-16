@@ -28,7 +28,11 @@ const sortSizes = (values: string[]) =>
   values.sort((a, b) => {
     const aNumber = Number.parseFloat(a)
     const bNumber = Number.parseFloat(b)
-    if (!Number.isNaN(aNumber) && !Number.isNaN(bNumber) && aNumber !== bNumber) {
+    if (
+      !Number.isNaN(aNumber) &&
+      !Number.isNaN(bNumber) &&
+      aNumber !== bNumber
+    ) {
       return aNumber - bNumber
     }
     return collator.compare(a, b)
@@ -157,20 +161,14 @@ export function useCollection(
   const [selectedLabels, setSelectedLabels] = useState<string[]>(
     urlFilters.labels
   )
-  const [selectedTypes, setSelectedTypes] = useState<string[]>(
-    urlFilters.types
-  )
-  const [selectedSizes, setSelectedSizes] = useState<string[]>(
-    urlFilters.sizes
-  )
+  const [selectedTypes, setSelectedTypes] = useState<string[]>(urlFilters.types)
+  const [selectedSizes, setSelectedSizes] = useState<string[]>(urlFilters.sizes)
   const [selectedCountries, setSelectedCountries] = useState<string[]>(
     urlFilters.countries
   )
   const [yearRangeSelection, setYearRangeSelection] = useState<
     [number, number] | null
-  >(
-    urlFilters.yearRange
-  )
+  >(urlFilters.yearRange)
   const [randomSeed, setRandomSeed] = useState(() => Date.now())
   const page = options.page ?? 1
   const isClientSort = sort === 'genre' || sort === 'random'
@@ -222,9 +220,7 @@ export function useCollection(
         }
       })()
 
-  const serverSortOrder: CollectionSortOrder = isClientSort
-    ? 'desc'
-    : sortOrder
+  const serverSortOrder: CollectionSortOrder = isClientSort ? 'desc' : sortOrder
 
   const setSortWithRandom = (nextSort: CollectionSortKey) => {
     if (nextSort === 'random' && sort !== 'random') {
@@ -432,8 +428,7 @@ export function useCollection(
         if (!info.year || info.year <= 0) {
           matchesYear = false
         } else {
-          matchesYear =
-            info.year >= yearRange[0] && info.year <= yearRange[1]
+          matchesYear = info.year >= yearRange[0] && info.year <= yearRange[1]
         }
       }
 
@@ -500,7 +495,7 @@ export function useCollection(
   const perPage = data?.pagination.per_page ?? COLLECTION.PER_PAGE
   const totalPages = shouldFetchAllPages
     ? Math.max(1, Math.ceil(sortedReleases.length / perPage))
-    : data?.pagination.pages ?? 1
+    : (data?.pagination.pages ?? 1)
   const safePage = shouldFetchAllPages ? Math.min(page, totalPages) : page
   const pagedReleases = useMemo(() => {
     if (!shouldFetchAllPages) {

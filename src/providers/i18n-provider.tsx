@@ -7,7 +7,9 @@ import noTranslation from '@/locales/no/translation.json'
 const detectLanguage = () => {
   if (typeof navigator === 'undefined') return 'en'
   const candidate =
-    (navigator.languages && navigator.languages[0]) || navigator.language || 'en'
+    (navigator.languages && navigator.languages[0]) ||
+    navigator.language ||
+    'en'
   const normalized = candidate.toLowerCase()
   if (
     normalized.startsWith('no') ||

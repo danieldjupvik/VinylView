@@ -29,7 +29,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const storedUsername = getUsername()
 
       if (!token || !storedUsername) {
-        setState((prev) => ({ ...prev, isLoading: false }))
+        clearAuth()
+        setState({
+          isAuthenticated: false,
+          isLoading: false,
+          username: null,
+          userId: null
+        })
         return
       }
 
