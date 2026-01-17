@@ -6,12 +6,12 @@ import { server } from './mocks/server'
 if (!globalThis.localStorage || typeof localStorage.getItem !== 'function') {
   const store = new Map<string, string>()
   globalThis.localStorage = {
-    getItem: (key: string) => store.get(key) ?? null,
+    getItem: (key: string) => store.get(String(key)) ?? null,
     setItem: (key: string, value: string) => {
-      store.set(key, value)
+      store.set(String(key), String(value))
     },
     removeItem: (key: string) => {
-      store.delete(key)
+      store.delete(String(key))
     },
     clear: () => {
       store.clear()

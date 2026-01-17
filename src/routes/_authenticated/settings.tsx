@@ -60,6 +60,7 @@ function SelectionCard({
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={selected}
       className={cn(
         'flex w-full items-center gap-3 rounded-md border p-3 text-left transition-all duration-200 hover:scale-[1.02] hover:bg-accent/50 hover:shadow-md',
         selected ? 'border-primary/60 bg-primary/10 shadow-sm' : 'border-border'

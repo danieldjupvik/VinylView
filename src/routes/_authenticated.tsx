@@ -1,5 +1,6 @@
 import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router'
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/hooks/use-auth'
 import {
   SidebarInset,
@@ -18,6 +19,7 @@ export const Route = createFileRoute('/_authenticated')({
 function AuthenticatedLayout() {
   const { isAuthenticated, isLoading } = useAuth()
   const navigate = useNavigate()
+  const { t } = useTranslation()
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -54,7 +56,7 @@ function AuthenticatedLayout() {
               <SidebarTrigger className="md:hidden" />
               <div className="flex items-center gap-2 md:hidden">
                 <BrandMark size="sm" />
-                <span className="font-semibold">VinylDeck</span>
+                <span className="font-semibold">{t('app.name')}</span>
               </div>
             </div>
             <div className="flex items-center gap-2">

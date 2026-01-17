@@ -130,11 +130,11 @@ export function CollectionToolbar({
           className="transition-all duration-200 hover:scale-110"
         >
           {isRandomSort ? (
-            <Shuffle className="h-4 w-4 transition-transform duration-200" />
+            <Shuffle className="h-4 w-4" />
           ) : sortOrder === 'asc' ? (
-            <ArrowUp className="h-4 w-4 transition-transform duration-200" />
+            <ArrowUp className="h-4 w-4" />
           ) : (
-            <ArrowDown className="h-4 w-4 transition-transform duration-200" />
+            <ArrowDown className="h-4 w-4" />
           )}
         </Button>
       </div>
