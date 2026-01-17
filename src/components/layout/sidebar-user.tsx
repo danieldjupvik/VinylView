@@ -1,3 +1,4 @@
+import type { MouseEvent } from 'react'
 import { ChevronsUpDown, LogOut, Settings } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Link, useLocation, useNavigate } from '@tanstack/react-router'
@@ -24,6 +25,13 @@ export function SidebarUser() {
   const { avatarSource, gravatarUrl } = usePreferences()
   const navigate = useNavigate()
   const location = useLocation()
+  const currentLocation = `${location.pathname}${location.search}${location.hash}`
+  const isModifiedEvent = (event: MouseEvent) =>
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey ||
+    event.button === 1
 
   const handleLogout = () => {
     logout()
@@ -82,7 +90,11 @@ export function SidebarUser() {
               <Link
                 to="/settings"
                 onClick={(event) => {
-                  if (location.pathname === '/settings') {
+                  if (isModifiedEvent(event)) {
+                    return
+                  }
+
+                  if (currentLocation === '/settings') {
                     event.preventDefault()
                   }
                 }}
