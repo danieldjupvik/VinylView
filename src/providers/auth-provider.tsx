@@ -8,7 +8,6 @@ import {
   getToken,
   getUsername,
   getStoredUserProfile,
-  getStoredIdentity,
   setToken,
   setStoredUserProfile,
   setStoredIdentity,
