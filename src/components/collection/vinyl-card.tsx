@@ -274,24 +274,26 @@ export function VinylCard({ release, className }: VinylCardProps) {
         )}
 
         {/* Hover Overlay with Details */}
-        <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 opacity-0 translate-y-2 transition-[opacity,transform] duration-300 group-hover:opacity-100 group-hover:translate-y-0">
-          <h3
-            className="line-clamp-2 text-base font-semibold text-white"
-            title={info.title}
-          >
-            {info.title}
-          </h3>
-          <p
-            className="mt-1 line-clamp-1 text-sm text-gray-200"
-            title={artistName}
-          >
-            {artistName}
-          </p>
-          {metaLine && (
-            <div className="mt-2 text-xs text-gray-300">
-              <span className="line-clamp-1">{metaLine}</span>
-            </div>
-          )}
+        <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <div className="translate-y-2 transition-transform duration-300 group-hover:translate-y-0">
+            <h3
+              className="line-clamp-2 text-base font-semibold text-white"
+              title={info.title}
+            >
+              {info.title}
+            </h3>
+            <p
+              className="mt-1 line-clamp-1 text-sm text-gray-200"
+              title={artistName}
+            >
+              {artistName}
+            </p>
+            {metaLine && (
+              <div className="mt-2 text-xs text-gray-300">
+                <span className="line-clamp-1">{metaLine}</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

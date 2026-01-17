@@ -25,7 +25,11 @@ function NotFoundComponent() {
       <p className="text-muted-foreground">
         {t('errors.notFound', 'Page not found')}
       </p>
-      <Link to="/" className="text-primary underline-offset-4 hover:underline">
+      <Link
+        to="/"
+        viewTransition
+        className="text-primary underline-offset-4 hover:underline"
+      >
         {t('nav.backHome', 'Go back home')}
       </Link>
     </div>

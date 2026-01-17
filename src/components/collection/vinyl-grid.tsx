@@ -7,9 +7,14 @@ import { VinylCardSkeleton } from './vinyl-card-skeleton'
 interface VinylGridProps {
   releases: DiscogsCollectionRelease[]
   isLoading: boolean
+  shouldAnimate: boolean
 }
 
-export function VinylGrid({ releases, isLoading }: VinylGridProps) {
+export function VinylGrid({
+  releases,
+  isLoading,
+  shouldAnimate
+}: VinylGridProps) {
   const { t } = useTranslation()
 
   if (isLoading) {
@@ -40,8 +45,12 @@ export function VinylGrid({ releases, isLoading }: VinylGridProps) {
       {releases.map((release, index) => (
         <div
           key={release.instance_id}
-          className="animate-card-pop"
-          style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
+          className={shouldAnimate ? 'animate-card-pop' : undefined}
+          style={
+            shouldAnimate
+              ? { animationDelay: `${Math.min(index * 30, 300)}ms` }
+              : undefined
+          }
         >
           <VinylCard release={release} />
         </div>

@@ -11,7 +11,7 @@ import './index.css'
 
 const router = createRouter({
   routeTree,
-  defaultViewTransition: true
+  defaultViewTransition: false
 })
 
 declare module '@tanstack/react-router' {

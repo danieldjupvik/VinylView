@@ -19,6 +19,8 @@ function CollectionPage() {
   const {
     filteredReleases,
     isLoading,
+    isFetching,
+    shouldAnimateCards,
     isError,
     error,
     pagination,
@@ -173,7 +175,11 @@ function CollectionPage() {
         </div>
       </div>
 
-      <VinylGrid releases={filteredReleases} isLoading={isLoading} />
+      <VinylGrid
+        releases={filteredReleases}
+        isLoading={isLoading || isFetching}
+        shouldAnimate={shouldAnimateCards}
+      />
 
       {pagination && (
         <PaginationControls

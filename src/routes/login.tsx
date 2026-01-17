@@ -83,7 +83,7 @@ function LoginPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards delay-500">
+            <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards delay-500">
               <Label htmlFor="username">{t('auth.username')}</Label>
               <Input
                 id="username"
@@ -96,7 +96,7 @@ function LoginPage() {
                 className="transition-all duration-200 focus:scale-[1.01]"
               />
             </div>
-            <div className="space-y-2 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards delay-600">
+            <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards delay-600">
               <Label htmlFor="token">{t('auth.token')}</Label>
               <Input
                 id="token"
