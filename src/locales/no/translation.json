@@ -103,9 +103,35 @@
       }
     },
     "version": "Versjon",
-    "theme": "Tema",
-    "dark": "Mørk",
-    "light": "Lys"
+    "appearance": {
+      "title": "Utseende",
+      "description": "Tilpass hvordan VinylDeck ser ut og føles",
+      "theme": {
+        "title": "Tema",
+        "description": "Velg ditt foretrukne fargetema.",
+        "light": "Lys",
+        "lightHint": "Et lyst, rent utseende",
+        "dark": "Mørk",
+        "darkHint": "Behagelig for øynene",
+        "system": "System",
+        "systemHint": "Følger enhetsinnstillingene"
+      },
+      "language": {
+        "title": "Språk",
+        "description": "Velg ditt foretrukne språk.",
+        "english": "Engelsk",
+        "englishHint": "English (US)",
+        "norwegian": "Norsk",
+        "norwegianHint": "Norsk (Bokmål)"
+      }
+    },
+    "about": {
+      "title": "Om",
+      "description": "Informasjon om appen",
+      "changelog": "Endringslogg",
+      "privacy": "Personvernerklæring",
+      "terms": "Vilkår for bruk"
+    }
   },
   "theme": {
     "toggle": "Bytt tema",
