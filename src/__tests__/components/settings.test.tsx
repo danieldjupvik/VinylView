@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { I18nextProvider } from 'react-i18next'
 import i18n from 'i18next'
 import { AuthContext, type AuthContextValue } from '@/providers/auth-context'
+import { APP_VERSION } from '@/lib/constants'
 import {
   PreferencesContext,
   type PreferencesContextValue
@@ -199,7 +200,7 @@ describe('Settings Page', () => {
   it('displays app version in about section', () => {
     renderSettings()
     expect(screen.getByText('Version')).toBeInTheDocument()
-    expect(screen.getByText('0.1.0')).toBeInTheDocument()
+    expect(screen.getByText(APP_VERSION)).toBeInTheDocument()
   })
 
   // Theme selection tests
