@@ -98,8 +98,8 @@
         "description": "Choose the avatar shown in the sidebar and menus.",
         "discogs": "Discogs avatar",
         "discogsHint": "Uses your Discogs profile image",
-      "gravatar": "Gravatar",
-      "gravatarHint": "Uses a Gravatar linked to your email"
+        "gravatar": "Gravatar",
+        "gravatarHint": "Uses a Gravatar linked to your email"
       }
     },
     "version": "Version",

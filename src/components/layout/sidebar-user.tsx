@@ -42,7 +42,7 @@ export function SidebarUser() {
 
   const preferredAvatar = avatarSource === 'gravatar' ? gravatarUrl : avatarUrl
   const fallbackAvatar = avatarSource === 'gravatar' ? avatarUrl : gravatarUrl
-  const resolvedAvatar = preferredAvatar ?? fallbackAvatar
+  const resolvedAvatar = preferredAvatar || fallbackAvatar
 
   return (
     <SidebarMenu>

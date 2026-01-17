@@ -57,60 +57,29 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       try {
-        const storedIdentity = getStoredIdentity()
-        const storedProfile = getStoredUserProfile()
-
-        if (!latestGravatarEmailRef.current && storedProfile?.email) {
-          latestGravatarEmailRef.current = storedProfile.email
-          setGravatarEmail(storedProfile.email)
-        }
-
-        if (storedIdentity) {
-          if (!storedProfile) {
-            try {
-              const profile = await getUserProfile(storedIdentity.username)
-              setStoredUserProfile(profile)
-              if (!latestGravatarEmailRef.current && profile.email) {
-                latestGravatarEmailRef.current = profile.email
-                setGravatarEmail(profile.email)
-              }
-              setState({
-                isAuthenticated: true,
-                isLoading: false,
-                username: storedIdentity.username,
-                userId: storedIdentity.id,
-                avatarUrl:
-                  profile.avatar_url ?? storedIdentity.avatar_url ?? null
-              })
-              return
-            } catch {
-              // Fall back to stored identity only
-            }
-          }
-          setState({
-            isAuthenticated: true,
-            isLoading: false,
-            username: storedIdentity.username,
-            userId: storedIdentity.id,
-            avatarUrl:
-              storedProfile?.avatar_url ?? storedIdentity.avatar_url ?? null
-          })
-          return
-        }
-
+        // Always validate the token by fetching fresh identity
+        // This ensures expired or invalid tokens are caught
         const identity = await fetchIdentity()
         setStoredIdentity(identity)
+
+        // Fetch user profile (use cached email if available)
+        const storedProfile = getStoredUserProfile()
         let profile: DiscogsUserProfile | null = null
         try {
           profile = await getUserProfile(identity.username)
           setStoredUserProfile(profile)
         } catch {
-          profile = null
+          // If profile fetch fails, use cached profile if available
+          profile = storedProfile
         }
+
+        // Update gravatar email from profile if not already set
         if (!latestGravatarEmailRef.current && profile?.email) {
           latestGravatarEmailRef.current = profile.email
           setGravatarEmail(profile.email)
         }
+
+        // Set authenticated state with validated data
         setState({
           isAuthenticated: true,
           isLoading: false,
@@ -119,7 +88,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           avatarUrl: profile?.avatar_url ?? identity.avatar_url ?? null
         })
       } catch {
-        // Token is invalid, clear it
+        // Token is invalid or expired, clear everything
         clearAuth()
         setState({
           isAuthenticated: false,
