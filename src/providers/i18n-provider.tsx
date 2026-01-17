@@ -3,14 +3,10 @@ import { initReactI18next } from 'react-i18next'
 
 import enTranslation from '@/locales/en/translation.json'
 import noTranslation from '@/locales/no/translation.json'
+import { STORAGE_KEYS } from '@/lib/constants'
 
-const detectLanguage = () => {
-  if (typeof navigator === 'undefined') return 'en'
-  const candidate =
-    (navigator.languages && navigator.languages[0]) ||
-    navigator.language ||
-    'en'
-  const normalized = candidate.toLowerCase()
+const normalizeLanguage = (value: string) => {
+  const normalized = value.toLowerCase()
   if (
     normalized.startsWith('no') ||
     normalized.startsWith('nb') ||
@@ -19,6 +15,21 @@ const detectLanguage = () => {
     return 'no'
   }
   return 'en'
+}
+
+const detectLanguage = () => {
+  if (typeof navigator === 'undefined') return 'en'
+  const candidate =
+    (navigator.languages && navigator.languages[0]) ||
+    navigator.language ||
+    'en'
+  return normalizeLanguage(candidate)
+}
+
+const readStoredLanguage = () => {
+  if (typeof window === 'undefined') return null
+  const stored = localStorage.getItem(STORAGE_KEYS.LANGUAGE)
+  return stored ? normalizeLanguage(stored) : null
 }
 
 i18n.use(initReactI18next).init({
@@ -30,7 +41,7 @@ i18n.use(initReactI18next).init({
       translation: noTranslation
     }
   },
-  lng: detectLanguage(),
+  lng: readStoredLanguage() ?? detectLanguage(),
   supportedLngs: ['en', 'no'],
   nonExplicitSupportedLngs: true,
   fallbackLng: 'en',
@@ -38,5 +49,11 @@ i18n.use(initReactI18next).init({
     escapeValue: false
   }
 })
+
+if (typeof window !== 'undefined') {
+  i18n.on('languageChanged', (language) => {
+    localStorage.setItem(STORAGE_KEYS.LANGUAGE, normalizeLanguage(language))
+  })
+}
 
 export default i18n

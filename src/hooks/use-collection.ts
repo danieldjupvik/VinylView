@@ -97,6 +97,11 @@ interface CollectionSelectedFilters {
   yearRange: [number, number] | null
 }
 
+interface NonVinylBreakdownItem {
+  format: string
+  count: number
+}
+
 const readFiltersFromUrl = (): CollectionSelectedFilters => {
   const params = readSearchParams()
   return {
@@ -140,6 +145,9 @@ interface UseCollectionReturn {
   setYearRange: (range: [number, number] | null) => void
   clearFilters: () => void
   activeFilterCount: number
+  nonVinylCount: number
+  nonVinylBreakdown: NonVinylBreakdownItem[]
+  hasCompleteCollection: boolean
 }
 
 export function useCollection(
@@ -289,6 +297,31 @@ export function useCollection(
     return releases.filter((release) =>
       isVinylRecord(release.basic_information.formats)
     )
+  }, [releases])
+
+  const nonVinylStats = useMemo(() => {
+    if (!releases) {
+      return { total: 0, breakdown: [] as NonVinylBreakdownItem[] }
+    }
+
+    const counts = new Map<string, number>()
+    let total = 0
+
+    for (const release of releases) {
+      const formats = release.basic_information.formats ?? []
+      if (isVinylRecord(formats)) continue
+      total += 1
+      const formatName =
+        formats.find((format) => format.name && format.name !== 'Vinyl')
+          ?.name ?? 'Unknown'
+      counts.set(formatName, (counts.get(formatName) ?? 0) + 1)
+    }
+
+    const breakdown = Array.from(counts.entries())
+      .map(([format, count]) => ({ format, count }))
+      .sort((a, b) => b.count - a.count || a.format.localeCompare(b.format))
+
+    return { total, breakdown }
   }, [releases])
 
   const filterOptions = useMemo<CollectionFilterOptions>(() => {
@@ -564,10 +597,16 @@ export function useCollection(
       : {
           page: data.pagination.page,
           pages: data.pagination.pages,
-          total: data.pagination.items,
+          total:
+            data.pagination.pages <= 1
+              ? vinylOnly.length
+              : data.pagination.items,
           perPage: data.pagination.per_page
         }
     : null
+
+  const hasCompleteCollection =
+    shouldFetchAllPages || (data?.pagination.pages ?? 0) <= 1
 
   return {
     releases: releases ?? [],
@@ -601,6 +640,9 @@ export function useCollection(
     setSelectedCountries,
     setYearRange: setYearRangeSelection,
     clearFilters,
-    activeFilterCount
+    activeFilterCount,
+    nonVinylCount: nonVinylStats.total,
+    nonVinylBreakdown: nonVinylStats.breakdown,
+    hasCompleteCollection
   }
 }

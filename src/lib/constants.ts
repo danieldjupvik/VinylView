@@ -8,7 +8,8 @@ export const STORAGE_KEYS = {
   AVATAR_SOURCE: 'vinylview_avatar_source',
   GRAVATAR_EMAIL: 'vinylview_gravatar_email',
   IDENTITY: 'vinylview_identity',
-  USER_PROFILE: 'vinylview_user_profile'
+  USER_PROFILE: 'vinylview_user_profile',
+  LANGUAGE: 'vinylview_language'
 } as const
 
 /**

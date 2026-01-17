@@ -6,6 +6,7 @@ import { useCollection } from '@/hooks/use-collection'
 import { VinylGrid } from '@/components/collection/vinyl-grid'
 import { CollectionToolbar } from '@/components/collection/collection-toolbar'
 import { PaginationControls } from '@/components/collection/pagination-controls'
+import { Badge } from '@/components/ui/badge'
 
 export const Route = createFileRoute('/_authenticated/collection')({
   component: CollectionPage
@@ -21,6 +22,9 @@ function CollectionPage() {
     isError,
     error,
     pagination,
+    nonVinylCount,
+    nonVinylBreakdown,
+    hasCompleteCollection,
     search,
     setSearch,
     sort,
@@ -46,6 +50,10 @@ function CollectionPage() {
   const rangeStart = visibleCount > 0 ? (currentPage - 1) * perPage + 1 : 0
   const rangeEnd =
     visibleCount > 0 ? Math.min(rangeStart + visibleCount - 1, totalCount) : 0
+  const showNonVinyl = hasCompleteCollection && nonVinylCount > 0
+  const nonVinylSummary = nonVinylBreakdown
+    .map((item) => `${item.count} ${item.format}`)
+    .join(', ')
 
   // Reset to page 1 when sort changes
   const handleSortChange = (newSort: typeof sort) => {
@@ -119,14 +127,24 @@ function CollectionPage() {
     <div className="flex flex-col gap-6 p-6">
       <div>
         <h1 className="text-2xl font-bold">{t('collection.title')}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {t('collection.showing', {
-            count: visibleCount,
-            start: rangeStart,
-            end: rangeEnd,
-            total: totalCount
-          })}
-        </p>
+        <div className="mt-2 flex flex-col gap-2 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <p>
+            {t('collection.showing', {
+              count: visibleCount,
+              start: rangeStart,
+              end: rangeEnd,
+              total: totalCount
+            })}
+          </p>
+          {showNonVinyl ? (
+            <div className="flex items-center gap-2">
+              <span>{t('collection.nonVinylHidden')}</span>
+              <Badge variant="secondary" className="font-normal">
+                {nonVinylSummary}
+              </Badge>
+            </div>
+          ) : null}
+        </div>
       </div>
 
       <CollectionToolbar
