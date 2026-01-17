@@ -88,6 +88,9 @@
     "vinyl": "Vinyl",
     "records": "{{count}} record",
     "records_other": "{{count}} records",
+    "lastUpdated": "Last updated: {{time}}",
+    "notUpdated": "Not updated yet",
+    "refresh": "Refresh",
     "nonVinylHidden": "Non-vinyl hidden:",
     "showing": "Showing {{start}}-{{end}} of {{total}} album",
     "showing_other": "Showing {{start}}-{{end}} of {{total}} albums"

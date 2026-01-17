@@ -126,6 +126,8 @@ interface UseCollectionReturn {
   filteredReleases: DiscogsCollectionRelease[]
   isLoading: boolean
   isFetching: boolean
+  dataUpdatedAt: number
+  refetch: () => Promise<unknown>
   shouldAnimateCards: boolean
   isError: boolean
   error: Error | null
@@ -251,52 +253,60 @@ export function useCollection(
     setSortOrder(nextOrder)
   }
 
-  const { data, isLoading, isError, error, isFetchedAfterMount, isFetching } =
-    useQuery({
-      queryKey: [
-        'collection',
-        username,
-        shouldFetchAllPages ? 'all' : page,
-        serverSort,
-        serverSortOrder
-      ],
-      placeholderData: (previousData) => previousData,
-      queryFn: async () => {
-        if (!username) {
-          throw new Error('Username is required')
-        }
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    isFetchedAfterMount,
+    isFetching,
+    dataUpdatedAt,
+    refetch
+  } = useQuery({
+    queryKey: [
+      'collection',
+      username,
+      shouldFetchAllPages ? 'all' : page,
+      serverSort,
+      serverSortOrder
+    ],
+    placeholderData: (previousData) => previousData,
+    queryFn: async () => {
+      if (!username) {
+        throw new Error('Username is required')
+      }
 
-        const perPage = COLLECTION.PER_PAGE
-        const fetchPage = (pageNumber: number) =>
-          getCollection(username, {
-            page: pageNumber,
-            perPage,
-            sort: serverSort,
-            sortOrder: serverSortOrder
-          })
+      const perPage = COLLECTION.PER_PAGE
+      const fetchPage = (pageNumber: number) =>
+        getCollection(username, {
+          page: pageNumber,
+          perPage,
+          sort: serverSort,
+          sortOrder: serverSortOrder
+        })
 
-        if (!shouldFetchAllPages) {
-          return fetchPage(page)
-        }
+      if (!shouldFetchAllPages) {
+        return fetchPage(page)
+      }
 
-        const firstPage = await fetchPage(1)
-        const totalPages = firstPage.pagination.pages
+      const firstPage = await fetchPage(1)
+      const totalPages = firstPage.pagination.pages
 
-        if (totalPages <= 1) {
-          return firstPage
-        }
+      if (totalPages <= 1) {
+        return firstPage
+      }
 
-        const releases = [...firstPage.releases]
-        for (let currentPage = 2; currentPage <= totalPages; currentPage += 1) {
-          const response = await fetchPage(currentPage)
-          releases.push(...response.releases)
-        }
+      const releases = [...firstPage.releases]
+      for (let currentPage = 2; currentPage <= totalPages; currentPage += 1) {
+        const response = await fetchPage(currentPage)
+        releases.push(...response.releases)
+      }
 
-        return { ...firstPage, releases }
-      },
-      enabled: !!username,
-      staleTime: 5 * 60 * 1000 // 5 minutes
-    })
+      return { ...firstPage, releases }
+    },
+    enabled: !!username,
+    staleTime: 5 * 60 * 1000 // 5 minutes
+  })
 
   const [hasCachedDataAtMount] = useState(() => data !== undefined)
 
@@ -651,6 +661,8 @@ export function useCollection(
     filteredReleases: pagedReleases,
     isLoading,
     isFetching,
+    dataUpdatedAt,
+    refetch,
     shouldAnimateCards,
     isError,
     error: error as Error | null,

@@ -1,25 +1,29 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, RotateCw } from 'lucide-react'
 import { useCollection } from '@/hooks/use-collection'
 import { VinylGrid } from '@/components/collection/vinyl-grid'
 import { CollectionToolbar } from '@/components/collection/collection-toolbar'
 import { PaginationControls } from '@/components/collection/pagination-controls'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 
 export const Route = createFileRoute('/_authenticated/collection')({
   component: CollectionPage
 })
 
 function CollectionPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [page, setPage] = useState(1)
+  const [now, setNow] = useState(() => Date.now())
 
   const {
     filteredReleases,
     isLoading,
     isFetching,
+    dataUpdatedAt,
+    refetch,
     shouldAnimateCards,
     isError,
     error,
@@ -56,6 +60,51 @@ function CollectionPage() {
   const nonVinylSummary = nonVinylBreakdown
     .map((item) => `${item.count} ${item.format}`)
     .join(', ')
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setNow(Date.now())
+    }, 30_000)
+
+    return () => window.clearInterval(interval)
+  }, [])
+
+  const lastUpdatedLabel = useMemo(() => {
+    if (!dataUpdatedAt) {
+      return t('collection.notUpdated')
+    }
+
+    const diffSeconds = Math.max(0, Math.floor((now - dataUpdatedAt) / 1000))
+    const units: Array<[Intl.RelativeTimeFormatUnit, number]> = [
+      ['day', 86_400],
+      ['hour', 3_600],
+      ['minute', 60],
+      ['second', 1]
+    ]
+
+    for (const [unit, secondsInUnit] of units) {
+      if (diffSeconds >= secondsInUnit || unit === 'second') {
+        const value = Math.round(diffSeconds / secondsInUnit)
+        const numberFormatter = new Intl.NumberFormat(i18n.language, {
+          style: 'unit',
+          unit,
+          unitDisplay: 'short'
+        })
+        return t('collection.lastUpdated', {
+          time: numberFormatter.format(value)
+        })
+      }
+    }
+
+    const fallbackFormatter = new Intl.NumberFormat(i18n.language, {
+      style: 'unit',
+      unit: 'second',
+      unitDisplay: 'short'
+    })
+    return t('collection.lastUpdated', {
+      time: fallbackFormatter.format(0)
+    })
+  }, [dataUpdatedAt, now, i18n.language, t])
 
   // Reset to page 1 when sort changes
   const handleSortChange = (newSort: typeof sort) => {
@@ -128,8 +177,26 @@ function CollectionPage() {
   return (
     <div className="flex flex-col gap-6 p-6">
       <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
-        <h1 className="text-2xl font-bold">{t('collection.title')}</h1>
-        <div className="mt-2 flex flex-col gap-2 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <h1 className="text-2xl font-bold">{t('collection.title')}</h1>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span className="tabular-nums">{lastUpdatedLabel}</span>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => {
+                handleClearFilters()
+                void refetch()
+              }}
+              disabled={isFetching}
+              aria-label={t('collection.refresh')}
+              title={t('collection.refresh')}
+            >
+              <RotateCw className={isFetching ? 'animate-spin' : ''} />
+            </Button>
+          </div>
+        </div>
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-sm text-muted-foreground">
           <p className="tabular-nums">
             {t('collection.showing', {
               count: visibleCount,

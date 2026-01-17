@@ -88,6 +88,9 @@
     "vinyl": "Vinyl",
     "records": "{{count}} plate",
     "records_other": "{{count}} plater",
+    "lastUpdated": "Sist oppdatert: {{time}}",
+    "notUpdated": "Ikke oppdatert ennå",
+    "refresh": "Oppdater",
     "nonVinylHidden": "Ikke-vinyl skjult:",
     "showing": "Viser {{start}}-{{end}} av {{total}} album",
     "showing_other": "Viser {{start}}-{{end}} av {{total}} album"
