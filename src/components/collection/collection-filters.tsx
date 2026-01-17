@@ -3,7 +3,11 @@ import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '@/components/ui/popover'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
@@ -170,12 +174,7 @@ function FilterContent({
               : 'space-y-6 px-4 py-4'
           )}
         >
-          <div
-            className={cn(
-              'space-y-3',
-              isDesktop ? 'col-span-full' : ''
-            )}
-          >
+          <div className={cn('space-y-3', isDesktop ? 'col-span-full' : '')}>
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-medium">
                 {t('collection.filters.yearRange')}
@@ -192,9 +191,7 @@ function FilterContent({
                 min={yearBounds[0]}
                 max={yearBounds[1]}
                 step={1}
-                onValueChange={(value) =>
-                  setYearRange([value[0], value[1]])
-                }
+                onValueChange={(value) => setYearRange([value[0], value[1]])}
               />
             ) : (
               <p className="text-xs text-muted-foreground">

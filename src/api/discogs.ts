@@ -21,9 +21,7 @@ export async function getIdentity(): Promise<DiscogsIdentity> {
 export async function getUserProfile(
   username: string
 ): Promise<DiscogsUserProfile> {
-  const response = await apiClient.get<DiscogsUserProfile>(
-    `/users/${username}`
-  )
+  const response = await apiClient.get<DiscogsUserProfile>(`/users/${username}`)
   return response.data
 }
 

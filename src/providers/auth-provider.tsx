@@ -15,17 +15,9 @@ import {
   setUsername,
   clearAuth
 } from '@/lib/storage'
-import { AuthContext } from './auth-context'
+import { AuthContext, type AuthState } from './auth-context'
 import type { DiscogsIdentity, DiscogsUserProfile } from '@/types/discogs'
 import { usePreferences } from '@/hooks/use-preferences'
-
-interface AuthState {
-  isAuthenticated: boolean
-  isLoading: boolean
-  username: string | null
-  userId: number | null
-  avatarUrl: string | null
-}
 
 interface AuthProviderProps {
   children: ReactNode
@@ -48,7 +40,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const storedUsername = getUsername()
 
       if (!token || !storedUsername) {
-        setState((prev) => ({ ...prev, isLoading: false }))
+        clearAuth()
+        setState({
+          isAuthenticated: false,
+          isLoading: false,
+          username: null,
+          userId: null,
+          avatarUrl: null
+        })
         return
       }
 
@@ -73,7 +72,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
                 isLoading: false,
                 username: storedIdentity.username,
                 userId: storedIdentity.id,
-                avatarUrl: profile.avatar_url ?? storedIdentity.avatar_url ?? null
+                avatarUrl:
+                  profile.avatar_url ?? storedIdentity.avatar_url ?? null
               })
               return
             } catch {

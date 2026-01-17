@@ -6,10 +6,7 @@ import {
   setGravatarEmail as storeGravatarEmail
 } from '@/lib/storage'
 import { buildGravatarUrl, normalizeGravatarEmail } from '@/lib/gravatar'
-import {
-  PreferencesContext,
-  type AvatarSource
-} from './preferences-context'
+import { PreferencesContext, type AvatarSource } from './preferences-context'
 
 interface PreferencesProviderProps {
   children: ReactNode
@@ -22,8 +19,8 @@ export function PreferencesProvider({ children }: PreferencesProviderProps) {
     const stored = getAvatarSource()
     return stored === 'gravatar' ? 'gravatar' : DEFAULT_AVATAR_SOURCE
   })
-  const [gravatarEmail, setGravatarEmailState] = useState(() =>
-    getGravatarEmail() ?? ''
+  const [gravatarEmail, setGravatarEmailState] = useState(
+    () => getGravatarEmail() ?? ''
   )
   const [gravatarUrl, setGravatarUrl] = useState<string | null>(null)
 

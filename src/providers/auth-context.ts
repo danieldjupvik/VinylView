@@ -1,6 +1,6 @@
 import { createContext } from 'react'
 
-interface AuthState {
+export interface AuthState {
   isAuthenticated: boolean
   isLoading: boolean
   username: string | null

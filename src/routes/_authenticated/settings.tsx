@@ -22,11 +22,7 @@ export const Route = createFileRoute('/_authenticated/settings')({
 function SettingsPage() {
   const { t } = useTranslation()
   const { username, avatarUrl } = useAuth()
-  const {
-    avatarSource,
-    gravatarUrl,
-    setAvatarSource
-  } = usePreferences()
+  const { avatarSource, gravatarUrl, setAvatarSource } = usePreferences()
   const initials = username
     ? username
         .split(/[\s_-]/)
@@ -49,7 +45,9 @@ function SettingsPage() {
         <Card>
           <CardHeader>
             <CardTitle>{t('settings.profile.title')}</CardTitle>
-            <CardDescription>{t('settings.profile.description')}</CardDescription>
+            <CardDescription>
+              {t('settings.profile.description')}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-3">

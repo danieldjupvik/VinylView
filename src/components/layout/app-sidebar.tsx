@@ -62,7 +62,7 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   disabled
-                  tooltip={t('nav.wantlist') + ' (Coming soon)'}
+                  tooltip={`${t('nav.wantlist')} ${t('common.comingSoon')}`}
                 >
                   <Heart />
                   <span>{t('nav.wantlist')}</span>

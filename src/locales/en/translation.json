@@ -8,6 +8,9 @@
     "english": "English",
     "norwegian": "Norwegian"
   },
+  "common": {
+    "comingSoon": "(Coming soon)"
+  },
   "nav": {
     "collection": "Collection",
     "wantlist": "Wantlist",
@@ -94,12 +97,12 @@
         "description": "Choose the avatar shown in the sidebar and menus.",
         "discogs": "Discogs avatar",
         "discogsHint": "Uses your Discogs profile image",
-      "gravatar": "Gravatar",
-      "gravatarHint": "Uses a Gravatar linked to your email"
+        "gravatar": "Gravatar",
+        "gravatarHint": "Uses a Gravatar linked to your email"
+      },
+      "gravatarEmail": "Gravatar email",
+      "gravatarFetched": "Pulled from Discogs when available."
     },
-    "gravatarEmail": "Gravatar email",
-    "gravatarFetched": "Pulled from Discogs when available."
-  },
     "version": "Version",
     "theme": "Theme",
     "dark": "Dark",

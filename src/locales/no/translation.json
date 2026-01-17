@@ -8,6 +8,9 @@
     "english": "Engelsk",
     "norwegian": "Norsk"
   },
+  "common": {
+    "comingSoon": "(Kommer snart)"
+  },
   "nav": {
     "collection": "Samling",
     "wantlist": "Ønskeliste",
@@ -94,12 +97,12 @@
         "description": "Velg avataren som vises i sidepanelet og menyer.",
         "discogs": "Discogs-avatar",
         "discogsHint": "Bruker profilbildet ditt fra Discogs",
-      "gravatar": "Gravatar",
-      "gravatarHint": "Bruker en Gravatar koblet til e-posten din"
+        "gravatar": "Gravatar",
+        "gravatarHint": "Bruker en Gravatar koblet til e-posten din"
+      },
+      "gravatarEmail": "Gravatar e-post",
+      "gravatarFetched": "Hentes fra Discogs når tilgjengelig."
     },
-    "gravatarEmail": "Gravatar e-post",
-    "gravatarFetched": "Hentes fra Discogs når tilgjengelig."
-  },
     "version": "Versjon",
     "theme": "Tema",
     "dark": "Mørk",

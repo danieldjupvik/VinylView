@@ -40,8 +40,12 @@ function CollectionPage() {
     activeFilterCount
   } = useCollection({ page })
   const visibleCount = filteredReleases.length
-  const rangeStart = visibleCount > 0 ? 1 : 0
-  const rangeEnd = visibleCount
+  const totalCount = pagination?.total ?? visibleCount
+  const perPage = pagination?.perPage ?? visibleCount
+  const currentPage = pagination?.page ?? page
+  const rangeStart = visibleCount > 0 ? (currentPage - 1) * perPage + 1 : 0
+  const rangeEnd =
+    visibleCount > 0 ? Math.min(rangeStart + visibleCount - 1, totalCount) : 0
 
   // Reset to page 1 when sort changes
   const handleSortChange = (newSort: typeof sort) => {
@@ -51,6 +55,51 @@ function CollectionPage() {
 
   const handleSortOrderChange = (newOrder: typeof sortOrder) => {
     setSortOrder(newOrder)
+    setPage(1)
+  }
+
+  const handleSearchChange = (nextSearch: string) => {
+    setSearch(nextSearch)
+    setPage(1)
+  }
+
+  const handleSetSelectedGenres = (values: string[]) => {
+    setSelectedGenres(values)
+    setPage(1)
+  }
+
+  const handleSetSelectedStyles = (values: string[]) => {
+    setSelectedStyles(values)
+    setPage(1)
+  }
+
+  const handleSetSelectedLabels = (values: string[]) => {
+    setSelectedLabels(values)
+    setPage(1)
+  }
+
+  const handleSetSelectedTypes = (values: string[]) => {
+    setSelectedTypes(values)
+    setPage(1)
+  }
+
+  const handleSetSelectedSizes = (values: string[]) => {
+    setSelectedSizes(values)
+    setPage(1)
+  }
+
+  const handleSetSelectedCountries = (values: string[]) => {
+    setSelectedCountries(values)
+    setPage(1)
+  }
+
+  const handleSetYearRange = (range: [number, number] | null) => {
+    setYearRange(range)
+    setPage(1)
+  }
+
+  const handleClearFilters = () => {
+    clearFilters()
     setPage(1)
   }
 
@@ -75,14 +124,14 @@ function CollectionPage() {
             count: visibleCount,
             start: rangeStart,
             end: rangeEnd,
-            total: visibleCount
+            total: totalCount
           })}
         </p>
       </div>
 
       <CollectionToolbar
         search={search}
-        onSearchChange={setSearch}
+        onSearchChange={handleSearchChange}
         sort={sort}
         onSortChange={handleSortChange}
         sortOrder={sortOrder}
@@ -90,14 +139,14 @@ function CollectionPage() {
         filters={{
           options: filterOptions,
           selected: selectedFilters,
-          setSelectedGenres,
-          setSelectedStyles,
-          setSelectedLabels,
-          setSelectedTypes,
-          setSelectedSizes,
-          setSelectedCountries,
-          setYearRange,
-          clearFilters,
+          setSelectedGenres: handleSetSelectedGenres,
+          setSelectedStyles: handleSetSelectedStyles,
+          setSelectedLabels: handleSetSelectedLabels,
+          setSelectedTypes: handleSetSelectedTypes,
+          setSelectedSizes: handleSetSelectedSizes,
+          setSelectedCountries: handleSetSelectedCountries,
+          setYearRange: handleSetYearRange,
+          clearFilters: handleClearFilters,
           activeFilterCount
         }}
       />

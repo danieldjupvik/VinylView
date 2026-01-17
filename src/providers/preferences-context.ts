@@ -10,5 +10,6 @@ export interface PreferencesContextValue {
   setGravatarEmail: (email: string) => void
 }
 
-export const PreferencesContext =
-  createContext<PreferencesContextValue | null>(null)
+export const PreferencesContext = createContext<PreferencesContextValue | null>(
+  null
+)

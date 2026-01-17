@@ -93,7 +93,18 @@ function SidebarProvider({
 
   // Adds a keyboard shortcut to toggle the sidebar.
   React.useEffect(() => {
+    const isEditableTarget = (target: EventTarget | null) => {
+      if (!(target instanceof HTMLElement)) return false
+      if (target.isContentEditable) return true
+      return !!target.closest(
+        'input, textarea, select, [contenteditable="true"]'
+      )
+    }
+
     const handleKeyDown = (event: KeyboardEvent) => {
+      if (isEditableTarget(event.target)) {
+        return
+      }
       if (
         event.key === SIDEBAR_KEYBOARD_SHORTCUT &&
         (event.metaKey || event.ctrlKey)
@@ -162,6 +173,7 @@ function Sidebar({
   collapsible?: 'offcanvas' | 'icon' | 'none'
 }) {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+  const { style, ...rest } = props
 
   if (collapsible === 'none') {
     return (
@@ -180,15 +192,20 @@ function Sidebar({
 
   if (isMobile) {
     return (
-      <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+      <Sheet open={openMobile} onOpenChange={setOpenMobile}>
         <SheetContent
+          {...rest}
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className="bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden"
+          className={cn(
+            'bg-sidebar text-sidebar-foreground w-(--sidebar-width) p-0 [&>button]:hidden',
+            className
+          )}
           style={
             {
-              '--sidebar-width': SIDEBAR_WIDTH_MOBILE
+              '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
+              ...style
             } as React.CSSProperties
           }
           side={side}
@@ -237,7 +254,8 @@ function Sidebar({
             : 'group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l',
           className
         )}
-        {...props}
+        style={style}
+        {...rest}
       >
         <div
           data-sidebar="sidebar"

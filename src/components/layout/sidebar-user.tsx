@@ -39,10 +39,8 @@ export function SidebarUser() {
         .slice(0, 2)
     : '?'
 
-  const preferredAvatar =
-    avatarSource === 'gravatar' ? gravatarUrl : avatarUrl
-  const fallbackAvatar =
-    avatarSource === 'gravatar' ? avatarUrl : gravatarUrl
+  const preferredAvatar = avatarSource === 'gravatar' ? gravatarUrl : avatarUrl
+  const fallbackAvatar = avatarSource === 'gravatar' ? avatarUrl : gravatarUrl
   const resolvedAvatar = preferredAvatar ?? fallbackAvatar
 
   return (

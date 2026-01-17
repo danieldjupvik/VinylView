@@ -4,10 +4,7 @@ export function normalizeGravatarEmail(email: string): string {
   return email.trim().toLowerCase()
 }
 
-export function buildGravatarUrl(
-  email: string,
-  size = 96
-): string | null {
+export function buildGravatarUrl(email: string, size = 96): string | null {
   const normalized = normalizeGravatarEmail(email)
   if (!normalized) {
     return null
