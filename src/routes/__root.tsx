@@ -20,7 +20,7 @@ function NotFoundComponent() {
   const { t } = useTranslation()
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 animate-in fade-in zoom-in-95 duration-300">
       <h1 className="text-4xl font-bold">404</h1>
       <p className="text-muted-foreground">
         {t('errors.notFound', 'Page not found')}

@@ -1,15 +1,15 @@
-export const APP_VERSION = '0.1.0'
+export const APP_VERSION = __APP_VERSION__
 
 export const DISCOGS_API_URL = 'https://api.discogs.com'
 
 export const STORAGE_KEYS = {
-  TOKEN: 'vinylview_token',
-  USERNAME: 'vinylview_username',
-  AVATAR_SOURCE: 'vinylview_avatar_source',
-  GRAVATAR_EMAIL: 'vinylview_gravatar_email',
-  IDENTITY: 'vinylview_identity',
-  USER_PROFILE: 'vinylview_user_profile',
-  LANGUAGE: 'vinylview_language'
+  TOKEN: 'vinyldeck_token',
+  USERNAME: 'vinyldeck_username',
+  AVATAR_SOURCE: 'vinyldeck_avatar_source',
+  GRAVATAR_EMAIL: 'vinyldeck_gravatar_email',
+  IDENTITY: 'vinyldeck_identity',
+  USER_PROFILE: 'vinyldeck_user_profile',
+  LANGUAGE: 'vinyldeck_language'
 } as const
 
 /**

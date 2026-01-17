@@ -1,6 +1,7 @@
+import type { MouseEvent } from 'react'
 import { ChevronsUpDown, LogOut, Settings } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link, useLocation, useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { useAuth } from '@/hooks/use-auth'
 import { usePreferences } from '@/hooks/use-preferences'
@@ -23,6 +24,14 @@ export function SidebarUser() {
   const { username, logout, avatarUrl } = useAuth()
   const { avatarSource, gravatarUrl } = usePreferences()
   const navigate = useNavigate()
+  const location = useLocation()
+  const currentLocation = `${location.pathname}${location.search}${location.hash}`
+  const isModifiedEvent = (event: MouseEvent) =>
+    event.metaKey ||
+    event.ctrlKey ||
+    event.shiftKey ||
+    event.altKey ||
+    event.button === 1
 
   const handleLogout = () => {
     logout()
@@ -78,7 +87,18 @@ export function SidebarUser() {
             sideOffset={4}
           >
             <DropdownMenuItem asChild>
-              <Link to="/settings">
+              <Link
+                to="/settings"
+                onClick={(event) => {
+                  if (isModifiedEvent(event)) {
+                    return
+                  }
+
+                  if (currentLocation === '/settings') {
+                    event.preventDefault()
+                  }
+                }}
+              >
                 <Settings className="mr-2 size-4" />
                 {t('nav.settings')}
               </Link>

@@ -228,7 +228,7 @@ export function VinylCard({ release, className }: VinylCardProps) {
   return (
     <div
       className={cn(
-        'group relative cursor-pointer overflow-hidden rounded-xl bg-card transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl',
+        'group relative cursor-pointer overflow-hidden rounded-xl bg-card shadow-sm ring-1 ring-border/40 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-2xl hover:ring-border/60',
         className
       )}
     >
@@ -238,7 +238,7 @@ export function VinylCard({ release, className }: VinylCardProps) {
           <img
             src={coverImage}
             alt={`${artistName} - ${info.title}`}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"
             loading="lazy"
           />
         ) : (
@@ -249,12 +249,12 @@ export function VinylCard({ release, className }: VinylCardProps) {
 
         {/* Vinyl Info Badges */}
         {(vinylInfo.color || vinylInfo.weight) && (
-          <div className="absolute right-2 top-2 flex flex-col gap-1.5">
+          <div className="absolute right-2 top-2 flex flex-col gap-1.5 transition-transform duration-300 group-hover:-translate-y-0.5">
             {/* Color Badge with actual color */}
             {vinylInfo.color && colorStyles && (
               <div
                 className={cn(
-                  'flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold shadow-lg ring-1 backdrop-blur-sm',
+                  'flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold shadow-lg ring-1 backdrop-blur-sm transition-transform duration-300 group-hover:scale-[1.03]',
                   colorStyles.bg,
                   colorStyles.text,
                   colorStyles.border
@@ -266,7 +266,7 @@ export function VinylCard({ release, className }: VinylCardProps) {
             )}
             {/* Weight Badge */}
             {vinylInfo.weight && (
-              <div className="rounded-full bg-black/70 px-3 py-1 text-xs font-medium text-white shadow-lg backdrop-blur-sm ring-1 ring-white/30">
+              <div className="rounded-full bg-black/70 px-3 py-1 text-xs font-medium text-white shadow-lg backdrop-blur-sm ring-1 ring-white/30 transition-transform duration-300 group-hover:scale-[1.03]">
                 {vinylInfo.weight}
               </div>
             )}
@@ -274,7 +274,7 @@ export function VinylCard({ release, className }: VinylCardProps) {
         )}
 
         {/* Hover Overlay with Details */}
-        <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+        <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 opacity-0 translate-y-2 transition-[opacity,transform] duration-300 group-hover:opacity-100 group-hover:translate-y-0">
           <h3
             className="line-clamp-2 text-base font-semibold text-white"
             title={info.title}

@@ -67,9 +67,10 @@ export function CollectionToolbar({
 
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <div className="relative flex-1 sm:max-w-xs">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <div className="group relative flex-1 sm:max-w-xs">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-foreground" />
         <Input
+          type="search"
           placeholder={t('collection.search')}
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
@@ -126,6 +127,7 @@ export function CollectionToolbar({
           onClick={toggleSortOrder}
           title={sortOrderLabel}
           aria-label={sortOrderLabel}
+          className="transition-all duration-200 hover:scale-110"
         >
           {isRandomSort ? (
             <Shuffle className="h-4 w-4" />

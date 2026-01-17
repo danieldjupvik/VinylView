@@ -1,22 +1,24 @@
-# VinylView MVP Implementation Plan
+# VinylDeck MVP Implementation Plan
 
 ## Implementation Progress
 
-> **Last Updated**: 2026-01-16
+> **Last Updated**: 2026-01-17
 >
 > This section tracks implementation progress. Check boxes indicate completed items.
 
-| Phase                          | Status         | Description                                                           |
-| ------------------------------ | -------------- | --------------------------------------------------------------------- |
-| Phase 1: Foundation            | ✅ Complete    | Dependencies, shadcn, folder structure, Vite config, i18n, .nvmrc     |
-| Phase 2: Core Infrastructure   | ✅ Complete    | Constants, storage, rate-limiter, API client, Discogs API, types      |
-| Phase 3: State & Providers     | ✅ Complete    | QueryProvider, AuthProvider, useAuth hook, ThemeProvider              |
-| Phase 4: Routing               | ✅ Complete    | All routes: root, login, index, \_authenticated, collection, settings |
-| Phase 5: Layout Components     | ✅ Complete    | AppSidebar, SidebarUser, ModeToggle                                   |
-| Phase 6: Auth Components       | ✅ Complete    | Login form built directly in login route                              |
-| Phase 7: Collection Components | ✅ Complete    | useCollection hook, VinylCard, VinylGrid, toolbar, pagination         |
-| Phase 8: Animations & Polish   | 🔄 In Progress | Card animations, vinyl color badges, responsive grid, design polish   |
-| Phase 9: Testing               | ⏳ Pending     | Unit tests, component tests, integration tests                        |
+| Phase                          | Status      | Description                                                           |
+| ------------------------------ | ----------- | --------------------------------------------------------------------- |
+| Phase 1: Foundation            | ✅ Complete | Dependencies, shadcn, folder structure, Vite config, i18n, .nvmrc     |
+| Phase 2: Core Infrastructure   | ✅ Complete | Constants, storage, rate-limiter, API client, Discogs API, types      |
+| Phase 3: State & Providers     | ✅ Complete | QueryProvider, AuthProvider, useAuth hook, ThemeProvider              |
+| Phase 4: Routing               | ✅ Complete | All routes: root, login, index, \_authenticated, collection, settings |
+| Phase 5: Layout Components     | ✅ Complete | AppSidebar, SidebarUser, ModeToggle                                   |
+| Phase 6: Auth Components       | ✅ Complete | Login form built directly in login route                              |
+| Phase 7: Collection Components | ✅ Complete | useCollection hook, VinylCard, VinylGrid, toolbar, pagination         |
+| Phase 8: Animations & Polish   | ✅ Complete | Card animations, brand polish, page transitions, UI refinements       |
+| Phase 9: Testing               | ✅ Complete | Unit tests, component tests, integration tests                        |
+
+**Overall Completion:** 100% ✅
 
 ### Completed Files
 
@@ -36,6 +38,7 @@ src/
 │   │   └── vinyl-grid.tsx           ✅
 │   ├── layout/
 │   │   ├── app-sidebar.tsx    ✅
+│   │   ├── brand-mark.tsx     ✅
 │   │   ├── language-toggle.tsx ✅
 │   │   ├── mode-toggle.tsx    ✅
 │   │   └── sidebar-user.tsx   ✅
@@ -76,33 +79,32 @@ src/
 │   └── mocks/
 │       ├── handlers.ts        ✅
 │       └── server.ts          ✅
+│   ├── api/
+│   │   ├── rate-limiter.test.ts     ✅
+│   │   └── discogs.test.ts          ✅
+│   ├── hooks/
+│   │   ├── use-auth.test.tsx        ✅
+│   │   └── use-collection.test.tsx  ✅
+│   ├── components/
+│   │   ├── login-form.test.tsx      ✅
+│   │   ├── vinyl-card.test.tsx      ✅
+│   │   └── vinyl-grid.test.tsx      ✅
+│   └── integration/
+│       └── auth-flow.test.tsx       ✅
 ├── index.css                  ✅
 ├── main.tsx                   ✅
 └── routeTree.gen.ts           ✅ (auto-generated)
+scripts/
+└── generate-icons.js          ✅
+public/
+└── icons/
+    ├── icon-192.png           ✅
+    └── icon-512.png           ✅
 ```
 
 ### Remaining Files to Create
 
-```
-src/
-└── __tests__/
-    ├── api/
-    │   ├── rate-limiter.test.ts     ⏳
-    │   └── discogs.test.ts          ⏳
-    ├── hooks/
-    │   ├── use-auth.test.ts         ⏳
-    │   └── use-collection.test.ts   ⏳
-    ├── components/
-    │   ├── login-form.test.tsx      ⏳
-    │   ├── vinyl-card.test.tsx      ⏳
-    │   └── vinyl-grid.test.tsx      ⏳
-    └── integration/
-        └── auth-flow.test.tsx       ⏳
-public/
-└── icons/
-    ├── icon-192.png                 ⏳
-    └── icon-512.png                 ⏳
-```
+None. Phase 9 tests are now in place.
 
 ### Bug Fixes & Enhancements Applied
 
@@ -111,8 +113,10 @@ public/
 - Fixed Axios headers iteration in `src/api/client.ts` (forEach not available on AxiosHeaders)
 - Fixed React Compiler memoization warnings in `use-collection.ts`
 - Fixed TypeScript type issues with theme toggle component
+- Fixed auth provider token validation in `src/providers/auth-provider.tsx` - now validates token on every mount instead of trusting cached identity
+- Fixed avatar resolution in `src/components/layout/sidebar-user.tsx` - empty strings now properly fall back to alternate avatar source
 
-**Design Enhancements (Phase 8 - In Progress):**
+**Design Enhancements (Phase 8 - Complete):**
 
 - **Vinyl Color Badges**: Automatically extracted and color-coded badges showing vinyl color with matching background colors (Yellow, Red, Pink, Blue, Green, Purple, Orange, White/Clear, Black, Grey, Brown, Smoke, Marbled/Splatter)
 - **Weight Badges**: Display vinyl weight information (e.g., "180g") in separate badge
@@ -125,6 +129,13 @@ public/
 - **Filter Panel**: Responsive filter popover/sheet with Genre, Style, Label, Vinyl type, Size, Country, and Year range
 - **Sort Enhancements**: Added release year, label, format, genre, and random options with grouped labels
 - **Language Toggle**: English/Norwegian switching with system language auto-detect
+- **ViewTransition API**: Smooth page transitions using React 19 and the View Transitions API with fade animations
+- **Brand Mark System**: Shared circular logo component across login, sidebar, and loading states with vinyl spin
+- **Page Load Polish**: Floating login background orbs and improved toolbar framing
+- **Card Entry Motion**: Smoother staggered grid pop-in animation post-skeleton load
+- **Navigation Guard**: Prevents same-route sidebar clicks from triggering transitions
+- **PWA Icons**: Vinyl-themed placeholder icons (192x192, 512x512) with gradient background and disc design
+- **Service Worker**: Configured offline caching for API responses (1hr) and images (30 days)
 
 ---
 
@@ -309,7 +320,7 @@ bunx shadcn add button input card skeleton sidebar sonner scroll-area dropdown-m
 
 **Sidebar Structure:**
 
-- Header: Logo placeholder + "VinylView"
+- Header: Logo placeholder + "VinylDeck"
 - Browse section: Collection (active), Wantlist (future, disabled)
 - Settings at bottom
 - Footer: User avatar, username, logout dropdown
@@ -347,19 +358,16 @@ bunx shadcn add button input card skeleton sidebar sonner scroll-area dropdown-m
 
 ### Phase 8: Animations & Polish
 
-**Completed:**
+**✅ All items completed:**
 
 1. ✅ Card hover effects (scale, shadow on entire card)
 2. ✅ Vinyl color badge system with color-matching
 3. ✅ Responsive grid testing (2-5 columns, mobile to desktop)
 4. ✅ Theme system (Light/Dark/System)
 5. ✅ Loading skeleton animations
-
-**Remaining:**
-
-6. ⏳ PWA manifest icons (icon-192.png, icon-512.png)
-7. ⏳ Service worker optimization for offline caching
-8. ⏳ Page transition animations (if desired)
+6. ✅ PWA manifest icons (icon-192.png, icon-512.png) - Generated vinyl-themed placeholders
+7. ✅ Service worker optimization for offline caching - Configured in vite.config.ts
+8. ✅ Page transition animations - ViewTransition API integration with React 19
 
 ### Phase 9: Testing
 

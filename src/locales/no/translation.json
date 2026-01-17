@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "VinylView",
+    "name": "VinylDeck",
     "description": "Bla gjennom Discogs-vinylsamlingen din"
   },
   "language": {
@@ -9,13 +9,18 @@
     "norwegian": "Norsk"
   },
   "common": {
-    "comingSoon": "(Kommer snart)"
+    "comingSoon": "(Kommer snart)",
+    "soon": "Snart"
   },
   "nav": {
     "collection": "Samling",
     "wantlist": "Ønskeliste",
+    "random": "Tilfeldig",
     "settings": "Innstillinger",
     "browse": "Bla gjennom",
+    "analyze": "Analysere",
+    "collectionValue": "Samlingens verdi",
+    "stats": "Statistikk",
     "backHome": "Gå tilbake hjem"
   },
   "auth": {
@@ -92,7 +97,7 @@
     "subtitle": "Administrer profilen din og app-innstillinger",
     "profile": {
       "title": "Profil",
-      "description": "Tilpass hvordan profilen din vises i VinylView",
+      "description": "Tilpass hvordan profilen din vises i VinylDeck",
       "avatar": {
         "title": "Avatar",
         "description": "Velg avataren som vises i sidepanelet og menyer.",
@@ -103,9 +108,35 @@
       }
     },
     "version": "Versjon",
-    "theme": "Tema",
-    "dark": "Mørk",
-    "light": "Lys"
+    "appearance": {
+      "title": "Utseende",
+      "description": "Tilpass hvordan VinylDeck ser ut og føles",
+      "theme": {
+        "title": "Tema",
+        "description": "Velg ditt foretrukne fargetema.",
+        "light": "Lys",
+        "lightHint": "Et lyst, rent utseende",
+        "dark": "Mørk",
+        "darkHint": "Behagelig for øynene",
+        "system": "System",
+        "systemHint": "Følger enhetsinnstillingene"
+      },
+      "language": {
+        "title": "Språk",
+        "description": "Velg ditt foretrukne språk.",
+        "english": "Engelsk",
+        "englishHint": "English (US)",
+        "norwegian": "Norsk",
+        "norwegianHint": "Norsk (Bokmål)"
+      }
+    },
+    "about": {
+      "title": "Om",
+      "description": "Informasjon om appen",
+      "changelog": "Endringslogg",
+      "privacy": "Personvernerklæring",
+      "terms": "Vilkår for bruk"
+    }
   },
   "theme": {
     "toggle": "Bytt tema",

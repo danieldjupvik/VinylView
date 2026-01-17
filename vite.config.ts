@@ -4,9 +4,13 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 import { defineConfig } from 'vitest/config'
 import { VitePWA } from 'vite-plugin-pwa'
+import packageJson from './package.json'
 
 // https://vite.dev/config/
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(packageJson.version)
+  },
   plugins: [
     TanStackRouterVite({
       routesDirectory: './src/routes',
@@ -22,8 +26,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icons/*.png'],
       manifest: {
-        name: 'VinylView',
-        short_name: 'VinylView',
+        name: 'VinylDeck',
+        short_name: 'VinylDeck',
         description: 'Browse your Discogs vinyl collection',
         theme_color: '#09090b',
         background_color: '#09090b',

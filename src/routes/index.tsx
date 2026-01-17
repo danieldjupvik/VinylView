@@ -1,6 +1,7 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useEffect } from 'react'
 import { useAuth } from '@/hooks/use-auth'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { BrandMark } from '@/components/layout/brand-mark'
+import { useEffect } from 'react'
 
 export const Route = createFileRoute('/')({
   component: IndexComponent
@@ -22,7 +23,11 @@ function IndexComponent() {
 
   return (
     <div className="flex min-h-screen items-center justify-center">
-      <p className="text-muted-foreground">Loading...</p>
+      <BrandMark
+        size="lg"
+        spinning
+        className="animate-in fade-in duration-300"
+      />
     </div>
   )
 }

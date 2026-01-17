@@ -113,7 +113,7 @@ function CollectionPage() {
 
   if (isError) {
     return (
-      <div className="flex flex-col items-center justify-center p-6 text-center">
+      <div className="flex flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in-95 duration-300">
         <AlertCircle className="h-12 w-12 text-destructive" />
         <h2 className="mt-4 text-lg font-semibold">{t('errors.generic')}</h2>
         <p className="mt-2 text-sm text-muted-foreground">
@@ -125,10 +125,10 @@ function CollectionPage() {
 
   return (
     <div className="flex flex-col gap-6 p-6">
-      <div>
+      <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
         <h1 className="text-2xl font-bold">{t('collection.title')}</h1>
         <div className="mt-2 flex flex-col gap-2 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p>
+          <p className="tabular-nums">
             {t('collection.showing', {
               count: visibleCount,
               start: rangeStart,
@@ -137,7 +137,7 @@ function CollectionPage() {
             })}
           </p>
           {showNonVinyl ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right duration-500">
               <span>{t('collection.nonVinylHidden')}</span>
               <Badge variant="secondary" className="font-normal">
                 {nonVinylSummary}
@@ -147,27 +147,31 @@ function CollectionPage() {
         </div>
       </div>
 
-      <CollectionToolbar
-        search={search}
-        onSearchChange={handleSearchChange}
-        sort={sort}
-        onSortChange={handleSortChange}
-        sortOrder={sortOrder}
-        onSortOrderChange={handleSortOrderChange}
-        filters={{
-          options: filterOptions,
-          selected: selectedFilters,
-          setSelectedGenres: handleSetSelectedGenres,
-          setSelectedStyles: handleSetSelectedStyles,
-          setSelectedLabels: handleSetSelectedLabels,
-          setSelectedTypes: handleSetSelectedTypes,
-          setSelectedSizes: handleSetSelectedSizes,
-          setSelectedCountries: handleSetSelectedCountries,
-          setYearRange: handleSetYearRange,
-          clearFilters: handleClearFilters,
-          activeFilterCount
-        }}
-      />
+      <div className="animate-in fade-in slide-in-from-bottom-3 duration-500 fill-mode-backwards delay-100">
+        <div className="rounded-xl border bg-card/60 p-4 shadow-sm backdrop-blur">
+          <CollectionToolbar
+            search={search}
+            onSearchChange={handleSearchChange}
+            sort={sort}
+            onSortChange={handleSortChange}
+            sortOrder={sortOrder}
+            onSortOrderChange={handleSortOrderChange}
+            filters={{
+              options: filterOptions,
+              selected: selectedFilters,
+              setSelectedGenres: handleSetSelectedGenres,
+              setSelectedStyles: handleSetSelectedStyles,
+              setSelectedLabels: handleSetSelectedLabels,
+              setSelectedTypes: handleSetSelectedTypes,
+              setSelectedSizes: handleSetSelectedSizes,
+              setSelectedCountries: handleSetSelectedCountries,
+              setYearRange: handleSetYearRange,
+              clearFilters: handleClearFilters,
+              activeFilterCount
+            }}
+          />
+        </div>
+      </div>
 
       <VinylGrid releases={filteredReleases} isLoading={isLoading} />
 

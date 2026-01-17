@@ -24,9 +24,11 @@ export function VinylGrid({ releases, isLoading }: VinylGridProps) {
 
   if (releases.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <Disc3 className="h-20 w-20 text-muted-foreground opacity-50" />
-        <p className="mt-6 text-lg font-medium text-muted-foreground">
+      <div className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in zoom-in-95 duration-500">
+        <div className="animate-in spin-in duration-700 fill-mode-backwards">
+          <Disc3 className="h-20 w-20 text-muted-foreground opacity-50" />
+        </div>
+        <p className="mt-6 text-lg font-medium text-muted-foreground animate-in fade-in slide-in-from-bottom-3 duration-500 fill-mode-backwards delay-200">
           {t('collection.empty')}
         </p>
       </div>
@@ -35,8 +37,14 @@ export function VinylGrid({ releases, isLoading }: VinylGridProps) {
 
   return (
     <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-      {releases.map((release) => (
-        <VinylCard key={release.instance_id} release={release} />
+      {releases.map((release, index) => (
+        <div
+          key={release.instance_id}
+          className="animate-card-pop"
+          style={{ animationDelay: `${Math.min(index * 30, 300)}ms` }}
+        >
+          <VinylCard release={release} />
+        </div>
       ))}
     </div>
   )

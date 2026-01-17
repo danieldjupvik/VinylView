@@ -1,6 +1,6 @@
 {
   "app": {
-    "name": "VinylView",
+    "name": "VinylDeck",
     "description": "Browse your Discogs vinyl collection"
   },
   "language": {
@@ -9,13 +9,18 @@
     "norwegian": "Norwegian"
   },
   "common": {
-    "comingSoon": "(Coming soon)"
+    "comingSoon": "(Coming soon)",
+    "soon": "Soon"
   },
   "nav": {
     "collection": "Collection",
     "wantlist": "Wantlist",
+    "random": "Random",
     "settings": "Settings",
     "browse": "Browse",
+    "analyze": "Analyze",
+    "collectionValue": "Collection Value",
+    "stats": "Stats",
     "backHome": "Go back home"
   },
   "auth": {
@@ -92,7 +97,7 @@
     "subtitle": "Manage your profile and app preferences",
     "profile": {
       "title": "Profile",
-      "description": "Personalize how your profile appears in VinylView",
+      "description": "Personalize how your profile appears in VinylDeck",
       "avatar": {
         "title": "Avatar",
         "description": "Choose the avatar shown in the sidebar and menus.",
@@ -103,9 +108,35 @@
       }
     },
     "version": "Version",
-    "theme": "Theme",
-    "dark": "Dark",
-    "light": "Light"
+    "appearance": {
+      "title": "Appearance",
+      "description": "Customize how VinylDeck looks and feels",
+      "theme": {
+        "title": "Theme",
+        "description": "Select your preferred color scheme.",
+        "light": "Light",
+        "lightHint": "A bright, clean look",
+        "dark": "Dark",
+        "darkHint": "Easy on the eyes",
+        "system": "System",
+        "systemHint": "Matches your device settings"
+      },
+      "language": {
+        "title": "Language",
+        "description": "Choose your preferred language.",
+        "english": "English",
+        "englishHint": "English (US)",
+        "norwegian": "Norwegian",
+        "norwegianHint": "Norsk (Bokmål)"
+      }
+    },
+    "about": {
+      "title": "About",
+      "description": "Information about the app",
+      "changelog": "Changelog",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service"
+    }
   },
   "theme": {
     "toggle": "Toggle theme",
