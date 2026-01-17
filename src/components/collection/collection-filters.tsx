@@ -91,7 +91,7 @@ function FilterGroup({
             const isChecked = selected.includes(option.value)
             return (
               <label
-                key={`${option.value}-${index}`}
+                key={option.value}
                 htmlFor={id}
                 className="flex items-center gap-2 text-sm"
               >

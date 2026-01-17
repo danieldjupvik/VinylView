@@ -1,15 +1,15 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
-import { useTranslation } from 'react-i18next'
-import { AlertCircle, RotateCw } from 'lucide-react'
-import { useCollection } from '@/hooks/use-collection'
-import { useViewPreference } from '@/hooks/use-view-preference'
-import { VinylGrid } from '@/components/collection/vinyl-grid'
-import { VinylTable } from '@/components/collection/vinyl-table'
 import { CollectionToolbar } from '@/components/collection/collection-toolbar'
 import { PaginationControls } from '@/components/collection/pagination-controls'
+import { VinylGrid } from '@/components/collection/vinyl-grid'
+import { VinylTable } from '@/components/collection/vinyl-table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { useCollection } from '@/hooks/use-collection'
+import { useViewPreference } from '@/hooks/use-view-preference'
+import { createFileRoute } from '@tanstack/react-router'
+import { AlertCircle, RotateCw } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export const Route = createFileRoute('/_authenticated/collection')({
   component: CollectionPage
@@ -83,6 +83,28 @@ function CollectionPage() {
     }
   }, [])
 
+  // Memoize Intl.NumberFormat instances by locale and unit
+  const numberFormatters = useMemo(() => {
+    const cache = new Map<string, Intl.NumberFormat>()
+
+    const getFormatter = (unit: Intl.RelativeTimeFormatUnit) => {
+      const key = `${i18n.language}-${unit}`
+      if (!cache.has(key)) {
+        cache.set(
+          key,
+          new Intl.NumberFormat(i18n.language, {
+            style: 'unit',
+            unit,
+            unitDisplay: 'short'
+          })
+        )
+      }
+      return cache.get(key)!
+    }
+
+    return { getFormatter }
+  }, [i18n.language])
+
   const lastUpdatedLabel = useMemo(() => {
     if (!dataUpdatedAt) {
       return t('collection.notUpdated')
@@ -99,26 +121,16 @@ function CollectionPage() {
     for (const [unit, secondsInUnit] of units) {
       if (diffSeconds >= secondsInUnit || unit === 'second') {
         const value = Math.round(diffSeconds / secondsInUnit)
-        const numberFormatter = new Intl.NumberFormat(i18n.language, {
-          style: 'unit',
-          unit,
-          unitDisplay: 'short'
-        })
         return t('collection.lastUpdated', {
-          time: numberFormatter.format(value)
+          time: numberFormatters.getFormatter(unit).format(value)
         })
       }
     }
 
-    const fallbackFormatter = new Intl.NumberFormat(i18n.language, {
-      style: 'unit',
-      unit: 'second',
-      unitDisplay: 'short'
-    })
     return t('collection.lastUpdated', {
-      time: fallbackFormatter.format(0)
+      time: numberFormatters.getFormatter('second').format(0)
     })
-  }, [dataUpdatedAt, now, i18n.language, t])
+  }, [dataUpdatedAt, now, t, numberFormatters])
 
   // Reset to page 1 when sort changes
   const handleSortChange = (newSort: typeof sort) => {

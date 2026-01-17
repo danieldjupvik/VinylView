@@ -1,6 +1,6 @@
 import { Disc3 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import type { DiscogsBasicInformation } from '@/types/discogs'
+import type { DiscogsCollectionRelease, DiscogsFormat } from '@/types/discogs'
 import {
   Table,
   TableBody,
@@ -12,14 +12,8 @@ import {
 import { VinylTableSkeleton } from './vinyl-table-skeleton'
 import { CollectionEmptyState } from './collection-empty-state'
 
-interface VinylTableRelease {
-  id: number
-  instance_id?: number
-  basic_information: DiscogsBasicInformation
-}
-
 interface VinylTableProps {
-  releases: VinylTableRelease[]
+  releases: DiscogsCollectionRelease[]
   isLoading: boolean
   shouldAnimate: boolean
 }
@@ -32,7 +26,7 @@ const formatGenres = (genres: string[]) => {
   return limited.join(', ')
 }
 
-const formatFormats = (formats: DiscogsBasicInformation['formats']) => {
+const formatFormats = (formats: DiscogsFormat[]) => {
   const unique = Array.from(
     new Set((formats ?? []).map((format) => format.name).filter(Boolean))
   )

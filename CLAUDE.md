@@ -132,7 +132,7 @@ The sidebar uses shadcn's sidebar component with collapsible functionality.
 
 ## View Transitions
 
-- React 19 ViewTransition API enabled in TanStack Router (`defaultViewTransition: true`)
+- React 19 ViewTransition API enabled per-link in TanStack Router (`defaultViewTransition: false`, view transitions applied via `viewTransition` prop)
 - Smooth fade transitions between pages (300ms duration)
 - Respects `prefers-reduced-motion` for accessibility (50ms duration when enabled)
 - CSS configured in `src/index.css` with custom fade-in/fade-out animations
