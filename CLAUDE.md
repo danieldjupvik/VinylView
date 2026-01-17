@@ -101,9 +101,10 @@ Auth is managed via React Context in `src/providers/`:
 
 Auth flow:
 
-1. On mount, validates stored token via `/oauth/identity`
-2. Login validates credentials, stores token/username in localStorage
-3. Logout clears localStorage and resets state
+1. On mount, always validates stored token via `/oauth/identity` (never trusts cached identity)
+2. Cached user profile is only used after successful token validation
+3. Login validates credentials, stores token/username in localStorage
+4. Logout clears localStorage and resets state
 
 ## Layout Components
 
@@ -120,3 +121,19 @@ The sidebar uses shadcn's sidebar component with collapsible functionality.
 
 - Language auto-detects from system (English/Norwegian)
 - Language toggle appears next to the theme toggle
+
+## View Transitions
+
+- React 19 ViewTransition API enabled in TanStack Router (`defaultViewTransition: true`)
+- Smooth fade transitions between pages (300ms duration)
+- Respects `prefers-reduced-motion` for accessibility (50ms duration when enabled)
+- CSS configured in `src/index.css` with custom fade-in/fade-out animations
+
+## PWA (Progressive Web App)
+
+- Configured via `vite-plugin-pwa` in `vite.config.ts`
+- Icons: Vinyl-themed placeholders (192x192, 512x512) generated via `scripts/generate-icons.js`
+- Offline caching:
+  - API responses: NetworkFirst strategy, 1-hour cache
+  - Cover images: CacheFirst strategy, 30-day cache
+- Service worker auto-updates on new deployment

@@ -1,6 +1,5 @@
 import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router'
 import { useEffect } from 'react'
-import { Disc3 } from 'lucide-react'
 import { useAuth } from '@/hooks/use-auth'
 import {
   SidebarInset,
@@ -10,6 +9,7 @@ import {
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import { ModeToggle } from '@/components/layout/mode-toggle'
 import { LanguageToggle } from '@/components/layout/language-toggle'
+import { BrandMark } from '@/components/layout/brand-mark'
 
 export const Route = createFileRoute('/_authenticated')({
   component: AuthenticatedLayout
@@ -29,7 +29,11 @@ function AuthenticatedLayout() {
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="text-muted-foreground">Loading...</div>
+        <BrandMark
+          size="lg"
+          spinning
+          className="animate-in fade-in duration-300"
+        />
       </div>
     )
   }
@@ -42,23 +46,26 @@ function AuthenticatedLayout() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-14 items-center justify-between border-b px-4">
-          <div className="flex items-center gap-2">
-            <SidebarTrigger className="md:hidden" />
-            <div className="flex items-center gap-2 md:hidden">
-              <div className="bg-primary text-primary-foreground flex aspect-square size-6 items-center justify-center rounded-md">
-                <Disc3 className="size-3.5" />
+      <SidebarInset className="relative">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_circle_at_top,rgba(120,120,120,0.12),transparent_60%)] opacity-70 dark:bg-[radial-gradient(1200px_circle_at_top,rgba(255,255,255,0.06),transparent_60%)]" />
+        <div className="relative z-10 flex min-h-svh flex-col">
+          <header className="flex h-14 items-center justify-between border-b bg-background/80 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div className="flex items-center gap-2">
+              <SidebarTrigger className="md:hidden" />
+              <div className="flex items-center gap-2 md:hidden">
+                <BrandMark size="sm" />
+                <span className="font-semibold">VinylView</span>
               </div>
-              <span className="font-semibold">VinylView</span>
             </div>
+            <div className="flex items-center gap-2">
+              <LanguageToggle />
+              <ModeToggle />
+            </div>
+          </header>
+          <div className="flex-1">
+            <Outlet />
           </div>
-          <div className="flex items-center gap-2">
-            <LanguageToggle />
-            <ModeToggle />
-          </div>
-        </header>
-        <Outlet />
+        </div>
       </SidebarInset>
     </SidebarProvider>
   )

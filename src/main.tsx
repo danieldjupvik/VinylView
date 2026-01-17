@@ -9,7 +9,10 @@ import { PreferencesProvider } from '@/providers/preferences-provider'
 import '@/providers/i18n-provider'
 import './index.css'
 
-const router = createRouter({ routeTree })
+const router = createRouter({
+  routeTree,
+  defaultViewTransition: true
+})
 
 declare module '@tanstack/react-router' {
   interface Register {

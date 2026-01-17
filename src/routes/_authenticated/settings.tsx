@@ -33,7 +33,7 @@ function SettingsPage() {
 
   return (
     <div className="mx-auto w-full max-w-4xl p-6">
-      <div className="space-y-1">
+      <div className="space-y-1 animate-in fade-in slide-in-from-bottom-2 duration-500">
         <h1 className="text-2xl font-bold">{t('settings.title')}</h1>
         <p className="text-sm text-muted-foreground">
           {t('settings.subtitle')}
@@ -41,7 +41,7 @@ function SettingsPage() {
       </div>
 
       <div className="mt-6 space-y-8">
-        <Card>
+        <Card className="animate-in fade-in slide-in-from-bottom-3 duration-500 fill-mode-backwards delay-100">
           <CardHeader>
             <CardTitle>{t('settings.profile.title')}</CardTitle>
             <CardDescription>
@@ -63,9 +63,9 @@ function SettingsPage() {
                   type="button"
                   onClick={() => setAvatarSource('discogs')}
                   className={cn(
-                    'hover:bg-accent/50 flex w-full items-center gap-3 rounded-md border p-3 text-left transition',
+                    'flex w-full items-center gap-3 rounded-md border p-3 text-left transition-all duration-200 hover:scale-[1.02] hover:bg-accent/50 hover:shadow-md',
                     avatarSource === 'discogs'
-                      ? 'border-primary/60 bg-primary/10'
+                      ? 'border-primary/60 bg-primary/10 shadow-sm'
                       : 'border-border'
                   )}
                 >
@@ -94,9 +94,9 @@ function SettingsPage() {
                   type="button"
                   onClick={() => setAvatarSource('gravatar')}
                   className={cn(
-                    'hover:bg-accent/50 flex w-full items-center gap-3 rounded-md border p-3 text-left transition',
+                    'flex w-full items-center gap-3 rounded-md border p-3 text-left transition-all duration-200 hover:scale-[1.02] hover:bg-accent/50 hover:shadow-md',
                     avatarSource === 'gravatar'
-                      ? 'border-primary/60 bg-primary/10'
+                      ? 'border-primary/60 bg-primary/10 shadow-sm'
                       : 'border-border'
                   )}
                 >
@@ -125,7 +125,7 @@ function SettingsPage() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="animate-in fade-in slide-in-from-bottom-3 duration-500 fill-mode-backwards delay-200">
           <CardHeader>
             <CardTitle>{t('app.name')}</CardTitle>
             <CardDescription>{t('app.description')}</CardDescription>

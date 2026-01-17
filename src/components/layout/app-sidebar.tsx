@@ -1,6 +1,3 @@
-import { Disc3, Heart } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-import { Link, useLocation } from '@tanstack/react-router'
 import {
   Sidebar,
   SidebarContent,
@@ -13,6 +10,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem
 } from '@/components/ui/sidebar'
+import { Link, useLocation } from '@tanstack/react-router'
+import { Disc3, Heart } from 'lucide-react'
+import type { MouseEvent } from 'react'
+import { useTranslation } from 'react-i18next'
+import { BrandMark } from './brand-mark'
 import { SidebarUser } from './sidebar-user'
 
 export function AppSidebar() {
@@ -20,18 +22,29 @@ export function AppSidebar() {
   const location = useLocation()
 
   const isActive = (path: string) => location.pathname === path
+  const handleSameRouteClick =
+    (path: string) => (event: MouseEvent<HTMLAnchorElement>) => {
+      if (isActive(path)) {
+        event.preventDefault()
+      }
+    }
 
   return (
     <Sidebar>
-      <SidebarHeader>
+      <SidebarHeader className="pt-3">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link to="/collection">
-                <div className="bg-primary text-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <Disc3 className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
+            <SidebarMenuButton
+              size="lg"
+              asChild
+              className="gap-3 text-base hover:bg-transparent active:bg-transparent"
+            >
+              <Link
+                to="/collection"
+                onClick={handleSameRouteClick('/collection')}
+              >
+                <BrandMark size="sm" />
+                <div className="grid flex-1 text-left leading-tight">
                   <span className="truncate font-semibold">
                     {t('app.name')}
                   </span>
@@ -53,7 +66,10 @@ export function AppSidebar() {
                   isActive={isActive('/collection')}
                   tooltip={t('nav.collection')}
                 >
-                  <Link to="/collection">
+                  <Link
+                    to="/collection"
+                    onClick={handleSameRouteClick('/collection')}
+                  >
                     <Disc3 />
                     <span>{t('nav.collection')}</span>
                   </Link>
@@ -73,7 +89,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter>
+      <SidebarFooter className="pb-3">
         <SidebarUser />
       </SidebarFooter>
     </Sidebar>

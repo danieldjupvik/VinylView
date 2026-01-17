@@ -7,7 +7,12 @@ interface VinylCardSkeletonProps {
 
 export function VinylCardSkeleton({ className }: VinylCardSkeletonProps) {
   return (
-    <div className={cn('overflow-hidden rounded-lg bg-card', className)}>
+    <div
+      className={cn(
+        'overflow-hidden rounded-lg bg-card shadow-sm ring-1 ring-border/30',
+        className
+      )}
+    >
       <Skeleton className="aspect-square w-full rounded-none" />
       <div className="p-3">
         <Skeleton className="h-4 w-3/4" />

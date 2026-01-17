@@ -22,17 +22,18 @@ export function PaginationControls({
   }
 
   return (
-    <div className="flex items-center justify-center gap-4">
+    <div className="flex items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-3 duration-500">
       <Button
         variant="outline"
         size="sm"
         onClick={() => onPageChange(page - 1)}
         disabled={page <= 1 || isLoading}
+        className="transition-all duration-200 hover:scale-105 disabled:hover:scale-100"
       >
         <ChevronLeft className="mr-1 h-4 w-4" />
         {t('collection.pagination.previous')}
       </Button>
-      <span className="text-sm text-muted-foreground">
+      <span className="text-sm text-muted-foreground tabular-nums">
         {t('collection.pagination.page', { current: page, total: totalPages })}
       </span>
       <Button
@@ -40,6 +41,7 @@ export function PaginationControls({
         size="sm"
         onClick={() => onPageChange(page + 1)}
         disabled={page >= totalPages || isLoading}
+        className="transition-all duration-200 hover:scale-105 disabled:hover:scale-100"
       >
         {t('collection.pagination.next')}
         <ChevronRight className="ml-1 h-4 w-4" />

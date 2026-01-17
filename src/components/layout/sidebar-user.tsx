@@ -1,6 +1,6 @@
 import { ChevronsUpDown, LogOut, Settings } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link, useLocation, useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { useAuth } from '@/hooks/use-auth'
 import { usePreferences } from '@/hooks/use-preferences'
@@ -23,6 +23,7 @@ export function SidebarUser() {
   const { username, logout, avatarUrl } = useAuth()
   const { avatarSource, gravatarUrl } = usePreferences()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const handleLogout = () => {
     logout()
@@ -78,7 +79,14 @@ export function SidebarUser() {
             sideOffset={4}
           >
             <DropdownMenuItem asChild>
-              <Link to="/settings">
+              <Link
+                to="/settings"
+                onClick={(event) => {
+                  if (location.pathname === '/settings') {
+                    event.preventDefault()
+                  }
+                }}
+              >
                 <Settings className="mr-2 size-4" />
                 {t('nav.settings')}
               </Link>
