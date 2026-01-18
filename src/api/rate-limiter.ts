@@ -41,6 +41,7 @@ class RateLimiter {
     lastUpdated: Date.now()
   }
 
+  private inFlight = 0
   private waitPromise: Promise<void> | null = null
 
   private resetWindowIfExpired(): boolean {
@@ -51,6 +52,7 @@ class RateLimiter {
     this.state.remaining = this.state.limit
     this.state.used = 0
     this.state.lastUpdated = Date.now()
+    this.inFlight = 0
     return true
   }
 
@@ -67,10 +69,35 @@ class RateLimiter {
     const used = headers['x-discogs-ratelimit-used']
     const remaining = headers['x-discogs-ratelimit-remaining']
 
-    if (limit) this.state.limit = parseInt(limit, 10)
-    if (used) this.state.used = parseInt(used, 10)
-    if (remaining) this.state.remaining = parseInt(remaining, 10)
-    this.state.lastUpdated = Date.now()
+    let updated = false
+
+    if (limit) {
+      const parsedLimit = Number.parseInt(limit, 10)
+      if (Number.isFinite(parsedLimit)) {
+        this.state.limit = parsedLimit
+        updated = true
+      }
+    }
+
+    if (used) {
+      const parsedUsed = Number.parseInt(used, 10)
+      if (Number.isFinite(parsedUsed)) {
+        this.state.used = parsedUsed
+        updated = true
+      }
+    }
+
+    if (remaining) {
+      const parsedRemaining = Number.parseInt(remaining, 10)
+      if (Number.isFinite(parsedRemaining)) {
+        this.state.remaining = parsedRemaining
+        updated = true
+      }
+    }
+
+    if (updated) {
+      this.state.lastUpdated = Date.now()
+    }
   }
 
   /**
@@ -88,7 +115,7 @@ class RateLimiter {
       return false
     }
 
-    return this.state.remaining < RATE_LIMIT.BUFFER
+    return this.state.remaining - this.inFlight < RATE_LIMIT.BUFFER
   }
 
   /**
@@ -129,6 +156,17 @@ class RateLimiter {
     })
 
     return this.waitPromise
+  }
+
+  /**
+   * Track in-flight requests to prevent burst overruns.
+   */
+  startRequest(): void {
+    this.inFlight += 1
+  }
+
+  finishRequest(): void {
+    this.inFlight = Math.max(0, this.inFlight - 1)
   }
 
   /**

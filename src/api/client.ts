@@ -24,6 +24,8 @@ export const apiClient = axios.create({
  */
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
+    rateLimiter.startRequest()
+
     // Wait if we're being rate limited
     await rateLimiter.waitIfNeeded()
 
@@ -35,7 +37,10 @@ apiClient.interceptors.request.use(
 
     return config
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    rateLimiter.finishRequest()
+    return Promise.reject(error)
+  }
 )
 
 /**
@@ -57,7 +62,11 @@ function extractRateLimitHeaders(
   ]
 
   for (const key of rateLimitKeys) {
-    const value = axiosHeaders[key]
+    const headerAccessor = axiosHeaders as { get?: (name: string) => unknown }
+    const fromAccessor =
+      typeof headerAccessor.get === 'function' ? headerAccessor.get(key) : null
+    const value =
+      typeof fromAccessor === 'string' ? fromAccessor : axiosHeaders[key]
     if (typeof value === 'string') {
       headers[key] = value
     }
@@ -78,6 +87,8 @@ function extractRateLimitHeaders(
  */
 apiClient.interceptors.response.use(
   (response) => {
+    rateLimiter.finishRequest()
+
     // Update rate limiter from response headers
     const headers = extractRateLimitHeaders(response.headers)
     rateLimiter.updateFromHeaders(headers)
@@ -85,6 +96,8 @@ apiClient.interceptors.response.use(
     return response
   },
   (error: AxiosError) => {
+    rateLimiter.finishRequest()
+
     // Update rate limiter even on error responses
     if (error.response?.headers) {
       const headers = extractRateLimitHeaders(

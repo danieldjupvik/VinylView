@@ -136,6 +136,25 @@ const DEFAULT_COLOR_STYLE = {
   border: 'ring-white/30'
 }
 
+const IRRELEVANT_VINYL_TERMS = [
+  'pressing',
+  'records',
+  'vinyl',
+  'edition',
+  'reissue',
+  'remastered',
+  'company',
+  'plant',
+  'united',
+  'optimal',
+  'pallas',
+  'gz',
+  'rainbo',
+  'gatefold',
+  'sleeve',
+  'jacket'
+]
+
 function getColorStyles(colorName: string) {
   const color = colorName.toLowerCase()
   const matchedRule = COLOR_STYLE_RULES.find((rule) =>
@@ -149,26 +168,6 @@ function extractVinylInfo(
 ): VinylInfo {
   const info: VinylInfo = {}
 
-  // Common pressing plants and irrelevant terms to filter out
-  const irrelevantTerms = [
-    'pressing',
-    'records',
-    'vinyl',
-    'edition',
-    'reissue',
-    'remastered',
-    'company',
-    'plant',
-    'united',
-    'optimal',
-    'pallas',
-    'gz',
-    'rainbo',
-    'gatefold',
-    'sleeve',
-    'jacket'
-  ]
-
   for (const format of formats) {
     if (format.name === 'Vinyl' && format.text) {
       const parts = format.text.split(',').map((p) => p.trim())
@@ -177,7 +176,7 @@ function extractVinylInfo(
         const lower = part.toLowerCase()
 
         // Check if this is an irrelevant term
-        const isIrrelevant = irrelevantTerms.some((term) =>
+        const isIrrelevant = IRRELEVANT_VINYL_TERMS.some((term) =>
           lower.includes(term)
         )
         if (isIrrelevant) continue

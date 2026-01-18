@@ -7,10 +7,10 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
       retry: (failureCount, error) => {
-        // Don't retry on 401 (unauthorized) or 404
+        // Don't retry on 401 (unauthorized), 404, or 429 (rate limited)
         if (isAxiosError(error)) {
           const status = error.response?.status
-          if (status === 401 || status === 404) {
+          if (status === 401 || status === 404 || status === 429) {
             return false
           }
         }

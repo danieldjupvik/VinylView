@@ -95,6 +95,7 @@
       "format": "Format",
       "country": "Land"
     },
+    "unknownArtist": "Ukjent artist",
     "pagination": {
       "previous": "Forrige",
       "next": "Neste",

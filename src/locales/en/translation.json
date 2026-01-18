@@ -95,6 +95,7 @@
       "format": "Format",
       "country": "Country"
     },
+    "unknownArtist": "Unknown artist",
     "pagination": {
       "previous": "Previous",
       "next": "Next",

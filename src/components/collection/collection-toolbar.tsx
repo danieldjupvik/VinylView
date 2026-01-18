@@ -81,6 +81,7 @@ export function CollectionToolbar({
         <Input
           type="search"
           placeholder={t('collection.search')}
+          aria-label={t('collection.search')}
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
           className="pl-9"
