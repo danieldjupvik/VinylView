@@ -14,16 +14,15 @@ export const readParamRange = (
 ): [number, number] | null => {
   const value = params.get(key)
   if (!value) return null
-  const parts = value.split('-')
-  if (parts.length !== 2) return null
-  const [startRaw, endRaw] = parts.map((part) => part.trim())
-  if (!startRaw || !endRaw) return null
-  const numericPattern = /^[+-]?\d+(\.\d+)?$/
-  if (!numericPattern.test(startRaw) || !numericPattern.test(endRaw)) {
-    return null
-  }
+
+  // Capture two signed numbers separated by a hyphen
+  const match = value.match(/^([+-]?\d+(?:\.\d+)?)-([+-]?\d+(?:\.\d+)?)$/)
+  if (!match) return null
+
+  const [, startRaw, endRaw] = match
   const start = Number(startRaw)
   const end = Number(endRaw)
+
   if (!Number.isFinite(start) || !Number.isFinite(end)) return null
   return start <= end ? [start, end] : [end, start]
 }

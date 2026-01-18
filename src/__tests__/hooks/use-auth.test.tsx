@@ -73,28 +73,24 @@ describe('useAuth', () => {
     expect(result.current.isAuthenticated).toBe(false)
   })
 
+  // TODO: Investigate why result.current is null in this specific test case.
+  // Although other tests use useAuth successfully, this one fails with "expected null to be truthy"
+  // when checking result.current.
   it.skip('throws error when username does not match token', async () => {
     const { result } = renderHook(() => useAuth(), { wrapper })
 
     await waitFor(() => {
-      if (result.current) {
-        expect(result.current.isLoading).toBe(false)
-      }
+      expect(result.current).toBeTruthy()
+      expect(result.current!.isLoading).toBe(false)
     })
 
-    let error: Error | undefined
-    try {
-      await act(async () => {
-        if (result.current) {
-          await result.current.login('wronguser', 'valid-token')
-        }
+    await expect(
+      act(async () => {
+        await result.current.login('wronguser', 'valid-token')
       })
-    } catch (e) {
-      error = e as Error
-    }
+    ).rejects.toThrow('Username does not match token')
 
-    expect(error).toBeDefined()
-    expect(error?.message).toBe('Username does not match token')
+    expect(result.current.isAuthenticated).toBe(false)
   })
 
   it('handles getUserProfile failure gracefully during login', async () => {

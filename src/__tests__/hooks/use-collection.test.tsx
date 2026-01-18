@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { http, HttpResponse } from 'msw'
 import { useCollection } from '@/hooks/use-collection'
 import { AuthContext, type AuthContextValue } from '@/providers/auth-context'
+import { setToken } from '@/lib/storage'
 import { server } from '@/__tests__/mocks/server'
 
 const buildRelease = ({
@@ -58,6 +59,9 @@ const createWrapper = (username = 'testuser') => {
     login: async () => {},
     logout: () => {}
   }
+
+  // Set token to satisfy API handlers
+  setToken('valid-token')
 
   return ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>

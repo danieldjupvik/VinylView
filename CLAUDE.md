@@ -1,5 +1,3 @@
-# AGENTS.md
-
 This file provides guidance for automated agents and AI assistants when working with code in this repository.
 
 ## Build & Development Commands
