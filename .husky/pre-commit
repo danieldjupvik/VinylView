@@ -15,7 +15,9 @@ fi
 for src in AGENTS.md CLAUDE.md GEMINI.md; do
   if git diff --cached --name-only | grep -q "^$src$"; then
     for dest in AGENTS.md CLAUDE.md GEMINI.md; do
-      [ "$src" != "$dest" ] && cp "$src" "$dest"
+      if [ "$src" != "$dest" ]; then
+        git show ":$src" > "$dest"
+      fi
     done
     git add AGENTS.md CLAUDE.md GEMINI.md
     break
