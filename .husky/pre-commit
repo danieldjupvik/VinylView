@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # .husky/pre-commit
 
 # Check if NVM is installed before trying to use it
@@ -11,11 +11,15 @@ if [ -s "$HOME/.nvm/nvm.sh" ]; then
   nvm use
 fi
 
-# Sync AGENTS.md content to other AI agent instruction files
-if [ -f "AGENTS.md" ]; then
-  cp AGENTS.md GEMINI.md
-  cp AGENTS.md CLAUDE.md
-  git add GEMINI.md CLAUDE.md
-fi
+# Sync agent instruction files - use whichever was staged as source
+for src in AGENTS.md CLAUDE.md GEMINI.md; do
+  if git diff --cached --name-only | grep -q "^$src$"; then
+    for dest in AGENTS.md CLAUDE.md GEMINI.md; do
+      [ "$src" != "$dest" ] && cp "$src" "$dest"
+    done
+    git add AGENTS.md CLAUDE.md GEMINI.md
+    break
+  fi
+done
 
 bunx lint-staged
