@@ -1,0 +1,8 @@
+{
+  "release-type": "node",
+  "package-name": "vinyldeck",
+  "include-v-in-tag": true,
+  "changelog-path": "CHANGELOG.md",
+  "prerelease": true,
+  "prerelease-type": "beta"
+}

@@ -15,13 +15,35 @@ This file provides guidance for automated agents and AI assistants when working 
 
 ## Releases & Versioning
 
-This project uses GitHub tags and the GitHub release system for version management:
+This project uses release-please and GitHub releases for versioning:
 
-- **main branch** (production): Normal releases with semantic versioning tags (e.g., `v1.0.0`)
-- **develop branch** (development): Pre-releases and beta tags (e.g., `v1.0.0-beta.1`)
-- Tags follow semantic versioning format
-- GitHub releases are created for each version with release notes
-- Release artifacts are managed through GitHub
+- **Releases happen only from `main`** via release-please
+- **Beta phase:** releases are marked as GitHub pre-releases (tags like `v0.2.0-beta`)
+- CI runs tests on PRs and pushes to `develop` and `main`
+- Do not manually bump versions or edit `CHANGELOG.md` for release entries; release-please does it
+- `CHANGELOG.md` remains the canonical changelog and can be rendered in the app
+
+### Commit Guide (for clean changelogs)
+
+Use Conventional Commits so release-please generates clear changelog entries:
+
+- `feat: add grid/table toggle`
+- `fix: handle empty collection state`
+- `refactor: simplify filter options`
+- `chore: update dependencies`
+- `docs: update README`
+- `test: add view preference tests`
+- `ci: add release-please workflow`
+
+Prefer imperative, user-facing summaries; keep the subject short and avoid punctuation at the end.
+
+### PR Merge Guidance
+
+Release-please builds changelogs from commits on `main`. To keep release notes clean:
+
+- Squash-merge PRs into `main`
+- Use a single, user-facing Conventional Commit as the squash message (or PR title)
+- Avoid noisy internal details in the squash message; keep it focused on outcomes
 
 ## Tech Stack
 
