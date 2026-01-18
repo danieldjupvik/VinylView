@@ -11,37 +11,165 @@ This file provides guidance for automated agents and AI assistants when working 
 - `bun run test:coverage` - Run tests with coverage report
 - `bun run test:ui` - Run tests with UI
 
+## Branching Strategy: Trunk-Based Development
+
+This project uses **Trunk-Based Development** with a single `main` branch:
+
+- **`main`** is the only long-lived branch
+- Feature branches are short-lived and merge directly into `main`
+- No `develop` or `release/*` branches
+- Releases are automated via release-please
+
+### Workflow
+
+1. Create a feature branch from `main`: `git checkout -b feat/my-feature`
+2. Make commits using Conventional Commits format
+3. Open a PR targeting `main`
+4. CI runs tests automatically
+5. **Squash merge** the PR into `main`
+6. release-please automatically creates/updates a release PR
+7. When ready to release, merge the release-please PR
+
+### How Release-Please Works
+
+- On every push to `main`, release-please creates or updates a "Release PR"
+- The Release PR accumulates ALL changes since the last release
+- Example: Merge 3 feature PRs → release-please updates the same Release PR with all 3
+- Merging the Release PR triggers:
+  - Version bump in `package.json`
+  - `CHANGELOG.md` update
+  - Git tag creation (e.g., `v0.2.0-beta`)
+  - GitHub Release creation
+
+### Deployment Strategy
+
+Controlled by `scripts/vercel-ignore-build.sh` and `vercel.json`:
+
+| Deployment Type       | When             | Behavior                             |
+| --------------------- | ---------------- | ------------------------------------ |
+| **Preview** (PRs)     | Every PR push    | ✓ Always builds - reviewers can test |
+| **Production** (main) | Feature merge    | ✗ Skipped - no deploy                |
+| **Production** (main) | Release PR merge | ✓ Builds and deploys                 |
+
+This ensures production only updates on actual releases, while PRs still get preview URLs for testing.
+
 ## Releases & Versioning
 
 This project uses release-please and GitHub releases for versioning:
 
 - **Releases happen only from `main`** via release-please
 - **Beta phase:** releases are marked as GitHub pre-releases (tags like `v0.2.0-beta`)
-- CI runs tests on PRs and pushes to `develop` and `main`
+- CI runs tests on PRs and pushes to `main`
 - Do not manually bump versions or edit `CHANGELOG.md` for release entries; release-please does it
 - `CHANGELOG.md` remains the canonical changelog and can be rendered in the app
 
 ### Commit Guide (for clean changelogs)
 
-Use Conventional Commits so release-please generates clear changelog entries:
+Use Conventional Commits so release-please generates clear changelog entries. The commit message becomes the changelog entry, so write it for users.
 
-- `feat: add grid/table toggle`
-- `fix: handle empty collection state`
-- `refactor: simplify filter options`
-- `chore: update dependencies`
-- `docs: update README`
-- `test: add view preference tests`
-- `ci: add release-please workflow`
+**Format:** `<type>: <description>`
 
-Prefer imperative, user-facing summaries; keep the subject short and avoid punctuation at the end.
+**How release-please categorizes commits:**
 
-### PR Merge Guidance
+| Type                           | Changelog Section            | Version Bump  | Example                      |
+| ------------------------------ | ---------------------------- | ------------- | ---------------------------- |
+| `feat:`                        | **Features**                 | Minor (0.X.0) | `feat: add dark mode toggle` |
+| `fix:`                         | **Bug Fixes**                | Patch (0.0.X) | `fix: prevent double submit` |
+| `feat!:` or `BREAKING CHANGE:` | **⚠ BREAKING CHANGES**       | Major (X.0.0) | `feat!: redesign auth flow`  |
+| `docs:`                        | Hidden                       | None          | `docs: update README`        |
+| `chore:`                       | Hidden                       | None          | `chore: update dependencies` |
+| `refactor:`                    | Hidden                       | None          | `refactor: simplify utils`   |
+| `test:`                        | Hidden                       | None          | `test: add unit tests`       |
+| `ci:`                          | Hidden                       | None          | `ci: fix workflow`           |
+| `style:`                       | Hidden                       | None          | `style: format code`         |
+| `perf:`                        | **Performance Improvements** | Patch (0.0.X) | `perf: optimize rendering`   |
 
-Release-please builds changelogs from commits on `main`. To keep release notes clean:
+**Key points:**
 
-- Squash-merge PRs into `main`
-- Use a single, user-facing Conventional Commit as the squash message (or PR title)
-- Avoid noisy internal details in the squash message; keep it focused on outcomes
+- Only `feat`, `fix`, `perf`, and breaking changes appear in the public changelog
+- Hidden types still trigger release-please to update the PR, but won't add changelog entries
+- Use `feat` and `fix` for user-facing changes you want documented
+- Use `chore`, `docs`, `refactor`, etc. for internal work that users don't need to know about
+
+**Good examples (user-facing, imperative):**
+
+```text
+feat: add grid/table toggle for collection view
+feat: support filtering by release year
+feat: add keyboard navigation to vinyl cards
+fix: prevent duplicate API calls on rapid pagination
+fix: handle empty collection state gracefully
+fix: correct genre display for multi-genre releases
+```
+
+**Bad examples (avoid these):**
+
+```text
+feat: Added the thing          # Past tense, vague
+fix: Fix bug                   # Redundant "fix", no description
+feat: Implement feature X.     # Period at end, verbose
+update stuff                   # No type prefix, vague
+```
+
+**With scope (optional, for larger codebases):**
+
+```text
+feat(auth): add session timeout warning
+fix(api): handle rate limit errors gracefully
+```
+
+### Squash Merge Workflow (Step-by-Step)
+
+Release-please reads commit messages on `main` to build the changelog. Follow this workflow:
+
+**1. Name your PR with a Conventional Commit title:**
+
+```text
+feat: add collection search functionality
+fix: resolve pagination reset on filter change
+chore: update TypeScript to 5.9
+```
+
+**2. When merging on GitHub:**
+
+- Click "Squash and merge" (not "Create a merge commit" or "Rebase and merge")
+- GitHub shows a commit message dialog
+- **DO NOT use the auto-generated message** (it lists all commits, which is noisy)
+- The first line should already be your PR title - keep it as-is
+- Optionally add a blank line and brief body, but the title is what matters
+
+**3. Example of what GitHub shows:**
+
+```text
+feat: add collection search functionality
+
+* WIP: search input
+* add debounce
+* fix styling
+* address PR feedback
+```
+
+**Change it to just:**
+
+```text
+feat: add collection search functionality
+```
+
+**Why this matters:**
+
+- The **first line** of the squash commit becomes the changelog entry
+- Auto-generated messages create cluttered changelogs with WIP commits
+- One clean line = one clean changelog entry
+
+**Why squash merge (not merge commit or rebase)?**
+
+| Strategy           | Result                     | Changelog Impact                |
+| ------------------ | -------------------------- | ------------------------------- |
+| **Squash merge** ✓ | One commit per PR          | Clean: one entry per feature    |
+| Merge commit       | All commits + merge commit | Noisy: WIP commits in changelog |
+| Rebase and merge   | All commits (rebased)      | Noisy: WIP commits in changelog |
+
+Squash merge is the only strategy that gives you full control over the changelog entry.
 
 ## Tech Stack
 
