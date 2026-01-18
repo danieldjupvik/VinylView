@@ -102,12 +102,12 @@ export interface ApiError {
   message: string
 }
 
-export function isApiError(error: unknown): error is AxiosError {
+export function isAxiosError(error: unknown): error is AxiosError {
   return axios.isAxiosError(error)
 }
 
 export function getApiError(error: unknown): ApiError {
-  if (isApiError(error)) {
+  if (isAxiosError(error)) {
     return {
       status: error.response?.status ?? 0,
       message: error.message

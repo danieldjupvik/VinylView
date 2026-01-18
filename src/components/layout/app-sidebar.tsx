@@ -37,7 +37,8 @@ export function AppSidebar() {
   const location = useLocation()
   const { isMobile, setOpenMobile } = useSidebar()
 
-  const isActive = (path: string) => location.pathname === path
+  const isActive = (path: string) =>
+    location.pathname === path || location.pathname.startsWith(`${path}/`)
   const handleNavClick =
     (path: string) => (event: MouseEvent<HTMLAnchorElement>) => {
       if (

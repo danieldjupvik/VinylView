@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import type { Theme } from './theme-context'
 import { ThemeProviderContext } from './theme-context'
 
 type ThemeProviderProps = {
-  children: React.ReactNode
+  children: ReactNode
   defaultTheme?: Theme
   storageKey?: string
 }
@@ -14,9 +14,13 @@ export function ThemeProvider({
   storageKey = 'vinyldeck-theme',
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
-  )
+  const [theme, setTheme] = useState<Theme>(() => {
+    const stored = localStorage.getItem(storageKey)
+    const validThemes: Theme[] = ['light', 'dark', 'system']
+    return validThemes.includes(stored as Theme)
+      ? (stored as Theme)
+      : defaultTheme
+  })
 
   useEffect(() => {
     const root = window.document.documentElement
@@ -40,9 +44,13 @@ export function ThemeProvider({
 
   const value = {
     theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme)
-      setTheme(theme)
+    setTheme: (nextTheme: Theme) => {
+      const validThemes: Theme[] = ['light', 'dark', 'system']
+      const safeTheme = validThemes.includes(nextTheme)
+        ? nextTheme
+        : defaultTheme
+      localStorage.setItem(storageKey, safeTheme)
+      setTheme(safeTheme)
     }
   }
 

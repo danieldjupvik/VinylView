@@ -12,139 +12,136 @@ interface VinylInfo {
   weight?: string
 }
 
-function getColorStyles(colorName: string): {
-  bg: string
-  text: string
-  border: string
-} {
-  const color = colorName.toLowerCase()
-
-  // Map color names to Tailwind-compatible styles
-  if (color.includes('yellow') || color.includes('gold')) {
-    return {
+const COLOR_STYLE_RULES: Array<{
+  keywords: string[]
+  styles: { bg: string; text: string; border: string }
+}> = [
+  {
+    keywords: ['yellow', 'gold'],
+    styles: {
       bg: 'bg-yellow-400/90',
       text: 'text-yellow-950',
       border: 'ring-yellow-900/50'
     }
-  }
-  if (color.includes('pink') || color.includes('magenta')) {
-    return {
+  },
+  {
+    keywords: ['pink', 'magenta'],
+    styles: {
       bg: 'bg-pink-500/90',
       text: 'text-white',
       border: 'ring-pink-700/60'
     }
-  }
-  if (color.includes('red')) {
-    return {
+  },
+  {
+    keywords: ['red'],
+    styles: {
       bg: 'bg-red-500/90',
       text: 'text-white',
       border: 'ring-red-700/60'
     }
-  }
-  if (color.includes('blue') || color.includes('cyan')) {
-    return {
+  },
+  {
+    keywords: ['blue', 'cyan'],
+    styles: {
       bg: 'bg-blue-500/90',
       text: 'text-white',
       border: 'ring-blue-700/60'
     }
-  }
-  if (color.includes('green') || color.includes('lime')) {
-    return {
+  },
+  {
+    keywords: ['green', 'lime'],
+    styles: {
       bg: 'bg-green-500/90',
       text: 'text-white',
       border: 'ring-green-700/60'
     }
-  }
-  if (
-    color.includes('purple') ||
-    color.includes('violet') ||
-    color.includes('lavender')
-  ) {
-    return {
+  },
+  {
+    keywords: ['purple', 'violet', 'lavender'],
+    styles: {
       bg: 'bg-purple-500/90',
       text: 'text-white',
       border: 'ring-purple-700/60'
     }
-  }
-  if (color.includes('orange') || color.includes('amber')) {
-    return {
+  },
+  {
+    keywords: ['orange', 'amber'],
+    styles: {
       bg: 'bg-orange-500/90',
       text: 'text-white',
       border: 'ring-orange-700/60'
     }
-  }
-  if (
-    color.includes('white') ||
-    color.includes('clear') ||
-    color.includes('transparent') ||
-    color.includes('translucent')
-  ) {
-    return {
+  },
+  {
+    keywords: ['white', 'clear', 'transparent', 'translucent'],
+    styles: {
       bg: 'bg-white/95',
       text: 'text-gray-900',
       border: 'ring-gray-900/50'
     }
-  }
-  if (color.includes('smoke') || color.includes('smoky')) {
-    return {
+  },
+  {
+    keywords: ['smoke', 'smoky'],
+    styles: {
       bg: 'bg-gray-500/90',
       text: 'text-white',
       border: 'ring-gray-700/60'
     }
-  }
-  if (color.includes('black')) {
-    return {
+  },
+  {
+    keywords: ['black'],
+    styles: {
       bg: 'bg-gray-900/90',
       text: 'text-white',
       border: 'ring-gray-700/60'
     }
-  }
-  if (
-    color.includes('brown') ||
-    color.includes('bronze') ||
-    color.includes('tan')
-  ) {
-    return {
+  },
+  {
+    keywords: ['brown', 'bronze', 'tan'],
+    styles: {
       bg: 'bg-amber-700/90',
       text: 'text-white',
       border: 'ring-amber-900/60'
     }
-  }
-  if (
-    color.includes('grey') ||
-    color.includes('gray') ||
-    color.includes('silver')
-  ) {
-    return {
+  },
+  {
+    keywords: ['grey', 'gray', 'silver'],
+    styles: {
       bg: 'bg-gray-400/90',
       text: 'text-gray-900',
       border: 'ring-gray-900/50'
     }
-  }
-  if (
-    color.includes('marbled') ||
-    color.includes('marble') ||
-    color.includes('splatter') ||
-    color.includes('swirl') ||
-    color.includes('mixed')
-  ) {
-    return {
+  },
+  {
+    keywords: ['marbled', 'marble', 'splatter', 'swirl', 'mixed'],
+    styles: {
       bg: 'bg-gradient-to-br from-purple-500/90 to-pink-500/90',
       text: 'text-white',
       border: 'ring-purple-700/60'
     }
-  }
-  if (color.includes('opaque')) {
-    // Opaque often comes with another color, but if standalone use a neutral color
-    return {
+  },
+  {
+    keywords: ['opaque'],
+    styles: {
       bg: 'bg-slate-600/90',
       text: 'text-white',
       border: 'ring-slate-800/60'
     }
   }
+]
 
-  // Default for unknown colors
-  return { bg: 'bg-black/70', text: 'text-white', border: 'ring-white/30' }
+const DEFAULT_COLOR_STYLE = {
+  bg: 'bg-black/70',
+  text: 'text-white',
+  border: 'ring-white/30'
+}
+
+function getColorStyles(colorName: string) {
+  const color = colorName.toLowerCase()
+  const matchedRule = COLOR_STYLE_RULES.find((rule) =>
+    rule.keywords.some((keyword) => color.includes(keyword))
+  )
+  return matchedRule?.styles ?? DEFAULT_COLOR_STYLE
 }
 
 function extractVinylInfo(

@@ -98,7 +98,8 @@
     "pagination": {
       "previous": "Previous",
       "next": "Next",
-      "page": "Page {{current}} of {{total}}"
+      "page": "Page {{current}} of {{total}}",
+      "navigation": "Collection pagination"
     },
     "vinyl": "Vinyl",
     "records": "{{count}} record",

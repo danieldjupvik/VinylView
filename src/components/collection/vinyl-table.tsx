@@ -92,7 +92,7 @@ export function VinylTable({
 
             return (
               <TableRow
-                key={release.instance_id ?? release.id}
+                key={release.instance_id}
                 className={
                   shouldAnimate
                     ? 'animate-view-switch cursor-pointer'

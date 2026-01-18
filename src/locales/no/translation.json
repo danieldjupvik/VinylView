@@ -98,7 +98,8 @@
     "pagination": {
       "previous": "Forrige",
       "next": "Neste",
-      "page": "Side {{current}} av {{total}}"
+      "page": "Side {{current}} av {{total}}",
+      "navigation": "Paginering for samling"
     },
     "vinyl": "Vinyl",
     "records": "{{count}} plate",

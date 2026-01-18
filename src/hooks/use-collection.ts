@@ -297,9 +297,20 @@ export function useCollection(
       }
 
       const releases = [...firstPage.releases]
-      for (let currentPage = 2; currentPage <= totalPages; currentPage += 1) {
-        const response = await fetchPage(currentPage)
-        releases.push(...response.releases)
+      const remainingPages = Array.from(
+        { length: totalPages - 1 },
+        (_, index) => index + 2
+      )
+      const BATCH_SIZE = 3
+
+      for (let i = 0; i < remainingPages.length; i += BATCH_SIZE) {
+        const batch = remainingPages.slice(i, i + BATCH_SIZE)
+        const responses = await Promise.all(
+          batch.map((pageNumber) => fetchPage(pageNumber))
+        )
+        for (const response of responses) {
+          releases.push(...response.releases)
+        }
       }
 
       return { ...firstPage, releases }
