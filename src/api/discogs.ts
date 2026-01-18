@@ -279,6 +279,7 @@ export async function getCustomFields(
  * Basic information about each release is provided, suitable for display in a list. For detailed information, make another API call to fetch the corresponding release.
  * If folder_id is not 0, or the collection has been made private by its owner, authentication as the collection owner is required.
  * If you are not authenticated as the collection owner, only public notes fields will be visible.
+ * Defaults to folder_id 0 (All) when not provided.
  *
  * GET /users/{username}/collection/folders/{folder_id}/releases
  */
@@ -286,10 +287,16 @@ export async function getCollection(
   username: string,
   params: CollectionParams = {}
 ): Promise<DiscogsCollectionResponse> {
-  const { page = 1, perPage = COLLECTION.PER_PAGE, sort, sortOrder } = params
+  const {
+    page = 1,
+    perPage = COLLECTION.PER_PAGE,
+    folderId = 0,
+    sort,
+    sortOrder
+  } = params
 
   const response = await apiClient.get<DiscogsCollectionResponse>(
-    `/users/${username}/collection/folders/0/releases`,
+    `/users/${username}/collection/folders/${folderId}/releases`,
     {
       params: {
         page,

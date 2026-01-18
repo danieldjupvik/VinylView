@@ -29,7 +29,7 @@ describe('discogs api', () => {
   it('passes collection params to the API', async () => {
     server.use(
       http.get(
-        'https://api.discogs.com/users/:username/collection/folders/0/releases',
+        'https://api.discogs.com/users/:username/collection/folders/3/releases',
         ({ request }) => {
           const url = new URL(request.url)
           expect(url.searchParams.get('page')).toBe('2')
@@ -53,6 +53,7 @@ describe('discogs api', () => {
     const response = await getCollection('testuser', {
       page: 2,
       perPage: 50,
+      folderId: 3,
       sort: 'artist',
       sortOrder: 'asc'
     })

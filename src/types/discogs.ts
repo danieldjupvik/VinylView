@@ -255,6 +255,7 @@ export type CollectionSortOrder = 'asc' | 'desc'
 export interface CollectionParams {
   page?: number
   perPage?: number
+  folderId?: number
   sort?: DiscogsCollectionSortKey
   sortOrder?: CollectionSortOrder
 }
