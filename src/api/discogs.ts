@@ -21,6 +21,7 @@ import type {
   DiscogsCommunityReleaseRating,
   DiscogsReleaseStats,
   DiscogsMasterVersionsResponse,
+  MasterReleaseVersionsParams,
   DiscogsSearchResponse,
   SearchParams,
   DiscogsMarketplaceFee,
@@ -354,7 +355,7 @@ export async function getWantlist(
   username: string,
   params: { page?: number; perPage?: number } = {}
 ): Promise<DiscogsWantlistResponse> {
-  const { page = 1, perPage = 50 } = params
+  const { page = 1, perPage = COLLECTION.PER_PAGE } = params
 
   const response = await apiClient.get<DiscogsWantlistResponse>(
     `/users/${username}/wants`,
@@ -522,16 +523,7 @@ export async function getReleaseStats(
  */
 export async function getMasterReleaseVersions(
   masterId: number,
-  params: {
-    page?: number
-    per_page?: number
-    format?: string
-    label?: string
-    released?: string
-    country?: string
-    sort?: 'released' | 'title' | 'format' | 'label' | 'catno' | 'country'
-    sort_order?: 'asc' | 'desc'
-  } = {}
+  params: MasterReleaseVersionsParams = {}
 ): Promise<DiscogsMasterVersionsResponse> {
   const response = await apiClient.get<DiscogsMasterVersionsResponse>(
     `/masters/${masterId}/versions`,

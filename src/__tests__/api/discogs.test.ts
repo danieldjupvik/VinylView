@@ -112,10 +112,10 @@ describe('discogs api', () => {
         ({ request }) => {
           const url = new URL(request.url)
           expect(url.searchParams.get('page')).toBe('1')
-          expect(url.searchParams.get('per_page')).toBe('50')
+          expect(url.searchParams.get('per_page')).toBe('100')
 
           return HttpResponse.json({
-            pagination: { page: 1, pages: 1, per_page: 50, items: 10 },
+            pagination: { page: 1, pages: 1, per_page: 100, items: 10 },
             wants: []
           })
         }

@@ -599,6 +599,20 @@ export interface DiscogsMasterVersion {
 }
 
 /**
+ * Parameters for GET /masters/{master_id}/versions
+ */
+export interface MasterReleaseVersionsParams {
+  page?: number
+  per_page?: number
+  format?: string
+  label?: string
+  released?: string
+  country?: string
+  sort?: 'released' | 'title' | 'format' | 'label' | 'catno' | 'country'
+  sort_order?: 'asc' | 'desc'
+}
+
+/**
  * Response from GET /masters/{master_id}/versions
  */
 export interface DiscogsMasterVersionsResponse {
