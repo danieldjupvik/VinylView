@@ -1,6 +1,8 @@
 import { STORAGE_KEYS } from './constants'
 import type { DiscogsIdentity, DiscogsUserProfile } from '@/types/discogs'
 
+export type ViewMode = 'grid' | 'table'
+
 export function getToken(): string | null {
   return localStorage.getItem(STORAGE_KEYS.TOKEN)
 }
@@ -91,6 +93,23 @@ export function setStoredUserProfile(profile: DiscogsUserProfile): void {
 
 export function removeStoredUserProfile(): void {
   localStorage.removeItem(STORAGE_KEYS.USER_PROFILE)
+}
+
+export function getViewMode(): ViewMode {
+  if (typeof window === 'undefined') {
+    return 'grid'
+  }
+
+  const stored = localStorage.getItem(STORAGE_KEYS.VIEW_MODE)
+  return stored === 'table' ? 'table' : 'grid'
+}
+
+export function setViewMode(mode: ViewMode): void {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  localStorage.setItem(STORAGE_KEYS.VIEW_MODE, mode)
 }
 
 export function clearAuth(): void {

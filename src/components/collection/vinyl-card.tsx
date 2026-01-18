@@ -1,6 +1,6 @@
-import { Disc3 } from 'lucide-react'
-import type { DiscogsCollectionRelease } from '@/types/discogs'
 import { cn } from '@/lib/utils'
+import type { DiscogsCollectionRelease } from '@/types/discogs'
+import { Disc3 } from 'lucide-react'
 
 interface VinylCardProps {
   release: DiscogsCollectionRelease
@@ -233,7 +233,7 @@ export function VinylCard({ release, className }: VinylCardProps) {
       )}
     >
       {/* Cover Art */}
-      <div className="relative aspect-square overflow-hidden">
+      <div className="relative z-0 aspect-square overflow-hidden">
         {coverImage ? (
           <img
             src={coverImage}
@@ -272,31 +272,32 @@ export function VinylCard({ release, className }: VinylCardProps) {
             )}
           </div>
         )}
-
         {/* Hover Overlay with Details */}
-        <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 opacity-0 translate-y-2 transition-[opacity,transform] duration-300 group-hover:opacity-100 group-hover:translate-y-0">
-          <h3
-            className="line-clamp-2 text-base font-semibold text-white"
-            title={info.title}
-          >
-            {info.title}
-          </h3>
-          <p
-            className="mt-1 line-clamp-1 text-sm text-gray-200"
-            title={artistName}
-          >
-            {artistName}
-          </p>
-          {metaLine && (
-            <div className="mt-2 text-xs text-gray-300">
-              <span className="line-clamp-1">{metaLine}</span>
-            </div>
-          )}
+        <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <div className="translate-y-2 transition-transform duration-300 group-hover:translate-y-0">
+            <h3
+              className="line-clamp-2 text-base font-semibold text-white"
+              title={info.title}
+            >
+              {info.title}
+            </h3>
+            <p
+              className="mt-1 line-clamp-1 text-sm text-gray-200"
+              title={artistName}
+            >
+              {artistName}
+            </p>
+            {metaLine && (
+              <div className="mt-2 text-xs text-gray-300">
+                <span className="line-clamp-1">{metaLine}</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Minimal Info Below (always visible) */}
-      <div className="p-3">
+      <div className="relative z-20 -mt-px bg-card p-3">
         <h3
           className="truncate text-sm font-medium leading-tight"
           title={info.title}

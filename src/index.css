@@ -227,6 +227,17 @@
   }
 }
 
+@keyframes view-switch-in {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes collapsible-down {
   from {
     height: 0;
@@ -260,6 +271,9 @@
   }
   .animate-card-pop {
     animation: card-pop 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .animate-view-switch {
+    animation: view-switch-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
   .animate-collapsible-down {
     animation: collapsible-down 200ms ease-out;

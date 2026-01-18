@@ -16,6 +16,8 @@ import {
   CollectionFilters,
   type CollectionFiltersProps
 } from '@/components/collection/collection-filters'
+import { ViewToggle } from '@/components/collection/view-toggle'
+import type { ViewMode } from '@/lib/storage'
 import type { CollectionSortKey, CollectionSortOrder } from '@/types/discogs'
 
 interface CollectionToolbarProps {
@@ -25,6 +27,8 @@ interface CollectionToolbarProps {
   onSortChange: (sort: CollectionSortKey) => void
   sortOrder: CollectionSortOrder
   onSortOrderChange: (order: CollectionSortOrder) => void
+  viewMode: ViewMode
+  onViewToggle: () => void
   filters: CollectionFiltersProps
 }
 
@@ -35,6 +39,8 @@ export function CollectionToolbar({
   onSortChange,
   sortOrder,
   onSortOrderChange,
+  viewMode,
+  onViewToggle,
   filters
 }: CollectionToolbarProps) {
   const { t } = useTranslation()
@@ -78,9 +84,13 @@ export function CollectionToolbar({
         />
       </div>
       <div className="flex flex-wrap items-center justify-end gap-2">
+        <ViewToggle viewMode={viewMode} onToggle={onViewToggle} />
         <CollectionFilters {...filters} />
         <Select value={sort} onValueChange={onSortChange}>
-          <SelectTrigger size="sm" className="w-[140px]">
+          <SelectTrigger
+            size="sm"
+            className="w-[120px] px-2 sm:w-[140px] sm:px-3"
+          >
             <SelectValue placeholder={t('collection.sort.placeholder')} />
           </SelectTrigger>
           <SelectContent>

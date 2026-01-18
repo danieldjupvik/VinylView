@@ -45,8 +45,8 @@
       "placeholder": "Sorter etter",
       "artist": "Artist",
       "title": "Album",
-      "dateAdded": "Dato lagt til",
-      "releaseYear": "Utgivelsesår",
+      "dateAdded": "Lagt til",
+      "releaseYear": "Utgitt",
       "label": "Label",
       "format": "Format",
       "genre": "Sjanger",
@@ -80,6 +80,21 @@
       "anyYear": "Alle år",
       "empty": "Ingen alternativer"
     },
+    "view": {
+      "grid": "Rute",
+      "table": "Tabell",
+      "switchToGrid": "Bytt til rutenettvisning",
+      "switchToTable": "Bytt til tabellvisning"
+    },
+    "table": {
+      "cover": "Omslag",
+      "titleArtist": "Tittel / artist",
+      "year": "År",
+      "genre": "Sjanger",
+      "label": "Label",
+      "format": "Format",
+      "country": "Land"
+    },
     "pagination": {
       "previous": "Forrige",
       "next": "Neste",
@@ -88,6 +103,9 @@
     "vinyl": "Vinyl",
     "records": "{{count}} plate",
     "records_other": "{{count}} plater",
+    "lastUpdated": "Sist oppdatert: {{time}}",
+    "notUpdated": "Ikke oppdatert ennå",
+    "refresh": "Oppdater",
     "nonVinylHidden": "Ikke-vinyl skjult:",
     "showing": "Viser {{start}}-{{end}} av {{total}} album",
     "showing_other": "Viser {{start}}-{{end}} av {{total}} album"

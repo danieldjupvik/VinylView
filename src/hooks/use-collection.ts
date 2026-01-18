@@ -77,13 +77,18 @@ interface UseCollectionOptions {
   sortOrder?: CollectionSortOrder
 }
 
-interface CollectionFilterOptions {
-  genres: string[]
-  styles: string[]
-  labels: string[]
-  types: string[]
-  sizes: string[]
-  countries: string[]
+export interface FilterOption {
+  value: string
+  count: number
+}
+
+export interface CollectionFilterOptions {
+  genres: FilterOption[]
+  styles: FilterOption[]
+  labels: FilterOption[]
+  types: FilterOption[]
+  sizes: FilterOption[]
+  countries: FilterOption[]
   yearBounds: [number, number] | null
 }
 
@@ -120,6 +125,10 @@ interface UseCollectionReturn {
   vinylOnly: DiscogsCollectionRelease[]
   filteredReleases: DiscogsCollectionRelease[]
   isLoading: boolean
+  isFetching: boolean
+  dataUpdatedAt: number
+  refetch: () => Promise<unknown>
+  shouldAnimateCards: boolean
   isError: boolean
   error: Error | null
   pagination: {
@@ -244,7 +253,16 @@ export function useCollection(
     setSortOrder(nextOrder)
   }
 
-  const { data, isLoading, isError, error } = useQuery({
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    isFetchedAfterMount,
+    isFetching,
+    dataUpdatedAt,
+    refetch
+  } = useQuery({
     queryKey: [
       'collection',
       username,
@@ -252,6 +270,7 @@ export function useCollection(
       serverSort,
       serverSortOrder
     ],
+    placeholderData: (previousData) => previousData,
     queryFn: async () => {
       if (!username) {
         throw new Error('Username is required')
@@ -289,7 +308,10 @@ export function useCollection(
     staleTime: 5 * 60 * 1000 // 5 minutes
   })
 
+  const [hasCachedDataAtMount] = useState(() => data !== undefined)
+
   const releases = data?.releases
+  const shouldAnimateCards = !hasCachedDataAtMount && isFetchedAfterMount
 
   // Filter to vinyl only
   const vinylOnly = useMemo(() => {
@@ -325,36 +347,39 @@ export function useCollection(
   }, [releases])
 
   const filterOptions = useMemo<CollectionFilterOptions>(() => {
-    const genres = new Set<string>()
-    const styles = new Set<string>()
-    const labels = new Set<string>()
-    const types = new Set<string>()
-    const sizes = new Set<string>()
-    const countries = new Set<string>()
+    const genreCounts = new Map<string, number>()
+    const styleCounts = new Map<string, number>()
+    const labelCounts = new Map<string, number>()
+    const typeCounts = new Map<string, number>()
+    const sizeCounts = new Map<string, number>()
+    const countryCounts = new Map<string, number>()
     let minYear = Number.POSITIVE_INFINITY
     let maxYear = 0
 
     for (const release of vinylOnly) {
       const info = release.basic_information
       for (const genre of info.genres ?? []) {
-        genres.add(genre)
+        genreCounts.set(genre, (genreCounts.get(genre) ?? 0) + 1)
       }
       for (const style of info.styles ?? []) {
-        styles.add(style)
+        styleCounts.set(style, (styleCounts.get(style) ?? 0) + 1)
       }
       for (const label of info.labels ?? []) {
-        labels.add(label.name)
+        labelCounts.set(label.name, (labelCounts.get(label.name) ?? 0) + 1)
       }
       const { types: releaseTypes, sizes: releaseSizes } =
         extractVinylDescriptors(info.formats)
       for (const type of releaseTypes) {
-        types.add(type)
+        typeCounts.set(type, (typeCounts.get(type) ?? 0) + 1)
       }
       for (const size of releaseSizes) {
-        sizes.add(size)
+        sizeCounts.set(size, (sizeCounts.get(size) ?? 0) + 1)
       }
       if (info.country) {
-        countries.add(info.country)
+        countryCounts.set(
+          info.country,
+          (countryCounts.get(info.country) ?? 0) + 1
+        )
       }
       if (info.year && info.year > 0) {
         minYear = Math.min(minYear, info.year)
@@ -362,35 +387,57 @@ export function useCollection(
       }
     }
 
+    // Ensure selected filters are in the options even if they have 0 count
     for (const genre of selectedGenres) {
-      genres.add(genre)
+      if (!genreCounts.has(genre)) genreCounts.set(genre, 0)
     }
     for (const style of selectedStyles) {
-      styles.add(style)
+      if (!styleCounts.has(style)) styleCounts.set(style, 0)
     }
     for (const label of selectedLabels) {
-      labels.add(label)
+      if (!labelCounts.has(label)) labelCounts.set(label, 0)
     }
     for (const type of selectedTypes) {
-      types.add(type)
+      if (!typeCounts.has(type)) typeCounts.set(type, 0)
     }
     for (const size of selectedSizes) {
-      sizes.add(size)
+      if (!sizeCounts.has(size)) sizeCounts.set(size, 0)
     }
     for (const country of selectedCountries) {
-      countries.add(country)
+      if (!countryCounts.has(country)) countryCounts.set(country, 0)
+    }
+
+    const createFilterOptions = (
+      counts: Map<string, number>,
+      sortFn: (values: string[]) => string[]
+    ): FilterOption[] => {
+      const values = sortFn(Array.from(counts.keys()))
+      return values.map((value) => ({
+        value,
+        count: counts.get(value) ?? 0
+      }))
     }
 
     const yearBounds: [number, number] | null =
       Number.isFinite(minYear) && maxYear > 0 ? [minYear, maxYear] : null
 
     return {
-      genres: sortValues(genres),
-      styles: sortValues(styles),
-      labels: sortValues(labels),
-      types: sortValues(types),
-      sizes: sortSizes(Array.from(sizes)),
-      countries: sortValues(countries),
+      genres: createFilterOptions(genreCounts, (vals) =>
+        sortValues(new Set(vals))
+      ),
+      styles: createFilterOptions(styleCounts, (vals) =>
+        sortValues(new Set(vals))
+      ),
+      labels: createFilterOptions(labelCounts, (vals) =>
+        sortValues(new Set(vals))
+      ),
+      types: createFilterOptions(typeCounts, (vals) =>
+        sortValues(new Set(vals))
+      ),
+      sizes: createFilterOptions(sizeCounts, sortSizes),
+      countries: createFilterOptions(countryCounts, (vals) =>
+        sortValues(new Set(vals))
+      ),
       yearBounds
     }
   }, [
@@ -613,6 +660,10 @@ export function useCollection(
     vinylOnly,
     filteredReleases: pagedReleases,
     isLoading,
+    isFetching,
+    dataUpdatedAt,
+    refetch,
+    shouldAnimateCards,
     isError,
     error: error as Error | null,
     pagination,

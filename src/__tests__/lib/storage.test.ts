@@ -18,6 +18,8 @@ import {
   getStoredUserProfile,
   setStoredUserProfile,
   removeStoredUserProfile,
+  getViewMode,
+  setViewMode,
   clearAuth
 } from '@/lib/storage'
 import { STORAGE_KEYS } from '@/lib/constants'
@@ -216,6 +218,22 @@ describe('Storage utilities', () => {
 
     it('does not throw when clearing already empty storage', () => {
       expect(() => clearAuth()).not.toThrow()
+    })
+  })
+
+  describe('View mode storage', () => {
+    it('stores and retrieves view mode', () => {
+      setViewMode('table')
+      expect(getViewMode()).toBe('table')
+    })
+
+    it('defaults to grid when no view mode exists', () => {
+      expect(getViewMode()).toBe('grid')
+    })
+
+    it('falls back to grid for unknown values', () => {
+      localStorage.setItem(STORAGE_KEYS.VIEW_MODE, 'list')
+      expect(getViewMode()).toBe('grid')
     })
   })
 

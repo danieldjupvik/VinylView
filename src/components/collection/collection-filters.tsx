@@ -14,16 +14,10 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Slider } from '@/components/ui/slider'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/lib/utils'
-
-interface CollectionFilterOptions {
-  genres: string[]
-  styles: string[]
-  labels: string[]
-  types: string[]
-  sizes: string[]
-  countries: string[]
-  yearBounds: [number, number] | null
-}
+import type {
+  CollectionFilterOptions,
+  FilterOption
+} from '@/hooks/use-collection'
 
 interface CollectionSelectedFilters {
   genres: string[]
@@ -58,7 +52,7 @@ const toggleValue = (values: string[], value: string) =>
 interface FilterGroupProps {
   idPrefix: string
   title: string
-  options: string[]
+  options: FilterOption[]
   selected: string[]
   onChange: (next: string[]) => void
   columns?: 'single' | 'double'
@@ -94,10 +88,10 @@ function FilterGroup({
         <div className={cn('grid gap-2', gridClass)}>
           {options.map((option, index) => {
             const id = `${idPrefix}-${index}`
-            const isChecked = selected.includes(option)
+            const isChecked = selected.includes(option.value)
             return (
               <label
-                key={`${option}-${index}`}
+                key={option.value}
                 htmlFor={id}
                 className="flex items-center gap-2 text-sm"
               >
@@ -105,10 +99,15 @@ function FilterGroup({
                   id={id}
                   checked={isChecked}
                   onCheckedChange={() =>
-                    onChange(toggleValue(selected, option))
+                    onChange(toggleValue(selected, option.value))
                   }
                 />
-                <span className="line-clamp-1">{option}</span>
+                <span className="flex-1 line-clamp-1">
+                  <span className="text-xs text-muted-foreground tabular-nums">
+                    ({option.count})
+                  </span>{' '}
+                  {option.value}
+                </span>
               </label>
             )
           })}
@@ -170,7 +169,7 @@ function FilterContent({
         <div
           className={cn(
             isDesktop
-              ? 'grid gap-6 px-4 py-4 md:grid-cols-2 lg:grid-cols-3'
+              ? 'grid gap-6 px-4 py-4 md:grid-cols-3 lg:grid-cols-4'
               : 'space-y-6 px-4 py-4'
           )}
         >
@@ -321,7 +320,10 @@ export function CollectionFilters({
   return (
     <Popover>
       <PopoverTrigger asChild>{trigger}</PopoverTrigger>
-      <PopoverContent align="end" className="h-[70vh] w-[560px] p-0">
+      <PopoverContent
+        align="end"
+        className="h-[70vh] w-[90vw] max-w-[920px] p-0 md:w-[680px] lg:w-[920px]"
+      >
         {content}
       </PopoverContent>
     </Popover>

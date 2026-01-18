@@ -1,7 +1,6 @@
-import type { MouseEvent } from 'react'
-import { ChevronsUpDown, LogOut, Settings } from 'lucide-react'
+import { ChevronsUpDown, LogOut } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { Link, useLocation, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
 import { useAuth } from '@/hooks/use-auth'
 import { usePreferences } from '@/hooks/use-preferences'
@@ -10,7 +9,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import {
@@ -24,14 +22,6 @@ export function SidebarUser() {
   const { username, logout, avatarUrl } = useAuth()
   const { avatarSource, gravatarUrl } = usePreferences()
   const navigate = useNavigate()
-  const location = useLocation()
-  const currentLocation = `${location.pathname}${location.search}${location.hash}`
-  const isModifiedEvent = (event: MouseEvent) =>
-    event.metaKey ||
-    event.ctrlKey ||
-    event.shiftKey ||
-    event.altKey ||
-    event.button === 1
 
   const handleLogout = () => {
     logout()
@@ -86,24 +76,6 @@ export function SidebarUser() {
             align="start"
             sideOffset={4}
           >
-            <DropdownMenuItem asChild>
-              <Link
-                to="/settings"
-                onClick={(event) => {
-                  if (isModifiedEvent(event)) {
-                    return
-                  }
-
-                  if (currentLocation === '/settings') {
-                    event.preventDefault()
-                  }
-                }}
-              >
-                <Settings className="mr-2 size-4" />
-                {t('nav.settings')}
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="mr-2 size-4" />
               {t('auth.logout')}

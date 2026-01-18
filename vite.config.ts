@@ -24,6 +24,9 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      devOptions: {
+        enabled: false
+      },
       includeAssets: ['icons/*.png'],
       manifest: {
         name: 'VinylDeck',
@@ -64,6 +67,37 @@ export default defineConfig({
             handler: 'CacheFirst',
             options: {
               cacheName: 'discogs-images-cache',
+              cacheableResponse: {
+                statuses: [0, 200]
+              },
+              expiration: {
+                maxEntries: 500,
+                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+              }
+            }
+          },
+          {
+            urlPattern: /^https:\/\/(www|secure)\.gravatar\.com\/avatar\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'gravatar-images-cache',
+              cacheableResponse: {
+                statuses: [0, 200]
+              },
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+              }
+            }
+          },
+          {
+            urlPattern: /^https:\/\/img\.discogs\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'discogs-images-cache',
+              cacheableResponse: {
+                statuses: [0, 200]
+              },
               expiration: {
                 maxEntries: 500,
                 maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days

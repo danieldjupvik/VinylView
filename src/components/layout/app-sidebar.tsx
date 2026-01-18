@@ -14,7 +14,8 @@ import {
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarMenuItem
+  SidebarMenuItem,
+  useSidebar
 } from '@/components/ui/sidebar'
 import { Link, useLocation } from '@tanstack/react-router'
 import {
@@ -23,6 +24,7 @@ import {
   DollarSign,
   Disc3,
   Heart,
+  Settings,
   Shuffle
 } from 'lucide-react'
 import type { MouseEvent } from 'react'
@@ -33,12 +35,27 @@ import { SidebarUser } from './sidebar-user'
 export function AppSidebar() {
   const { t } = useTranslation()
   const location = useLocation()
+  const { isMobile, setOpenMobile } = useSidebar()
 
   const isActive = (path: string) => location.pathname === path
-  const handleSameRouteClick =
+  const handleNavClick =
     (path: string) => (event: MouseEvent<HTMLAnchorElement>) => {
+      if (
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey ||
+        event.button === 1
+      ) {
+        return
+      }
+
       if (isActive(path)) {
         event.preventDefault()
+      }
+
+      if (isMobile) {
+        setOpenMobile(false)
       }
     }
 
@@ -54,7 +71,8 @@ export function AppSidebar() {
             >
               <Link
                 to="/collection"
-                onClick={handleSameRouteClick('/collection')}
+                viewTransition
+                onClick={handleNavClick('/collection')}
               >
                 <BrandMark size="sm" />
                 <div className="grid flex-1 text-left leading-tight">
@@ -89,7 +107,8 @@ export function AppSidebar() {
                     >
                       <Link
                         to="/collection"
-                        onClick={handleSameRouteClick('/collection')}
+                        viewTransition
+                        onClick={handleNavClick('/collection')}
                       >
                         <Disc3 />
                         <span>{t('nav.collection')}</span>
@@ -158,6 +177,24 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="pb-3">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              isActive={isActive('/settings')}
+              tooltip={t('nav.settings')}
+            >
+              <Link
+                to="/settings"
+                viewTransition
+                onClick={handleNavClick('/settings')}
+              >
+                <Settings />
+                <span>{t('nav.settings')}</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
         <SidebarUser />
       </SidebarFooter>
     </Sidebar>

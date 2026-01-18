@@ -9,7 +9,8 @@ export const STORAGE_KEYS = {
   GRAVATAR_EMAIL: 'vinyldeck_gravatar_email',
   IDENTITY: 'vinyldeck_identity',
   USER_PROFILE: 'vinyldeck_user_profile',
-  LANGUAGE: 'vinyldeck_language'
+  LANGUAGE: 'vinyldeck_language',
+  VIEW_MODE: 'vinyldeck_view_mode'
 } as const
 
 /**
