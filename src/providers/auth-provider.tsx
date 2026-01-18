@@ -39,11 +39,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Validate existing token on mount
   useEffect(() => {
-    const validateSession = async () => {
-      const token = getToken()
-      const storedUsername = getUsername()
+    const cancelledRef = { current: false }
 
-      if (!token || !storedUsername) {
+    const validateSession = async () => {
+      const tokenSnapshot = getToken()
+      const usernameSnapshot = getUsername()
+      const isStale = () =>
+        getToken() !== tokenSnapshot ||
+        getUsername() !== usernameSnapshot ||
+        cancelledRef.current
+
+      if (!tokenSnapshot || !usernameSnapshot) {
+        if (isStale()) return
         clearAuth()
         setState({
           isAuthenticated: false,
@@ -59,6 +66,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Always validate the token by fetching fresh identity
         // This ensures expired or invalid tokens are caught
         const identity = await fetchIdentity()
+        if (isStale()) return
         setStoredIdentity(identity)
 
         // Fetch user profile (use cached email if available)
@@ -66,6 +74,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         let profile: DiscogsUserProfile | null = null
         try {
           profile = await getUserProfile(identity.username)
+          if (isStale()) return
           setStoredUserProfile(profile)
         } catch {
           // If profile fetch fails, use cached profile if available
@@ -73,12 +82,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
 
         // Update gravatar email from profile if not already set
-        if (!latestGravatarEmailRef.current && profile?.email) {
+        if (!latestGravatarEmailRef.current && profile?.email && !isStale()) {
           latestGravatarEmailRef.current = profile.email
           setGravatarEmail(profile.email)
         }
 
         // Set authenticated state with validated data
+        if (isStale()) return
         setState({
           isAuthenticated: true,
           isLoading: false,
@@ -88,6 +98,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         })
       } catch {
         // Token is invalid or expired, clear everything
+        if (isStale()) return
         clearAuth()
         setState({
           isAuthenticated: false,
@@ -100,6 +111,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
 
     validateSession()
+
+    return () => {
+      cancelledRef.current = true
+    }
   }, [setGravatarEmail])
 
   const login = useCallback(
