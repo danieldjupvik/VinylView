@@ -43,9 +43,15 @@ This project uses **Trunk-Based Development** with a single `main` branch:
 
 ### Deployment Strategy
 
-- Vercel only deploys when the release-please PR is merged (not on feature merges)
-- The `scripts/vercel-ignore-build.sh` script controls this behavior
-- Preview deployments still work for PRs
+Controlled by `scripts/vercel-ignore-build.sh` and `vercel.json`:
+
+| Deployment Type       | When             | Behavior                             |
+| --------------------- | ---------------- | ------------------------------------ |
+| **Preview** (PRs)     | Every PR push    | ✓ Always builds - reviewers can test |
+| **Production** (main) | Feature merge    | ✗ Skipped - no deploy                |
+| **Production** (main) | Release PR merge | ✓ Builds and deploys                 |
+
+This ensures production only updates on actual releases, while PRs still get preview URLs for testing.
 
 ## Releases & Versioning
 
