@@ -34,10 +34,16 @@ export const handlers = [
   // Collection endpoint
   http.get(
     'https://api.discogs.com/users/:username/collection/folders/0/releases',
-    ({ request }) => {
+    ({ request, params }) => {
+      const auth = request.headers.get('Authorization')
+      if (auth !== 'Discogs token=valid-token') {
+        return new HttpResponse(null, { status: 401 })
+      }
+
       const url = new URL(request.url)
       const page = parseInt(url.searchParams.get('page') || '1')
       const perPage = parseInt(url.searchParams.get('per_page') || '100')
+      const username = params.username as string
 
       return HttpResponse.json(
         {
@@ -49,11 +55,11 @@ export const handlers = [
             urls: {
               next:
                 page < 2
-                  ? `https://api.discogs.com/users/testuser/collection/folders/0/releases?page=${page + 1}`
+                  ? `https://api.discogs.com/users/${username}/collection/folders/0/releases?page=${page + 1}`
                   : undefined,
               prev:
                 page > 1
-                  ? `https://api.discogs.com/users/testuser/collection/folders/0/releases?page=${page - 1}`
+                  ? `https://api.discogs.com/users/${username}/collection/folders/0/releases?page=${page - 1}`
                   : undefined
             }
           },

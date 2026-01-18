@@ -150,6 +150,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const logout = useCallback(() => {
     clearAuth()
+
+    // Clear sensitive caches on logout
+    if ('caches' in window) {
+      const cacheNames = [
+        'discogs-api-cache',
+        'discogs-images-cache',
+        'gravatar-images-cache'
+      ]
+      cacheNames.forEach((name) => {
+        caches.delete(name).catch(() => {
+          // Ignore errors if cache doesn't exist
+        })
+      })
+    }
+
     setState({
       isAuthenticated: false,
       isLoading: false,
