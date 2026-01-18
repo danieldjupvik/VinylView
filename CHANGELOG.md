@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.0-beta.1](https://github.com/danieldjupvik/VinylView/compare/vinyldeck-v0.1.0-beta.1...vinyldeck-v0.2.0-beta.1) (2026-01-18)
+
+
+### Features
+
+* implement authentication and collection features with routing, UI components, and API integration ([461b2b2](https://github.com/danieldjupvik/VinylView/commit/461b2b29397bb8be1e8f96988de4aa9a115c79ed))
+* implement authentication and collection features with routing, UI components, and API integration ([461b2b2](https://github.com/danieldjupvik/VinylView/commit/461b2b29397bb8be1e8f96988de4aa9a115c79ed))
+* initial release (v0.1.0-beta) ([461b2b2](https://github.com/danieldjupvik/VinylView/commit/461b2b29397bb8be1e8f96988de4aa9a115c79ed))
+* Initial skeleton with Vite + React Compiler, React 19, Bun, Shadcn and tailwindcss ([#1](https://github.com/danieldjupvik/VinylView/issues/1)) ([5b3ecac](https://github.com/danieldjupvik/VinylView/commit/5b3ecac4a0709e16f1ea74d8d9270013241df6ce))
+
+## Changelog
+
 All notable changes to VinylDeck will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
