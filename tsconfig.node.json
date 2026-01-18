@@ -5,7 +5,7 @@
     "lib": ["ES2023"],
     "module": "ESNext",
     "types": ["node"],
-    "skipLibCheck": true,
+    "skipLibCheck": false,
     "resolveJsonModule": true,
 
     /* Bundler mode */
@@ -17,11 +17,17 @@
 
     /* Linting */
     "strict": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "useUnknownInCatchVariables": true
   },
   "include": ["vite.config.ts"]
 }
