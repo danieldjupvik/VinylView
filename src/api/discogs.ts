@@ -70,9 +70,16 @@ export async function getOAuthRequestToken(
 
   // Parse the response body
   const params = new URLSearchParams(response.data)
+  const oauthToken = params.get('oauth_token')
+  const oauthTokenSecret = params.get('oauth_token_secret')
+
+  if (!oauthToken || !oauthTokenSecret) {
+    throw new Error('Missing OAuth request token in response')
+  }
+
   return {
-    oauth_token: params.get('oauth_token') ?? '',
-    oauth_token_secret: params.get('oauth_token_secret') ?? '',
+    oauth_token: oauthToken,
+    oauth_token_secret: oauthTokenSecret,
     oauth_callback_confirmed: params.get('oauth_callback_confirmed') ?? 'false'
   }
 }
@@ -113,9 +120,16 @@ export async function getOAuthAccessToken(
   })
 
   const params = new URLSearchParams(response.data)
+  const oauthToken = params.get('oauth_token')
+  const oauthTokenSecret = params.get('oauth_token_secret')
+
+  if (!oauthToken || !oauthTokenSecret) {
+    throw new Error('Missing OAuth access token in response')
+  }
+
   return {
-    oauth_token: params.get('oauth_token') ?? '',
-    oauth_token_secret: params.get('oauth_token_secret') ?? ''
+    oauth_token: oauthToken,
+    oauth_token_secret: oauthTokenSecret
   }
 }
 
@@ -567,8 +581,9 @@ export async function getMarketplaceFee(
   price: number,
   currency: string = 'USD'
 ): Promise<DiscogsMarketplaceFee> {
+  const roundedPrice = Math.round(price * 100) / 100
   const response = await apiClient.get<DiscogsMarketplaceFee>(
-    `/marketplace/fee/${price.toFixed(2)}/${currency}`
+    `/marketplace/fee/${roundedPrice.toFixed(2)}/${currency}`
   )
   return response.data
 }

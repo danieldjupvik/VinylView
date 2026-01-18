@@ -50,6 +50,7 @@ class RateLimiter {
 
     this.state.remaining = this.state.limit
     this.state.used = 0
+    this.state.lastUpdated = Date.now()
     return true
   }
 

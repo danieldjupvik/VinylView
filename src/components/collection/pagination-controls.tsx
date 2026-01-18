@@ -22,7 +22,10 @@ export function PaginationControls({
   }
 
   return (
-    <div className="flex items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-3 duration-500">
+    <nav
+      aria-label={t('collection.pagination.navigation')}
+      className="flex items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-3 duration-500"
+    >
       <Button
         variant="outline"
         size="sm"
@@ -46,6 +49,6 @@ export function PaginationControls({
         {t('collection.pagination.next')}
         <ChevronRight className="ml-1 h-4 w-4" />
       </Button>
-    </div>
+    </nav>
   )
 }
