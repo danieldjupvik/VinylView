@@ -1,4 +1,21 @@
-#!/usr/bin/env sh
-. "$(dirname "$0")/_/husky.sh"
+#!/bin/sh
+# .husky/pre-commit
+
+# Check if NVM is installed before trying to use it
+if [ -s "$HOME/.nvm/nvm.sh" ]; then
+  # Load nvm
+  export NVM_DIR="$HOME/.nvm"
+  \. "$NVM_DIR/nvm.sh"
+  
+  # Activate the project's node version (reads .nvmrc)
+  nvm use
+fi
+
+# Sync AGENTS.md content to other AI agent instruction files
+if [ -f "AGENTS.md" ]; then
+  cp AGENTS.md GEMINI.md
+  cp AGENTS.md CLAUDE.md
+  git add GEMINI.md CLAUDE.md
+fi
 
 bunx lint-staged
