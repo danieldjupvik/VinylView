@@ -129,7 +129,7 @@ describe('discogs api', () => {
   it('fetches release details by ID', async () => {
     server.use(
       http.get('https://api.discogs.com/releases/:releaseId', ({ params }) => {
-        expect(params.releaseId).toBe('12345')
+        expect(params['releaseId']).toBe('12345')
 
         return HttpResponse.json({
           id: 12345,
@@ -170,7 +170,7 @@ describe('discogs api', () => {
   it('fetches master release by ID', async () => {
     server.use(
       http.get('https://api.discogs.com/masters/:masterId', ({ params }) => {
-        expect(params.masterId).toBe('67890')
+        expect(params['masterId']).toBe('67890')
 
         return HttpResponse.json({
           id: 67890,
@@ -196,7 +196,7 @@ describe('discogs api', () => {
       http.get(
         'https://api.discogs.com/users/:username/collection/value',
         ({ params }) => {
-          expect(params.username).toBe('testuser')
+          expect(params['username']).toBe('testuser')
 
           return HttpResponse.json({
             maximum: '1500.00',

@@ -158,7 +158,7 @@ describe('useCollection', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.vinylOnly).toHaveLength(1)
     expect(result.current.nonVinylCount).toBe(1)
-    expect(result.current.nonVinylBreakdown[0].format).toBe('CD')
+    expect(result.current.nonVinylBreakdown[0]?.format).toBe('CD')
   })
 
   it('paginates client-side when search is active', async () => {
@@ -229,10 +229,10 @@ describe('useCollection', () => {
 
     await waitFor(() => expect(result.current.pagination?.pages).toBe(2))
     expect(result.current.filteredReleases).toHaveLength(2)
-    expect(result.current.filteredReleases[0].basic_information.title).toBe(
+    expect(result.current.filteredReleases[0]?.basic_information.title).toBe(
       'Gamma Album'
     )
-    expect(result.current.filteredReleases[1].basic_information.title).toBe(
+    expect(result.current.filteredReleases[1]?.basic_information.title).toBe(
       'Delta Album'
     )
   })

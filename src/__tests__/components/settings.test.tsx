@@ -19,7 +19,7 @@ const SettingsComponent = SettingsRoute.options.component!
 
 // Initialize a minimal i18n instance for testing
 const i18nInstance = i18n.createInstance()
-i18nInstance.init({
+void i18nInstance.init({
   lng: 'en',
   initImmediate: false,
   resources: {

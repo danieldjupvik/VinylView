@@ -24,9 +24,9 @@ export function SidebarUser() {
   const navigate = useNavigate()
 
   const handleLogout = () => {
-    logout()
+    void logout()
     toast.success(t('auth.logoutSuccess'))
-    navigate({ to: '/login' })
+    void navigate({ to: '/login' })
   }
 
   const initials = username

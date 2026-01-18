@@ -110,7 +110,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     }
 
-    validateSession()
+    void validateSession()
 
     return () => {
       cancelledRef.current = true

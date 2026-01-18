@@ -23,8 +23,6 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import type { Theme } from '@/providers/theme-context'
-
 export const Route = createFileRoute('/_authenticated/settings')({
   component: SettingsPage
 })
@@ -225,12 +223,14 @@ function SettingsPage() {
               </div>
               <Select
                 value={currentLanguage}
-                onValueChange={(value) => i18n.changeLanguage(value)}
+                onValueChange={(value) => {
+                  void i18n.changeLanguage(value)
+                }}
               >
                 <SelectTrigger className="w-full sm:w-48">
                   <SelectValue>
                     <span className="flex items-center gap-2">
-                      <LanguageFlag lang={currentLanguage as 'en' | 'no'} />
+                      <LanguageFlag lang={currentLanguage} />
                       <span>
                         {currentLanguage === 'en'
                           ? t('settings.appearance.language.english')
@@ -271,21 +271,21 @@ function SettingsPage() {
               <div className="grid gap-3 sm:grid-cols-3">
                 <SelectionCard
                   selected={theme === 'light'}
-                  onClick={() => setTheme('light' as Theme)}
+                  onClick={() => setTheme('light')}
                   icon={<Sun className="size-5 text-foreground/70" />}
                   title={t('settings.appearance.theme.light')}
                   hint={t('settings.appearance.theme.lightHint')}
                 />
                 <SelectionCard
                   selected={theme === 'dark'}
-                  onClick={() => setTheme('dark' as Theme)}
+                  onClick={() => setTheme('dark')}
                   icon={<Moon className="size-5 text-foreground/70" />}
                   title={t('settings.appearance.theme.dark')}
                   hint={t('settings.appearance.theme.darkHint')}
                 />
                 <SelectionCard
                   selected={theme === 'system'}
-                  onClick={() => setTheme('system' as Theme)}
+                  onClick={() => setTheme('system')}
                   icon={<Monitor className="size-5 text-foreground/70" />}
                   title={t('settings.appearance.theme.system')}
                   hint={t('settings.appearance.theme.systemHint')}

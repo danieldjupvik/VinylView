@@ -14,9 +14,9 @@ function IndexComponent() {
   useEffect(() => {
     if (!isLoading) {
       if (isAuthenticated) {
-        navigate({ to: '/collection' })
+        void navigate({ to: '/collection' })
       } else {
-        navigate({ to: '/login' })
+        void navigate({ to: '/login' })
       }
     }
   }, [isAuthenticated, isLoading, navigate])

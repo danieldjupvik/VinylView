@@ -81,7 +81,10 @@ describe('useAuth', () => {
 
     await waitFor(() => {
       expect(result.current).toBeTruthy()
-      expect(result.current!.isLoading).toBe(false)
+      if (!result.current) {
+        throw new Error('Auth context not initialized')
+      }
+      expect(result.current.isLoading).toBe(false)
     })
 
     await expect(

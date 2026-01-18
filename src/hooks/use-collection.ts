@@ -582,7 +582,9 @@ export function useCollection(
       const copy = [...filteredReleases]
       for (let i = copy.length - 1; i > 0; i -= 1) {
         const j = Math.floor(next() * (i + 1))
-        ;[copy[i], copy[j]] = [copy[j], copy[i]]
+        const temp = copy[i]!
+        copy[i] = copy[j]!
+        copy[j] = temp
       }
       return copy
     }
@@ -683,7 +685,7 @@ export function useCollection(
     refetch,
     shouldAnimateCards,
     isError,
-    error: error as Error | null,
+    error: error instanceof Error ? error : null,
     pagination,
     search,
     setSearch,

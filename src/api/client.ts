@@ -10,6 +10,9 @@ export const apiClient = axios.create({
   }
 })
 
+const toError = (error: unknown): Error =>
+  error instanceof Error ? error : new Error(String(error))
+
 /**
  * Request interceptor: Add auth header and handle rate limiting
  *
@@ -39,7 +42,7 @@ apiClient.interceptors.request.use(
   },
   (error) => {
     rateLimiter.finishRequest()
-    return Promise.reject(error)
+    return Promise.reject(toError(error))
   }
 )
 
@@ -106,7 +109,7 @@ apiClient.interceptors.response.use(
       rateLimiter.updateFromHeaders(headers)
     }
 
-    return Promise.reject(error)
+    return Promise.reject(toError(error))
   }
 )
 

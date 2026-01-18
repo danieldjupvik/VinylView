@@ -204,7 +204,9 @@ function extractVinylInfo(
       colorCandidates.find(
         (candidate) => getColorStyles(candidate) !== DEFAULT_COLOR_STYLE
       ) ?? colorCandidates[0]
-    info.color = matchedColor
+    if (matchedColor) {
+      info.color = matchedColor
+    }
   }
 
   return info

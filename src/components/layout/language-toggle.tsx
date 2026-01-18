@@ -71,7 +71,9 @@ export function LanguageToggle({ className }: LanguageToggleProps) {
       <DropdownMenuContent align="end">
         <DropdownMenuRadioGroup
           value={currentLanguage}
-          onValueChange={(value) => i18n.changeLanguage(value)}
+          onValueChange={(value) => {
+            void i18n.changeLanguage(value)
+          }}
         >
           <DropdownMenuRadioItem value="en">
             <span className="flex items-center gap-2">

@@ -34,7 +34,7 @@ function LoginPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate({ to: '/collection' })
+      void navigate({ to: '/collection' })
     }
   }, [isAuthenticated, navigate])
 
@@ -50,7 +50,7 @@ function LoginPage() {
     try {
       await login(username.trim(), token.trim())
       toast.success(t('auth.loginSuccess'))
-      navigate({ to: '/collection' })
+      void navigate({ to: '/collection' })
     } catch {
       toast.error(t('auth.loginError'))
     } finally {
@@ -82,7 +82,12 @@ function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form
+            onSubmit={(event) => {
+              void handleSubmit(event)
+            }}
+            className="space-y-4"
+          >
             <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-500 fill-mode-backwards delay-500">
               <Label htmlFor="username">{t('auth.username')}</Label>
               <Input

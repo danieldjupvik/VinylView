@@ -135,7 +135,11 @@ function FilterContent({
 }) {
   const { t } = useTranslation()
   const yearBounds = options.yearBounds
+  const yearBoundsMin = yearBounds?.[0]
+  const yearBoundsMax = yearBounds?.[1]
   const yearRange = selected.yearRange ?? yearBounds
+  const yearRangeStart = yearRange?.[0]
+  const yearRangeEnd = yearRange?.[1]
   const hasActiveFilters = activeFilterCount > 0
   const isDesktop = layout === 'desktop'
   const groupColumns = isDesktop ? 'single' : 'double'
@@ -178,19 +182,25 @@ function FilterContent({
               <h4 className="text-sm font-medium">
                 {t('collection.filters.yearRange')}
               </h4>
-              {yearRange && (
+              {yearRangeStart !== undefined && yearRangeEnd !== undefined && (
                 <span className="text-xs text-muted-foreground">
-                  {yearRange[0]}-{yearRange[1]}
+                  {yearRangeStart}-{yearRangeEnd}
                 </span>
               )}
             </div>
-            {yearBounds && yearRange ? (
+            {yearBoundsMin !== undefined &&
+            yearBoundsMax !== undefined &&
+            yearRange ? (
               <Slider
                 value={yearRange}
-                min={yearBounds[0]}
-                max={yearBounds[1]}
+                min={yearBoundsMin}
+                max={yearBoundsMax}
                 step={1}
-                onValueChange={(value) => setYearRange([value[0], value[1]])}
+                onValueChange={(value) => {
+                  const [start, end] = value
+                  if (start === undefined || end === undefined) return
+                  setYearRange([start, end])
+                }}
               />
             ) : (
               <p className="text-xs text-muted-foreground">

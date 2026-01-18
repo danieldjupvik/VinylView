@@ -23,7 +23,7 @@ function AuthenticatedLayout() {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      navigate({ to: '/login' })
+      void navigate({ to: '/login' })
     }
   }, [isAuthenticated, isLoading, navigate])
 
