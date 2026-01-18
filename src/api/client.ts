@@ -27,9 +27,9 @@ apiClient.interceptors.request.use(
     // Wait if we're being rate limited
     await rateLimiter.waitIfNeeded()
 
-    // Add auth header if token exists
+    // Add auth header if token exists and header not already set
     const token = getToken()
-    if (token) {
+    if (token && !config.headers.Authorization) {
       config.headers.Authorization = `Discogs token=${token}`
     }
 

@@ -1,4 +1,49 @@
 /**
+ * ==============================================================================
+ * Authentication
+ * ==============================================================================
+ */
+
+/**
+ * Response from GET /oauth/request_token
+ */
+export interface DiscogsOAuthRequestToken {
+  oauth_token: string
+  oauth_token_secret: string
+  oauth_callback_confirmed: string
+}
+
+/**
+ * Response from POST /oauth/access_token
+ */
+export interface DiscogsOAuthAccessToken {
+  oauth_token: string
+  oauth_token_secret: string
+}
+
+/**
+ * ==============================================================================
+ * User Identity
+ * ==============================================================================
+ */
+
+/**
+ * Request body for POST /users/{username}
+ */
+export interface DiscogsUserProfileUpdate {
+  /** The real name of the user */
+  name?: string
+  /** The user’s website */
+  home_page?: string
+  /** The geographical location of the user */
+  location?: string
+  /** Biographical information about the user */
+  profile?: string
+  /** Currency for marketplace data. Must be one of: USD GBP EUR CAD AUD JPY CHF MXN BRL NZD SEK ZAR */
+  curr_abbr?: string
+}
+
+/**
  * Response from GET /oauth/identity
  * Returns basic information about the authenticated user.
  * Note: Does NOT include email - use getUserProfile() for that.
@@ -53,61 +98,47 @@ export interface DiscogsUserProfile {
   email?: string
 }
 
-export interface DiscogsArtist {
+/**
+ * ==============================================================================
+ * User Collection
+ * ==============================================================================
+ */
+
+/**
+ * Metadata about a user-defined collection notes field.
+ */
+export interface DiscogsCollectionField {
   id: number
   name: string
-  resource_url?: string
-  /** Artist name variation */
-  anv?: string
-  /** String to join multiple artists */
-  join?: string
-  /** Artist role on the release */
-  role?: string
-  /** Tracks the artist appears on */
-  tracks?: string
-}
-
-export interface DiscogsLabel {
-  id?: number
-  name: string
-  /** Catalog number */
-  catno: string
-  resource_url?: string
-  entity_type?: string
-  entity_type_name?: string
-}
-
-export interface DiscogsFormat {
-  name: string
-  /** Quantity */
-  qty: string
-  text?: string
-  /** Format descriptions (e.g., "Mini", "EP", "Album") */
-  descriptions?: string[]
+  position: number
+  type: 'dropdown' | 'textarea' | 'text'
+  public: boolean
+  options?: string[]
+  lines?: number
 }
 
 /**
- * Basic information about a release.
- * Suitable for display in a list. For detailed information,
- * make another API call to fetch the corresponding release.
+ * Response from GET /users/{username}/collection/fields
  */
-export interface DiscogsBasicInformation {
+export interface DiscogsCollectionFieldsResponse {
+  fields: DiscogsCollectionField[]
+}
+
+/**
+ * Metadata about a folder in a user's collection.
+ */
+export interface DiscogsCollectionFolder {
   id: number
-  title: string
-  year: number
+  count: number
+  name: string
   resource_url: string
-  /** Thumbnail image URL (150x150) */
-  thumb: string
-  /** Cover image URL (500x500) */
-  cover_image: string
-  formats: DiscogsFormat[]
-  labels: DiscogsLabel[]
-  artists: DiscogsArtist[]
-  country?: string
-  genres: string[]
-  styles: string[]
-  master_id?: number
-  master_url?: string
+}
+
+/**
+ * Response from GET /users/{username}/collection/folders
+ */
+export interface DiscogsCollectionFoldersResponse {
+  folders: DiscogsCollectionFolder[]
 }
 
 /**
@@ -137,6 +168,18 @@ export interface DiscogsCollectionRelease {
   }>
 }
 
+/**
+ * ==============================================================================
+ * Pagination
+ * ==============================================================================
+ * Some resources represent collections of objects and may be paginated.
+ * By default, 50 items per page are shown.
+ *
+ * To browse different pages, or change the number of items per page (up to 100),
+ * use the page and per_page query string parameters.
+ *
+ * Responses include a Link header and a pagination object in the response body.
+ */
 export interface DiscogsPagination {
   page: number
   pages: number
@@ -203,6 +246,45 @@ export interface CollectionParams {
 }
 
 /**
+ * Response from GET /users/{username}/collection/value
+ * Returns the minimum, median, and maximum value of a user's collection.
+ * Authentication as the collection owner is required.
+ */
+export interface DiscogsCollectionValue {
+  minimum: string
+  median: string
+  maximum: string
+}
+
+/**
+ * ==============================================================================
+ * User Wantlist
+ * ==============================================================================
+ * The Wantlist resource allows you to view and manage a user’s wantlist.
+ */
+
+/**
+ * Request body for PUT /users/{username}/wants/{release_id}
+ */
+export interface DiscogsWantlistAddRequest {
+  /** User notes to associate with this release */
+  notes?: string
+  /** User’s rating of this release, from 0 (unrated) to 5 (best). Defaults to 0. */
+  rating?: number
+}
+
+/**
+ * Response from PUT /users/{username}/wants/{release_id}
+ */
+export interface DiscogsWantlistAddResponse {
+  id: number
+  resource_url: string
+  rating: number
+  notes?: string
+  basic_information: DiscogsBasicInformation
+}
+
+/**
  * A single item in a user's wantlist.
  * Part of the response from GET /users/{username}/wants
  */
@@ -232,6 +314,69 @@ export interface DiscogsWantlistItem {
 export interface DiscogsWantlistResponse {
   pagination: DiscogsPagination
   wants: DiscogsWantlistItem[]
+}
+
+/**
+ * ==============================================================================
+ * Database
+ * ==============================================================================
+ */
+
+export interface DiscogsArtist {
+  id: number
+  name: string
+  resource_url?: string
+  /** Artist name variation */
+  anv?: string
+  /** String to join multiple artists */
+  join?: string
+  /** Artist role on the release */
+  role?: string
+  /** Tracks the artist appears on */
+  tracks?: string
+}
+
+export interface DiscogsLabel {
+  id?: number
+  name: string
+  /** Catalog number */
+  catno: string
+  resource_url?: string
+  entity_type?: string
+  entity_type_name?: string
+}
+
+export interface DiscogsFormat {
+  name: string
+  /** Quantity */
+  qty: string
+  text?: string
+  /** Format descriptions (e.g., "Mini", "EP", "Album") */
+  descriptions?: string[]
+}
+
+/**
+ * Basic information about a release.
+ * Suitable for display in a list. For detailed information,
+ * make another API call to fetch the corresponding release.
+ */
+export interface DiscogsBasicInformation {
+  id: number
+  title: string
+  year: number
+  resource_url: string
+  /** Thumbnail image URL (150x150) */
+  thumb: string
+  /** Cover image URL (500x500) */
+  cover_image: string
+  formats: DiscogsFormat[]
+  labels: DiscogsLabel[]
+  artists: DiscogsArtist[]
+  country?: string
+  genres: string[]
+  styles: string[]
+  master_id?: number
+  master_url?: string
 }
 
 /**
@@ -384,12 +529,165 @@ export interface DiscogsMasterRelease {
 }
 
 /**
- * Response from GET /users/{username}/collection/value
- * Returns the minimum, median, and maximum value of a user's collection.
- * Authentication as the collection owner is required.
+ * Response from GET /releases/{release_id}/rating/{username}
  */
-export interface DiscogsCollectionValue {
-  minimum: string
-  median: string
-  maximum: string
+export interface DiscogsReleaseRatingByUser {
+  username: string
+  release_id: number
+  rating: number
+}
+
+/**
+ * Response from GET /releases/{release_id}/rating
+ */
+export interface DiscogsCommunityReleaseRating {
+  rating: {
+    count: number
+    average: number
+  }
+  release_id: number
+}
+
+/**
+ * Response from GET /releases/{release_id}/stats
+ */
+export interface DiscogsReleaseStats {
+  num_have: number
+  num_want: number
+}
+
+/**
+ * A single version of a master release.
+ */
+export interface DiscogsMasterVersion {
+  id: number
+  status: string
+  stats: {
+    user: {
+      in_collection: number
+      in_wantlist: number
+    }
+    community: {
+      in_collection: number
+      in_wantlist: number
+    }
+  }
+  thumb: string
+  format: string
+  country: string
+  title: string
+  label: string
+  released: string
+  major_formats: string[]
+  catno: string
+  resource_url: string
+}
+
+/**
+ * Response from GET /masters/{master_id}/versions
+ */
+export interface DiscogsMasterVersionsResponse {
+  pagination: DiscogsPagination
+  versions: DiscogsMasterVersion[]
+}
+
+/**
+ * A single result from a database search.
+ */
+export interface DiscogsSearchResult {
+  id: number
+  type: 'release' | 'master' | 'artist' | 'label'
+  title: string
+  uri: string
+  resource_url: string
+  thumb: string
+  cover_image?: string
+  genre?: string[]
+  style?: string[]
+  format?: string[]
+  country?: string
+  year?: string
+  label?: string[]
+  catno?: string
+  barcode?: string[]
+  community?: {
+    want: number
+    have: number
+  }
+}
+
+/**
+ * Response from GET /database/search
+ */
+export interface DiscogsSearchResponse {
+  pagination: DiscogsPagination
+  results: DiscogsSearchResult[]
+}
+
+/**
+ * Parameters for GET /database/search
+ */
+export interface SearchParams {
+  q?: string
+  type?: 'release' | 'master' | 'artist' | 'label'
+  title?: string
+  release_title?: string
+  credit?: string
+  artist?: string
+  anv?: string
+  label?: string
+  genre?: string
+  style?: string
+  country?: string
+  year?: string
+  format?: string
+  catno?: string
+  barcode?: string
+  track?: string
+  submitter?: string
+  contributor?: string
+  page?: number
+  per_page?: number
+}
+
+/**
+ * ==============================================================================
+ * Marketplace
+ * ==============================================================================
+ */
+
+/**
+ * Response from GET /marketplace/fee/{price}
+ */
+export interface DiscogsMarketplaceFee {
+  value: number
+  currency: string
+}
+
+/**
+ * Price suggestion for a specific grade
+ */
+export interface DiscogsPriceSuggestion {
+  currency: string
+  value: number
+}
+
+/**
+ * Response from GET /marketplace/price_suggestions/{release_id}
+ */
+export type DiscogsPriceSuggestionsResponse = Record<
+  string,
+  DiscogsPriceSuggestion
+>
+
+/**
+ * Response from GET /marketplace/stats/{release_id}
+ */
+export interface DiscogsMarketplaceStats {
+  lowest_price: {
+    currency: string
+    value: number
+  } | null
+  num_for_sale: number | null
+  blocked_from_sale: boolean
 }
