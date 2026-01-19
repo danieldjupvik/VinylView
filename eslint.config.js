@@ -1,6 +1,7 @@
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import js from '@eslint/js'
+import { importX } from 'eslint-plugin-import-x'
 import globals from 'globals'
 import i18next from 'eslint-plugin-i18next'
 import reactHooks from 'eslint-plugin-react-hooks'
@@ -16,11 +17,14 @@ export default defineConfig([
     files: ['**/*.{ts,tsx}'],
     extends: [
       js.configs.recommended,
+      importX.flatConfigs.recommended,
+      importX.flatConfigs.typescript,
       tseslint.configs.recommendedTypeChecked,
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite
     ],
     plugins: {
+      'import-x': importX,
       i18next
     },
     languageOptions: {
@@ -32,6 +36,33 @@ export default defineConfig([
       }
     },
     rules: {
+      'import-x/no-dynamic-require': 'warn',
+      'import-x/no-nodejs-modules': 'warn',
+      'import-x/order': [
+        'warn',
+        {
+          alphabetize: { order: 'asc', caseInsensitive: true },
+          'newlines-between': 'always',
+          groups: [
+            'builtin',
+            'external',
+            'internal',
+            'parent',
+            'sibling',
+            'index',
+            'object',
+            'type'
+          ],
+          pathGroups: [
+            {
+              pattern: '@/**',
+              group: 'internal',
+              position: 'after'
+            }
+          ],
+          pathGroupsExcludedImportTypes: ['builtin']
+        }
+      ],
       'i18next/no-literal-string': 'error'
     }
   },
@@ -40,6 +71,12 @@ export default defineConfig([
     rules: {
       'i18next/no-literal-string': 'off',
       'react-refresh/only-export-components': 'off'
+    }
+  },
+  {
+    files: ['vite.config.ts', 'eslint.config.js', 'scripts/**/*.{js,ts}'],
+    rules: {
+      'import-x/no-nodejs-modules': 'off'
     }
   }
 ])
