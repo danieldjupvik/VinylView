@@ -5,6 +5,7 @@ This file provides guidance for automated agents and AI assistants when working 
 - `bun dev` - Start development server with HMR
 - `bun run build` - Type-check with TypeScript and build for production
 - `bun run lint` - Run ESLint
+- `bun run lint --fix` - Run ESLint and automatically fix issues
 - `bun run preview` - Preview production build locally
 - `bun run test` - Run tests in watch mode
 - `bun run test:run` - Run tests once
@@ -286,6 +287,76 @@ const data: any = response  // Vague reasoning
 - Avoid vague reasons like "needed", "fix later", or "doesn't work otherwise"
 - Use inline disables (`eslint-disable-next-line`) instead of file-level disables when possible
 - Consider if the code can be refactored to avoid needing the disable directive
+
+### TSDoc Documentation Standards
+
+Use **TSDoc** format for all function and utility documentation. TSDoc is the standard for TypeScript documentation comments and provides consistent, parseable documentation.
+
+**Apply TSDoc everywhere it makes sense** - exported functions, classes, types, complex utilities, and any code that benefits from clear documentation. Good documentation improves code quality and maintainability.
+
+**Format:**
+
+```typescript
+/**
+ * Brief one-line description of what the function does.
+ *
+ * Optional longer description with more details about behavior,
+ * edge cases, or important implementation notes.
+ *
+ * @param paramName - Description of what this parameter is for
+ * @param anotherParam - Description of another parameter
+ * @returns Description of what the function returns
+ */
+export function myFunction(paramName: string, anotherParam: number): boolean {
+  // implementation
+}
+```
+
+**Good examples:**
+
+```typescript
+/**
+ * Validates and sanitizes a redirect URL to prevent open redirect attacks.
+ * Only allows internal paths (relative URLs starting with /).
+ *
+ * @param redirectUrl - The URL to validate
+ * @param defaultPath - The default path to return if validation fails
+ * @returns The sanitized URL if valid, or the default redirect path
+ */
+export function getSafeRedirectUrl(
+  redirectUrl: string | null | undefined,
+  defaultPath = '/collection'
+): string {
+  // implementation
+}
+```
+
+**Guidelines:**
+
+- Always use TSDoc comments (`/** */`) for exported functions, classes, and types
+- Start with a concise one-line summary
+- Add a blank line before `@param` tags
+- Use `@param paramName - description` format (note the dash after param name)
+- Use `@returns` (not `@return`) to describe return value
+- Document edge cases and important behavior (e.g., "prevents open redirect attacks")
+- For internal/private functions, TSDoc is optional but encouraged
+- Keep descriptions clear and actionable - explain the "why" when relevant
+
+**Additional TSDoc tags:**
+
+````typescript
+/**
+ * Example showing additional tags
+ *
+ * @param value - The input value
+ * @returns The processed result
+ * @throws {Error} When value is invalid
+ * @example
+ * ```typescript
+ * const result = processValue('test')
+ * ```
+ */
+````
 
 ## API Layer
 
