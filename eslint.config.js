@@ -1,15 +1,16 @@
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import js from '@eslint/js'
-import { importX } from 'eslint-plugin-import-x'
-import globals from 'globals'
+import eslintConfigPrettier from 'eslint-config-prettier/flat'
 import i18next from 'eslint-plugin-i18next'
+import { importX } from 'eslint-plugin-import-x'
 import jsxA11y from 'eslint-plugin-jsx-a11y'
 import reactPlugin from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
-import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
+import globals from 'globals'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import tseslint from 'typescript-eslint'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -115,5 +116,7 @@ export default defineConfig([
       // Permit Node.js builtins in tooling and config files.
       'import-x/no-nodejs-modules': 'off'
     }
-  }
+  },
+  // turn off prettier rules that conflict with eslint rules
+  eslintConfigPrettier
 ])
