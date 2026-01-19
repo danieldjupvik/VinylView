@@ -189,25 +189,37 @@ function FilterContent({
                 </span>
               )}
             </div>
-            {yearBoundsMin !== undefined &&
-            yearBoundsMax !== undefined &&
-            yearRange ? (
-              <Slider
-                value={yearRange}
-                min={yearBoundsMin}
-                max={yearBoundsMax}
-                step={1}
-                onValueChange={(value) => {
-                  const [start, end] = value
-                  if (start === undefined || end === undefined) return
-                  setYearRange([start, end])
-                }}
-              />
-            ) : (
-              <p className="text-muted-foreground text-xs">
-                {t('collection.filters.anyYear')}
-              </p>
-            )}
+            {(() => {
+              if (
+                yearBoundsMin !== undefined &&
+                yearBoundsMax !== undefined &&
+                yearRange
+              ) {
+                return (
+                  <Slider
+                    value={yearRange}
+                    min={yearBoundsMin}
+                    max={yearBoundsMax}
+                    step={1}
+                    onValueChange={(value) => {
+                      const [start, end] = value
+                      if (start === undefined || end === undefined) return
+                      setYearRange([start, end])
+                    }}
+                  />
+                )
+              }
+
+              if (!selected.yearRange) {
+                return (
+                  <p className="text-muted-foreground text-xs">
+                    {t('collection.filters.anyYear')}
+                  </p>
+                )
+              }
+
+              return null
+            })()}
           </div>
 
           <div className={cn(isDesktop ? 'col-span-full' : '')}>
