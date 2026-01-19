@@ -31,7 +31,7 @@ function AuthenticatedLayout() {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      const currentUrl = location.pathname + location.searchStr
+      const currentUrl = location.pathname + location.searchStr + location.hash
       storeRedirectUrl(currentUrl)
       void navigate({ to: '/login' })
     }
@@ -40,7 +40,8 @@ function AuthenticatedLayout() {
     isLoading,
     navigate,
     location.pathname,
-    location.searchStr
+    location.searchStr,
+    location.hash
   ])
 
   // Show loading state while checking auth

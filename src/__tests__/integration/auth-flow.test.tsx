@@ -84,7 +84,7 @@ describe('auth flow', () => {
       SESSION_STORAGE_KEYS.REDIRECT_URL,
       '/collection?style=Rock'
     )
-    renderApp('/login')
+    const router = renderApp('/login')
 
     await screen.findByLabelText(/username/i)
     await user.type(screen.getByLabelText(/username/i), 'testuser')
@@ -98,5 +98,9 @@ describe('auth flow', () => {
       await screen.findByRole('heading', { name: /my collection/i })
     ).toBeInTheDocument()
     expect(sessionStorage.getItem(SESSION_STORAGE_KEYS.REDIRECT_URL)).toBeNull()
+
+    // Verify router navigated to correct URL with query params
+    expect(router.state.location.pathname).toBe('/collection')
+    expect(router.state.location.searchStr).toBe('?style=Rock')
   })
 })

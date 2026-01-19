@@ -288,6 +288,44 @@ const data: any = response  // Vague reasoning
 - Use inline disables (`eslint-disable-next-line`) instead of file-level disables when possible
 - Consider if the code can be refactored to avoid needing the disable directive
 
+### Code Comments
+
+**Minimize comments** - well-written code should be self-explanatory. Only add comments when they provide value that the code itself cannot convey.
+
+**When to add comments:**
+
+- Complex algorithms or business logic that isn't immediately obvious
+- Non-obvious "why" explanations (e.g., workarounds, edge cases, security considerations)
+- Important warnings or caveats that future developers need to know
+- Regex patterns or complex expressions that benefit from explanation
+
+**When NOT to add comments:**
+
+- Describing what code does when it's already clear from reading it
+- Restating variable/function names in prose
+- Adding TODO comments without actionable context
+- Commenting every function or block "just to have documentation"
+
+**Examples:**
+
+```typescript
+// Bad - obvious from the code
+// Loop through users and filter active ones
+const activeUsers = users.filter(user => user.isActive)
+
+// Bad - restates the function name
+// Gets the user by ID
+function getUserById(id: string) { ... }
+
+// Good - explains non-obvious "why"
+// Using indexOf instead of includes for IE11 compatibility
+const hasItem = items.indexOf(item) !== -1
+
+// Good - explains complex logic
+// Bitwise OR with 0 truncates to 32-bit integer (faster than Math.floor for positive numbers)
+const index = (position / cellSize) | 0
+```
+
 ### TSDoc Documentation Standards
 
 Use **TSDoc** format for all function and utility documentation. TSDoc is the standard for TypeScript documentation comments and provides consistent, parseable documentation.
@@ -387,20 +425,26 @@ Auth flow:
 
 ### Post-Login Redirect URL Preservation
 
-Users are returned to their original URL (including query params) after login. This works for:
+Users are returned to their original URL (including query params and hash fragments) after login. This works for:
 
-- **Unauthenticated access**: Visit `/collection?style=Rock` → redirect to `/login` → login → return to `/collection?style=Rock`
-- **Logout/re-login**: Be on `/collection?style=Rock` → logout → login → return to `/collection?style=Rock`
+- **Unauthenticated access**: Visit `/collection?style=Rock#top` → redirect to `/login` → login → return to `/collection?style=Rock#top`
+- **Logout/re-login**: Be on `/settings#appearance` → logout → login → return to `/settings#appearance`
 
 Implementation uses sessionStorage (not URL params) for clean login URLs:
 
 - `src/lib/redirect-utils.ts` - Utilities: `storeRedirectUrl()`, `getAndClearRedirectUrl()`, `isValidRedirectUrl()`
 - `src/lib/constants.ts` - `SESSION_STORAGE_KEYS.REDIRECT_URL`
-- `src/routes/_authenticated.tsx` - Stores URL before redirecting to login
+- `src/routes/_authenticated.tsx` - Stores URL (pathname + search + hash) before redirecting to login
 - `src/components/layout/sidebar-user.tsx` - Stores URL before logout
 - `src/routes/login.tsx` - Reads redirect URL via `useEffect` when `isAuthenticated` becomes true
 
-**Security**: `isValidRedirectUrl()` prevents open redirect attacks by only allowing internal paths (starting with `/`) and blocking protocol-relative URLs, backslashes, and `/login` paths.
+**Security**: `isValidRedirectUrl()` prevents open redirect attacks by:
+
+- Only allowing internal paths (starting with `/`)
+- Blocking protocol-relative URLs (`//evil.com`)
+- Blocking backslashes (`/\evil.com`)
+- Blocking URL-encoded bypass attempts (decodes before validation)
+- Blocking exact `/login` path (with query/hash) to prevent redirect loops
 
 **Important**: Navigation after login is handled by a `useEffect` watching `isAuthenticated`, not in the form submit handler. This avoids race conditions with `getAndClearRedirectUrl()` being called twice.
 

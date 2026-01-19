@@ -27,7 +27,7 @@ export function SidebarUser() {
   const location = useRouterState({ select: (s) => s.location })
 
   const handleLogout = () => {
-    const currentUrl = location.pathname + location.searchStr
+    const currentUrl = location.pathname + location.searchStr + location.hash
     storeRedirectUrl(currentUrl)
 
     void logout()

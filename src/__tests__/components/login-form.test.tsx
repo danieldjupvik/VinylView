@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { AuthContext, type AuthContextValue } from '@/providers/auth-context'
 import { Route as LoginRoute } from '@/routes/login'
@@ -49,6 +49,10 @@ const renderLogin = (overrides: Partial<AuthContextValue> = {}) => {
 }
 
 describe('Login form', () => {
+  afterEach(() => {
+    navigate.mockClear()
+  })
+
   it('disables submit when fields are empty', () => {
     renderLogin()
     const button = screen.getByRole('button', { name: /sign in/i })

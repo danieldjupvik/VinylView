@@ -41,20 +41,35 @@ describe('redirect-utils', () => {
       expect(isValidRedirectUrl('//evil.com/path')).toBe(false)
     })
 
+    it('rejects URL-encoded bypass attempts', () => {
+      // /%2f%2f decodes to //
+      expect(isValidRedirectUrl('/%2f%2fevil.com')).toBe(false)
+      expect(isValidRedirectUrl('/%2F%2Fevil.com')).toBe(false)
+      // /%5c decodes to backslash
+      expect(isValidRedirectUrl('/%5cevil.com')).toBe(false)
+      expect(isValidRedirectUrl('/%5Cevil.com')).toBe(false)
+    })
+
+    it('rejects invalid URL encoding', () => {
+      expect(isValidRedirectUrl('/%invalid')).toBe(false)
+      expect(isValidRedirectUrl('/path%')).toBe(false)
+    })
+
     it('rejects URLs with backslashes', () => {
       expect(isValidRedirectUrl('/\\evil.com')).toBe(false)
       expect(isValidRedirectUrl('\\evil.com')).toBe(false)
       expect(isValidRedirectUrl('/path\\subpath')).toBe(false)
     })
 
-    it('rejects login paths to prevent redirect loops', () => {
+    it('rejects exact login path to prevent redirect loops', () => {
       expect(isValidRedirectUrl('/login')).toBe(false)
       expect(isValidRedirectUrl('/login?foo=bar')).toBe(false)
-      expect(isValidRedirectUrl('/login/')).toBe(false)
-      expect(isValidRedirectUrl('/login/callback')).toBe(false)
+      expect(isValidRedirectUrl('/login#hash')).toBe(false)
     })
 
-    it('accepts paths that contain "login" but are not the login route', () => {
+    it('accepts paths that start with /login but are not the exact login route', () => {
+      expect(isValidRedirectUrl('/login/')).toBe(true)
+      expect(isValidRedirectUrl('/login/callback')).toBe(true)
       expect(isValidRedirectUrl('/user-login-history')).toBe(true)
       expect(isValidRedirectUrl('/settings/login-methods')).toBe(true)
     })
