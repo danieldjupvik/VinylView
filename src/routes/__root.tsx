@@ -1,4 +1,5 @@
 import { Link, Outlet, createRootRoute } from '@tanstack/react-router'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 import { useTranslation } from 'react-i18next'
 
 import { Toaster } from '@/components/ui/sonner'
@@ -13,6 +14,7 @@ function RootComponent() {
     <div className="bg-background text-foreground min-h-screen">
       <Outlet />
       <Toaster />
+      <SpeedInsights />
     </div>
   )
 }
