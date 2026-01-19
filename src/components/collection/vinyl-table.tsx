@@ -1,9 +1,7 @@
-import { useState } from 'react'
 import { Disc3 } from 'lucide-react'
-import type { TFunction } from 'i18next'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { DiscogsCollectionRelease, DiscogsFormat } from '@/types/discogs'
-import { getLimitedGenreParts } from '@/lib/formatters'
+
 import {
   Table,
   TableBody,
@@ -12,8 +10,13 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table'
-import { VinylTableSkeleton } from './vinyl-table-skeleton'
+import { getLimitedGenreParts } from '@/lib/formatters'
+import type { DiscogsCollectionRelease, DiscogsFormat } from '@/types/discogs'
+
 import { CollectionEmptyState } from './collection-empty-state'
+import { VinylTableSkeleton } from './vinyl-table-skeleton'
+
+import type { TFunction } from 'i18next'
 
 interface VinylTableProps {
   releases: DiscogsCollectionRelease[]
@@ -71,33 +74,33 @@ function VinylTableRow({
           <img
             src={coverImage}
             alt={`${artistName} - ${info.title}`}
-            className="h-10 w-10 rounded-sm bg-muted/40 object-contain"
+            className="bg-muted/40 h-10 w-10 rounded-sm object-contain"
             loading="lazy"
             onError={() => setImageError(true)}
           />
         ) : (
-          <div className="flex h-10 w-10 items-center justify-center rounded-sm bg-muted">
-            <Disc3 className="h-5 w-5 text-muted-foreground/70" />
+          <div className="bg-muted flex h-10 w-10 items-center justify-center rounded-sm">
+            <Disc3 className="text-muted-foreground/70 h-5 w-5" />
           </div>
         )}
       </TableCell>
-      <TableCell className="w-auto sm:w-[40%] sm:min-w-[240px] whitespace-normal">
+      <TableCell className="w-auto whitespace-normal sm:w-[40%] sm:min-w-[240px]">
         <div className="flex flex-col gap-1">
           <span
-            className="line-clamp-1 text-sm font-semibold leading-tight"
+            className="line-clamp-1 text-sm leading-tight font-semibold"
             title={info.title}
           >
             {info.title}
           </span>
           <span
-            className="line-clamp-1 text-xs text-muted-foreground"
+            className="text-muted-foreground line-clamp-1 text-xs"
             title={artistName}
           >
             {artistName}
           </span>
         </div>
       </TableCell>
-      <TableCell className="tabular-nums w-16">{year ?? '-'}</TableCell>
+      <TableCell className="w-16 tabular-nums">{year ?? '-'}</TableCell>
       <TableCell
         className="hidden max-w-[160px] truncate md:table-cell"
         title={genreText ?? undefined}
@@ -129,7 +132,7 @@ export function VinylTable({
 
   if (isLoading) {
     return (
-      <div className="rounded-xl border bg-card/60 shadow-sm backdrop-blur">
+      <div className="bg-card/60 rounded-xl border shadow-sm backdrop-blur">
         <VinylTableSkeleton />
       </div>
     )
@@ -140,7 +143,7 @@ export function VinylTable({
   }
 
   return (
-    <div className="rounded-xl border bg-card/60 shadow-sm backdrop-blur overflow-hidden">
+    <div className="bg-card/60 overflow-hidden rounded-xl border shadow-sm backdrop-blur">
       <Table className="table-fixed">
         <TableHeader className="bg-muted/30">
           <TableRow>

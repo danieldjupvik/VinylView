@@ -1,5 +1,6 @@
-import { describe, expect, it, beforeEach } from 'vitest'
 import { act, renderHook } from '@testing-library/react'
+import { describe, expect, it, beforeEach } from 'vitest'
+
 import { useViewPreference } from '@/hooks/use-view-preference'
 import { STORAGE_KEYS } from '@/lib/constants'
 

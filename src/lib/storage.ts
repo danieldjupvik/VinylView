@@ -1,5 +1,6 @@
-import { STORAGE_KEYS } from './constants'
 import type { DiscogsIdentity, DiscogsUserProfile } from '@/types/discogs'
+
+import { STORAGE_KEYS } from './constants'
 
 export type ViewMode = 'grid' | 'table'
 

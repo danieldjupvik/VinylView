@@ -1,10 +1,11 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it, vi } from 'vitest'
+import { createInstance } from 'i18next'
 import { I18nextProvider } from 'react-i18next'
-import i18n from 'i18next'
-import { AuthContext, type AuthContextValue } from '@/providers/auth-context'
+import { describe, expect, it, vi } from 'vitest'
+
 import { APP_VERSION } from '@/lib/constants'
+import { AuthContext, type AuthContextValue } from '@/providers/auth-context'
 import {
   PreferencesContext,
   type PreferencesContextValue
@@ -18,8 +19,8 @@ import { Route as SettingsRoute } from '@/routes/_authenticated/settings'
 const SettingsComponent = SettingsRoute.options.component!
 
 // Initialize a minimal i18n instance for testing
-const i18nInstance = i18n.createInstance()
-i18nInstance.init({
+const i18nInstance = createInstance()
+void i18nInstance.init({
   lng: 'en',
   initImmediate: false,
   resources: {

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+
 import { getViewMode, setViewMode, type ViewMode } from '@/lib/storage'
 
 export function useViewPreference() {

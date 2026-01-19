@@ -1,5 +1,7 @@
-import { describe, expect, it } from 'vitest'
 import { http, HttpResponse } from 'msw'
+import { describe, expect, it } from 'vitest'
+
+import { server } from '@/__tests__/mocks/server'
 import {
   getCollection,
   getIdentity,
@@ -11,7 +13,6 @@ import {
   getCollectionValue
 } from '@/api/discogs'
 import { setToken } from '@/lib/storage'
-import { server } from '@/__tests__/mocks/server'
 
 describe('discogs api', () => {
   it('returns identity using stored token', async () => {
@@ -129,7 +130,7 @@ describe('discogs api', () => {
   it('fetches release details by ID', async () => {
     server.use(
       http.get('https://api.discogs.com/releases/:releaseId', ({ params }) => {
-        expect(params.releaseId).toBe('12345')
+        expect(params['releaseId']).toBe('12345')
 
         return HttpResponse.json({
           id: 12345,
@@ -170,7 +171,7 @@ describe('discogs api', () => {
   it('fetches master release by ID', async () => {
     server.use(
       http.get('https://api.discogs.com/masters/:masterId', ({ params }) => {
-        expect(params.masterId).toBe('67890')
+        expect(params['masterId']).toBe('67890')
 
         return HttpResponse.json({
           id: 67890,
@@ -196,7 +197,7 @@ describe('discogs api', () => {
       http.get(
         'https://api.discogs.com/users/:username/collection/value',
         ({ params }) => {
-          expect(params.username).toBe('testuser')
+          expect(params['username']).toBe('testuser')
 
           return HttpResponse.json({
             maximum: '1500.00',

@@ -1,9 +1,9 @@
-import i18n from 'i18next'
+import i18next from 'i18next'
 import { initReactI18next } from 'react-i18next'
 
+import { STORAGE_KEYS } from '@/lib/constants'
 import enTranslation from '@/locales/en/translation.json'
 import noTranslation from '@/locales/no/translation.json'
-import { STORAGE_KEYS } from '@/lib/constants'
 
 const normalizeLanguage = (value: string) => {
   const normalized = value.toLowerCase()
@@ -37,7 +37,8 @@ const readStoredLanguage = () => {
   }
 }
 
-i18n.use(initReactI18next).init({
+// eslint-disable-next-line import-x/no-named-as-default-member
+void i18next.use(initReactI18next).init({
   resources: {
     en: {
       translation: enTranslation
@@ -56,7 +57,7 @@ i18n.use(initReactI18next).init({
 })
 
 if (typeof window !== 'undefined') {
-  i18n.on('languageChanged', (language) => {
+  i18next.on('languageChanged', (language) => {
     try {
       localStorage.setItem(STORAGE_KEYS.LANGUAGE, normalizeLanguage(language))
     } catch (error) {
@@ -65,4 +66,4 @@ if (typeof window !== 'undefined') {
   })
 }
 
-export default i18n
+export default i18next

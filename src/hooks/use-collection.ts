@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
+
 import { getCollection, isVinylRecord } from '@/api/discogs'
 import { useAuth } from '@/hooks/use-auth'
 import { COLLECTION } from '@/lib/constants'
@@ -12,8 +13,8 @@ import {
 import type {
   CollectionSortKey,
   CollectionSortOrder,
-  DiscogsCollectionSortKey,
-  DiscogsCollectionRelease
+  DiscogsCollectionRelease,
+  DiscogsCollectionSortKey
 } from '@/types/discogs'
 
 const collator = new Intl.Collator(undefined, {
@@ -582,7 +583,9 @@ export function useCollection(
       const copy = [...filteredReleases]
       for (let i = copy.length - 1; i > 0; i -= 1) {
         const j = Math.floor(next() * (i + 1))
-        ;[copy[i], copy[j]] = [copy[j], copy[i]]
+        const temp = copy[i]!
+        copy[i] = copy[j]!
+        copy[j] = temp
       }
       return copy
     }
@@ -651,24 +654,26 @@ export function useCollection(
     setYearRangeSelection(null)
   }
 
-  const pagination = data
-    ? shouldFetchAllPages
-      ? {
-          page: safePage,
-          pages: totalPages,
-          total: sortedReleases.length,
-          perPage
-        }
-      : {
-          page: data.pagination.page,
-          pages: data.pagination.pages,
-          total:
-            data.pagination.pages <= 1
-              ? vinylOnly.length
-              : data.pagination.items,
-          perPage: data.pagination.per_page
-        }
-    : null
+  const pagination = (() => {
+    if (!data) return null
+
+    if (shouldFetchAllPages) {
+      return {
+        page: safePage,
+        pages: totalPages,
+        total: sortedReleases.length,
+        perPage
+      }
+    }
+
+    return {
+      page: data.pagination.page,
+      pages: data.pagination.pages,
+      total:
+        data.pagination.pages <= 1 ? vinylOnly.length : data.pagination.items,
+      perPage: data.pagination.per_page
+    }
+  })()
 
   const hasCompleteCollection =
     shouldFetchAllPages || (data?.pagination.pages ?? 0) <= 1
@@ -683,7 +688,7 @@ export function useCollection(
     refetch,
     shouldAnimateCards,
     isError,
-    error: error as Error | null,
+    error: error instanceof Error ? error : null,
     pagination,
     search,
     setSearch,

@@ -1,4 +1,5 @@
 import { Disc3 } from 'lucide-react'
+
 import { cn } from '@/lib/utils'
 
 type BrandMarkSize = 'sm' | 'md' | 'lg'
@@ -28,7 +29,7 @@ export function BrandMark({
   return (
     <div
       className={cn(
-        'bg-secondary text-secondary-foreground flex aspect-square items-center justify-center rounded-full ring-1 ring-border/70 shadow-sm',
+        'bg-secondary text-secondary-foreground ring-border/70 flex aspect-square items-center justify-center rounded-full shadow-sm ring-1',
         classes.container,
         className
       )}

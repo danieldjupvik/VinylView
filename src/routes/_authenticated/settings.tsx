@@ -1,12 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useTranslation } from 'react-i18next'
-import { FileText, Monitor, Moon, Scale, Shield, Sun } from 'lucide-react'
 import { NO, US } from 'country-flag-icons/react/3x2'
-import { APP_VERSION } from '@/lib/constants'
-import { cn } from '@/lib/utils'
-import { useAuth } from '@/hooks/use-auth'
-import { usePreferences } from '@/hooks/use-preferences'
-import { useTheme } from '@/hooks/use-theme'
+import { FileText, Monitor, Moon, Scale, Shield, Sun } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   Card,
@@ -23,8 +19,11 @@ import {
   SelectValue
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import type { Theme } from '@/providers/theme-context'
-
+import { useAuth } from '@/hooks/use-auth'
+import { usePreferences } from '@/hooks/use-preferences'
+import { useTheme } from '@/hooks/use-theme'
+import { APP_VERSION } from '@/lib/constants'
+import { cn } from '@/lib/utils'
 export const Route = createFileRoute('/_authenticated/settings')({
   component: SettingsPage
 })
@@ -62,16 +61,16 @@ function SelectionCard({
       onClick={onClick}
       aria-pressed={selected}
       className={cn(
-        'flex w-full items-center gap-3 rounded-md border p-3 text-left transition-all duration-200 hover:scale-[1.02] hover:bg-accent/50 hover:shadow-md',
+        'hover:bg-accent/50 flex w-full items-center gap-3 rounded-md border p-3 text-left transition-all duration-200 hover:scale-[1.02] hover:shadow-md',
         selected ? 'border-primary/60 bg-primary/10 shadow-sm' : 'border-border'
       )}
     >
-      <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-muted">
+      <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-md">
         {icon}
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium truncate">{title}</div>
-        <div className="text-xs text-muted-foreground truncate">{hint}</div>
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-sm font-medium">{title}</div>
+        <div className="text-muted-foreground truncate text-xs">{hint}</div>
       </div>
     </button>
   )
@@ -110,16 +109,16 @@ function SettingsPage() {
 
   return (
     <div className="mx-auto w-full max-w-4xl p-4 sm:p-6">
-      <div className="space-y-1 animate-in fade-in slide-in-from-bottom-2 duration-500">
+      <div className="animate-in fade-in slide-in-from-bottom-2 space-y-1 duration-500">
         <h1 className="text-2xl font-bold">{t('settings.title')}</h1>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           {t('settings.subtitle')}
         </p>
       </div>
 
       <div className="mt-6 space-y-6">
         {/* Profile Section */}
-        <Card className="animate-in fade-in slide-in-from-bottom-3 duration-500 fill-mode-backwards delay-100">
+        <Card className="animate-in fade-in slide-in-from-bottom-3 fill-mode-backwards delay-100 duration-500">
           <CardHeader>
             <CardTitle>{t('settings.profile.title')}</CardTitle>
             <CardDescription>
@@ -132,7 +131,7 @@ function SettingsPage() {
                 <h3 className="text-sm font-medium">
                   {t('settings.profile.avatar.title')}
                 </h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   {t('settings.profile.avatar.description')}
                 </p>
               </div>
@@ -141,7 +140,7 @@ function SettingsPage() {
                   type="button"
                   onClick={() => setAvatarSource('discogs')}
                   className={cn(
-                    'flex w-full items-center gap-3 rounded-md border p-3 text-left transition-all duration-200 hover:scale-[1.02] hover:bg-accent/50 hover:shadow-md',
+                    'hover:bg-accent/50 flex w-full items-center gap-3 rounded-md border p-3 text-left transition-all duration-200 hover:scale-[1.02] hover:shadow-md',
                     avatarSource === 'discogs'
                       ? 'border-primary/60 bg-primary/10 shadow-sm'
                       : 'border-border'
@@ -159,11 +158,11 @@ function SettingsPage() {
                       {initials}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate">
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-medium">
                       {t('settings.profile.avatar.discogs')}
                     </div>
-                    <div className="text-xs text-muted-foreground truncate">
+                    <div className="text-muted-foreground truncate text-xs">
                       {t('settings.profile.avatar.discogsHint')}
                     </div>
                   </div>
@@ -172,7 +171,7 @@ function SettingsPage() {
                   type="button"
                   onClick={() => setAvatarSource('gravatar')}
                   className={cn(
-                    'flex w-full items-center gap-3 rounded-md border p-3 text-left transition-all duration-200 hover:scale-[1.02] hover:bg-accent/50 hover:shadow-md',
+                    'hover:bg-accent/50 flex w-full items-center gap-3 rounded-md border p-3 text-left transition-all duration-200 hover:scale-[1.02] hover:shadow-md',
                     avatarSource === 'gravatar'
                       ? 'border-primary/60 bg-primary/10 shadow-sm'
                       : 'border-border'
@@ -190,11 +189,11 @@ function SettingsPage() {
                       {initials}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium truncate">
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-medium">
                       {t('settings.profile.avatar.gravatar')}
                     </div>
-                    <div className="text-xs text-muted-foreground truncate">
+                    <div className="text-muted-foreground truncate text-xs">
                       {t('settings.profile.avatar.gravatarHint')}
                     </div>
                   </div>
@@ -205,7 +204,7 @@ function SettingsPage() {
         </Card>
 
         {/* Appearance Section */}
-        <Card className="animate-in fade-in slide-in-from-bottom-3 duration-500 fill-mode-backwards delay-150">
+        <Card className="animate-in fade-in slide-in-from-bottom-3 fill-mode-backwards delay-150 duration-500">
           <CardHeader>
             <CardTitle>{t('settings.appearance.title')}</CardTitle>
             <CardDescription>
@@ -219,18 +218,20 @@ function SettingsPage() {
                 <h3 className="text-sm font-medium">
                   {t('settings.appearance.language.title')}
                 </h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   {t('settings.appearance.language.description')}
                 </p>
               </div>
               <Select
                 value={currentLanguage}
-                onValueChange={(value) => i18n.changeLanguage(value)}
+                onValueChange={(value) => {
+                  void i18n.changeLanguage(value)
+                }}
               >
                 <SelectTrigger className="w-full sm:w-48">
                   <SelectValue>
                     <span className="flex items-center gap-2">
-                      <LanguageFlag lang={currentLanguage as 'en' | 'no'} />
+                      <LanguageFlag lang={currentLanguage} />
                       <span>
                         {currentLanguage === 'en'
                           ? t('settings.appearance.language.english')
@@ -264,29 +265,29 @@ function SettingsPage() {
                 <h3 className="text-sm font-medium">
                   {t('settings.appearance.theme.title')}
                 </h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   {t('settings.appearance.theme.description')}
                 </p>
               </div>
               <div className="grid gap-3 sm:grid-cols-3">
                 <SelectionCard
                   selected={theme === 'light'}
-                  onClick={() => setTheme('light' as Theme)}
-                  icon={<Sun className="size-5 text-foreground/70" />}
+                  onClick={() => setTheme('light')}
+                  icon={<Sun className="text-foreground/70 size-5" />}
                   title={t('settings.appearance.theme.light')}
                   hint={t('settings.appearance.theme.lightHint')}
                 />
                 <SelectionCard
                   selected={theme === 'dark'}
-                  onClick={() => setTheme('dark' as Theme)}
-                  icon={<Moon className="size-5 text-foreground/70" />}
+                  onClick={() => setTheme('dark')}
+                  icon={<Moon className="text-foreground/70 size-5" />}
                   title={t('settings.appearance.theme.dark')}
                   hint={t('settings.appearance.theme.darkHint')}
                 />
                 <SelectionCard
                   selected={theme === 'system'}
-                  onClick={() => setTheme('system' as Theme)}
-                  icon={<Monitor className="size-5 text-foreground/70" />}
+                  onClick={() => setTheme('system')}
+                  icon={<Monitor className="text-foreground/70 size-5" />}
                   title={t('settings.appearance.theme.system')}
                   hint={t('settings.appearance.theme.systemHint')}
                 />
@@ -296,7 +297,7 @@ function SettingsPage() {
         </Card>
 
         {/* About Section */}
-        <Card className="animate-in fade-in slide-in-from-bottom-3 duration-500 fill-mode-backwards delay-200">
+        <Card className="animate-in fade-in slide-in-from-bottom-3 fill-mode-backwards delay-200 duration-500">
           <CardHeader>
             <CardTitle>{t('settings.about.title')}</CardTitle>
             <CardDescription>{t('settings.about.description')}</CardDescription>
@@ -306,42 +307,42 @@ function SettingsPage() {
               <button
                 type="button"
                 disabled
-                className="flex w-full items-center gap-3 rounded-md p-2 text-left transition-colors hover:bg-accent/50 disabled:pointer-events-none disabled:opacity-50"
+                className="hover:bg-accent/50 flex w-full items-center gap-3 rounded-md p-2 text-left transition-colors disabled:pointer-events-none disabled:opacity-50"
               >
-                <FileText className="size-4 text-muted-foreground" />
+                <FileText className="text-muted-foreground size-4" />
                 <span className="text-sm">{t('settings.about.changelog')}</span>
-                <span className="ml-auto text-xs text-muted-foreground">
+                <span className="text-muted-foreground ml-auto text-xs">
                   {t('common.comingSoon')}
                 </span>
               </button>
               <button
                 type="button"
                 disabled
-                className="flex w-full items-center gap-3 rounded-md p-2 text-left transition-colors hover:bg-accent/50 disabled:pointer-events-none disabled:opacity-50"
+                className="hover:bg-accent/50 flex w-full items-center gap-3 rounded-md p-2 text-left transition-colors disabled:pointer-events-none disabled:opacity-50"
               >
-                <Shield className="size-4 text-muted-foreground" />
+                <Shield className="text-muted-foreground size-4" />
                 <span className="text-sm">{t('settings.about.privacy')}</span>
-                <span className="ml-auto text-xs text-muted-foreground">
+                <span className="text-muted-foreground ml-auto text-xs">
                   {t('common.comingSoon')}
                 </span>
               </button>
               <button
                 type="button"
                 disabled
-                className="flex w-full items-center gap-3 rounded-md p-2 text-left transition-colors hover:bg-accent/50 disabled:pointer-events-none disabled:opacity-50"
+                className="hover:bg-accent/50 flex w-full items-center gap-3 rounded-md p-2 text-left transition-colors disabled:pointer-events-none disabled:opacity-50"
               >
-                <Scale className="size-4 text-muted-foreground" />
+                <Scale className="text-muted-foreground size-4" />
                 <span className="text-sm">{t('settings.about.terms')}</span>
-                <span className="ml-auto text-xs text-muted-foreground">
+                <span className="text-muted-foreground ml-auto text-xs">
                   {t('common.comingSoon')}
                 </span>
               </button>
               <Separator className="my-3" />
               <div className="flex items-center justify-between px-2">
-                <span className="text-sm text-muted-foreground">
+                <span className="text-muted-foreground text-sm">
                   {t('settings.version')}
                 </span>
-                <span className="text-sm font-mono">{APP_VERSION}</span>
+                <span className="font-mono text-sm">{APP_VERSION}</span>
               </div>
             </div>
           </CardContent>

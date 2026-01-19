@@ -1,7 +1,8 @@
 import type { DiscogsCollectionRelease } from '@/types/discogs'
+
+import { CollectionEmptyState } from './collection-empty-state'
 import { VinylCard } from './vinyl-card'
 import { VinylCardSkeleton } from './vinyl-card-skeleton'
-import { CollectionEmptyState } from './collection-empty-state'
 
 interface VinylGridProps {
   releases: DiscogsCollectionRelease[]
@@ -20,7 +21,8 @@ export function VinylGrid({
     return (
       <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {Array.from({ length: 10 }).map((_, i) => (
-          <VinylCardSkeleton key={i} />
+          // eslint-disable-next-line react/no-array-index-key -- Skeleton items have no stable ID; index is safe for static placeholder list
+          <VinylCardSkeleton key={`skeleton-${i}`} />
         ))}
       </div>
     )

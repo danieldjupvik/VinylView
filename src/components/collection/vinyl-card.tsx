@@ -1,8 +1,9 @@
+import { Disc3 } from 'lucide-react'
 import { useState } from 'react'
+
+import { getLimitedGenreParts } from '@/lib/formatters'
 import { cn } from '@/lib/utils'
 import type { DiscogsCollectionRelease } from '@/types/discogs'
-import { Disc3 } from 'lucide-react'
-import { getLimitedGenreParts } from '@/lib/formatters'
 
 interface VinylCardProps {
   release: DiscogsCollectionRelease
@@ -204,7 +205,9 @@ function extractVinylInfo(
       colorCandidates.find(
         (candidate) => getColorStyles(candidate) !== DEFAULT_COLOR_STYLE
       ) ?? colorCandidates[0]
-    info.color = matchedColor
+    if (matchedColor) {
+      info.color = matchedColor
+    }
   }
 
   return info
@@ -221,12 +224,15 @@ export function VinylCard({ release, className }: VinylCardProps) {
     info.genres && info.genres.length > 0
       ? getLimitedGenreParts(info.genres)
       : []
-  const genreList =
-    genreParts.length === 2
-      ? `${genreParts[0]} & ${genreParts[1]}`
-      : genreParts.length > 0
-        ? genreParts.join(', ')
-        : null
+  const genreList = (() => {
+    if (genreParts.length === 2) {
+      return `${genreParts[0]} & ${genreParts[1]}`
+    }
+    if (genreParts.length > 0) {
+      return genreParts.join(', ')
+    }
+    return null
+  })()
   const metaLine = [year ? String(year) : null, genreList]
     .filter(Boolean)
     .join(' · ')
@@ -236,7 +242,7 @@ export function VinylCard({ release, className }: VinylCardProps) {
   return (
     <div
       className={cn(
-        'group relative cursor-pointer overflow-hidden rounded-xl bg-card shadow-sm ring-1 ring-border/40 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-2xl hover:ring-border/60',
+        'group bg-card ring-border/40 hover:ring-border/60 relative cursor-pointer overflow-hidden rounded-xl shadow-sm ring-1 transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-2xl',
         className
       )}
     >
@@ -251,16 +257,16 @@ export function VinylCard({ release, className }: VinylCardProps) {
             onError={() => setImageErrored(true)}
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-muted">
-            <Disc3 className="h-20 w-20 text-muted-foreground opacity-30" />
+          <div className="bg-muted flex h-full w-full items-center justify-center">
+            <Disc3 className="text-muted-foreground h-20 w-20 opacity-30" />
           </div>
         )}
 
         {/* Vinyl Info Badges */}
-        {(vinylInfo.color || vinylInfo.weight) && (
-          <div className="absolute right-2 top-2 flex flex-col gap-1.5 transition-transform duration-300 group-hover:-translate-y-0.5">
+        {vinylInfo.color || vinylInfo.weight ? (
+          <div className="absolute top-2 right-2 flex flex-col gap-1.5 transition-transform duration-300 group-hover:-translate-y-0.5">
             {/* Color Badge with actual color */}
-            {vinylInfo.color && colorStyles && (
+            {vinylInfo.color && colorStyles ? (
               <div
                 className={cn(
                   'flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold shadow-lg ring-1 backdrop-blur-sm transition-transform duration-300 group-hover:scale-[1.03]',
@@ -272,15 +278,15 @@ export function VinylCard({ release, className }: VinylCardProps) {
                 <Disc3 className="h-3 w-3" />
                 {vinylInfo.color}
               </div>
-            )}
+            ) : null}
             {/* Weight Badge */}
-            {vinylInfo.weight && (
-              <div className="rounded-full bg-black/70 px-3 py-1 text-xs font-medium text-white shadow-lg backdrop-blur-sm ring-1 ring-white/30 transition-transform duration-300 group-hover:scale-[1.03]">
+            {vinylInfo.weight ? (
+              <div className="rounded-full bg-black/70 px-3 py-1 text-xs font-medium text-white shadow-lg ring-1 ring-white/30 backdrop-blur-sm transition-transform duration-300 group-hover:scale-[1.03]">
                 {vinylInfo.weight}
               </div>
-            )}
+            ) : null}
           </div>
-        )}
+        ) : null}
         {/* Hover Overlay with Details */}
         <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <div className="translate-y-2 transition-transform duration-300 group-hover:translate-y-0">
@@ -296,25 +302,25 @@ export function VinylCard({ release, className }: VinylCardProps) {
             >
               {artistName}
             </p>
-            {metaLine && (
+            {metaLine ? (
               <div className="mt-2 text-xs text-gray-300">
                 <span className="line-clamp-1">{metaLine}</span>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       </div>
 
       {/* Minimal Info Below (always visible) */}
-      <div className="relative z-20 -mt-px bg-card p-3">
+      <div className="bg-card relative z-20 -mt-px p-3">
         <h3
-          className="truncate text-sm font-medium leading-tight"
+          className="truncate text-sm leading-tight font-medium"
           title={info.title}
         >
           {info.title}
         </h3>
         <p
-          className="mt-0.5 truncate text-xs text-muted-foreground"
+          className="text-muted-foreground mt-0.5 truncate text-xs"
           title={artistName}
         >
           {artistName}

@@ -1,4 +1,5 @@
 import { useContext } from 'react'
+
 import { PreferencesContext } from '@/providers/preferences-context'
 
 export function usePreferences() {

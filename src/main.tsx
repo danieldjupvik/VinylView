@@ -1,11 +1,13 @@
+import { RouterProvider, createRouter } from '@tanstack/react-router'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { RouterProvider, createRouter } from '@tanstack/react-router'
-import { routeTree } from './routeTree.gen'
-import { QueryProvider } from '@/providers/query-provider'
+
 import { AuthProvider } from '@/providers/auth-provider'
-import { ThemeProvider } from '@/providers/theme-provider'
 import { PreferencesProvider } from '@/providers/preferences-provider'
+import { QueryProvider } from '@/providers/query-provider'
+import { ThemeProvider } from '@/providers/theme-provider'
+
+import { routeTree } from './routeTree.gen'
 import '@/providers/i18n-provider'
 import './index.css'
 

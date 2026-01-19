@@ -1,12 +1,14 @@
-import { describe, expect, it } from 'vitest'
-import { renderHook, waitFor, act } from '@testing-library/react'
-import type { ReactNode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { renderHook, waitFor, act } from '@testing-library/react'
 import { http, HttpResponse } from 'msw'
-import { useCollection } from '@/hooks/use-collection'
-import { AuthContext, type AuthContextValue } from '@/providers/auth-context'
-import { setToken } from '@/lib/storage'
+import { describe, expect, it } from 'vitest'
+
 import { server } from '@/__tests__/mocks/server'
+import { useCollection } from '@/hooks/use-collection'
+import { setToken } from '@/lib/storage'
+import { AuthContext, type AuthContextValue } from '@/providers/auth-context'
+
+import type { ReactNode } from 'react'
 
 const buildRelease = ({
   id,
@@ -63,11 +65,13 @@ const createWrapper = (username = 'testuser') => {
   // Set token to satisfy API handlers
   setToken('valid-token')
 
-  return ({ children }: { children: ReactNode }) => (
+  const Wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>
       <AuthContext.Provider value={authValue}>{children}</AuthContext.Provider>
     </QueryClientProvider>
   )
+
+  return Wrapper
 }
 
 describe('useCollection', () => {
@@ -158,7 +162,7 @@ describe('useCollection', () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.vinylOnly).toHaveLength(1)
     expect(result.current.nonVinylCount).toBe(1)
-    expect(result.current.nonVinylBreakdown[0].format).toBe('CD')
+    expect(result.current.nonVinylBreakdown[0]?.format).toBe('CD')
   })
 
   it('paginates client-side when search is active', async () => {
@@ -229,10 +233,10 @@ describe('useCollection', () => {
 
     await waitFor(() => expect(result.current.pagination?.pages).toBe(2))
     expect(result.current.filteredReleases).toHaveLength(2)
-    expect(result.current.filteredReleases[0].basic_information.title).toBe(
+    expect(result.current.filteredReleases[0]?.basic_information.title).toBe(
       'Gamma Album'
     )
-    expect(result.current.filteredReleases[1].basic_information.title).toBe(
+    expect(result.current.filteredReleases[1]?.basic_information.title).toBe(
       'Delta Album'
     )
   })

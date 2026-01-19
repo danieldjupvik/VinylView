@@ -1,9 +1,21 @@
+import { Link, useLocation } from '@tanstack/react-router'
+import {
+  BarChart3,
+  ChevronRight,
+  DollarSign,
+  Disc3,
+  Heart,
+  Settings,
+  Shuffle
+} from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+
+import { Badge } from '@/components/ui/badge'
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger
 } from '@/components/ui/collapsible'
-import { Badge } from '@/components/ui/badge'
 import {
   Sidebar,
   SidebarContent,
@@ -17,20 +29,11 @@ import {
   SidebarMenuItem,
   useSidebar
 } from '@/components/ui/sidebar'
-import { Link, useLocation } from '@tanstack/react-router'
-import {
-  BarChart3,
-  ChevronRight,
-  DollarSign,
-  Disc3,
-  Heart,
-  Settings,
-  Shuffle
-} from 'lucide-react'
-import type { MouseEvent } from 'react'
-import { useTranslation } from 'react-i18next'
+
 import { BrandMark } from './brand-mark'
 import { SidebarUser } from './sidebar-user'
+
+import type { MouseEvent } from 'react'
 
 export function AppSidebar() {
   const { t } = useTranslation()

@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
+
 import { VinylGrid } from '@/components/collection/vinyl-grid'
 import type { DiscogsCollectionRelease } from '@/types/discogs'
 

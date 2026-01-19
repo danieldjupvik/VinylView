@@ -1,11 +1,19 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode
+} from 'react'
+
+import { buildGravatarUrl, normalizeGravatarEmail } from '@/lib/gravatar'
 import {
   getAvatarSource,
   getGravatarEmail,
   setAvatarSource as storeAvatarSource,
   setGravatarEmail as storeGravatarEmail
 } from '@/lib/storage'
-import { buildGravatarUrl, normalizeGravatarEmail } from '@/lib/gravatar'
+
 import { PreferencesContext, type AvatarSource } from './preferences-context'
 
 interface PreferencesProviderProps {
@@ -49,28 +57,37 @@ export function PreferencesProvider({ children }: PreferencesProviderProps) {
     }
   }, [gravatarEmail])
 
-  const setAvatarSource = (source: AvatarSource) => {
+  const setAvatarSource = useCallback((source: AvatarSource): void => {
     storeAvatarSource(source)
     setAvatarSourceState(source)
-  }
+  }, [])
 
-  const setGravatarEmail = (email: string) => {
+  const setGravatarEmail = useCallback((email: string): void => {
     const normalized = normalizeGravatarEmail(email)
     storeGravatarEmail(normalized)
     setGravatarEmailState(normalized)
     setGravatarUrl(null)
-  }
+  }, [])
+
+  const value = useMemo(
+    () => ({
+      avatarSource,
+      gravatarEmail,
+      gravatarUrl,
+      setAvatarSource,
+      setGravatarEmail
+    }),
+    [
+      avatarSource,
+      gravatarEmail,
+      gravatarUrl,
+      setAvatarSource,
+      setGravatarEmail
+    ]
+  )
 
   return (
-    <PreferencesContext.Provider
-      value={{
-        avatarSource,
-        gravatarEmail,
-        gravatarUrl,
-        setAvatarSource,
-        setGravatarEmail
-      }}
-    >
+    <PreferencesContext.Provider value={value}>
       {children}
     </PreferencesContext.Provider>
   )

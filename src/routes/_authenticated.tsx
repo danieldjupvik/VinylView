@@ -1,16 +1,17 @@
 import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useAuth } from '@/hooks/use-auth'
+
+import { AppSidebar } from '@/components/layout/app-sidebar'
+import { BrandMark } from '@/components/layout/brand-mark'
+import { LanguageToggle } from '@/components/layout/language-toggle'
+import { ModeToggle } from '@/components/layout/mode-toggle'
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger
 } from '@/components/ui/sidebar'
-import { AppSidebar } from '@/components/layout/app-sidebar'
-import { ModeToggle } from '@/components/layout/mode-toggle'
-import { LanguageToggle } from '@/components/layout/language-toggle'
-import { BrandMark } from '@/components/layout/brand-mark'
+import { useAuth } from '@/hooks/use-auth'
 
 export const Route = createFileRoute('/_authenticated')({
   component: AuthenticatedLayout
@@ -23,7 +24,7 @@ function AuthenticatedLayout() {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      navigate({ to: '/login' })
+      void navigate({ to: '/login' })
     }
   }, [isAuthenticated, isLoading, navigate])
 
@@ -51,7 +52,7 @@ function AuthenticatedLayout() {
       <SidebarInset className="relative">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1200px_circle_at_top,rgba(120,120,120,0.12),transparent_60%)] opacity-70 dark:bg-[radial-gradient(1200px_circle_at_top,rgba(255,255,255,0.06),transparent_60%)]" />
         <div className="relative z-10 flex min-h-svh flex-col">
-          <header className="flex h-14 items-center justify-between border-b bg-background/80 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <header className="bg-background/80 supports-[backdrop-filter]:bg-background/60 flex h-14 items-center justify-between border-b px-4 backdrop-blur">
             <div className="flex items-center gap-2">
               <SidebarTrigger className="md:hidden" />
               <div className="flex items-center gap-2 md:hidden">

@@ -1,6 +1,7 @@
 import { Link, Outlet, createRootRoute } from '@tanstack/react-router'
-import { Toaster } from '@/components/ui/sonner'
 import { useTranslation } from 'react-i18next'
+
+import { Toaster } from '@/components/ui/sonner'
 
 export const Route = createRootRoute({
   component: RootComponent,
@@ -9,7 +10,7 @@ export const Route = createRootRoute({
 
 function RootComponent() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="bg-background text-foreground min-h-screen">
       <Outlet />
       <Toaster />
     </div>
@@ -20,7 +21,7 @@ function NotFoundComponent() {
   const { t } = useTranslation()
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4 animate-in fade-in zoom-in-95 duration-300">
+    <div className="animate-in fade-in zoom-in-95 flex min-h-screen flex-col items-center justify-center gap-4 duration-300">
       <h1 className="text-4xl font-bold">404</h1>
       <p className="text-muted-foreground">
         {t('errors.notFound', 'Page not found')}

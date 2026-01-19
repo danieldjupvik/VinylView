@@ -1,12 +1,15 @@
-import { describe, expect, it, beforeEach } from 'vitest'
 import { renderHook, waitFor, act } from '@testing-library/react'
-import type { ReactNode } from 'react'
-import { AuthProvider } from '@/providers/auth-provider'
-import { PreferencesProvider } from '@/providers/preferences-provider'
+import { http, HttpResponse } from 'msw'
+import { describe, expect, it, beforeEach } from 'vitest'
+
 import { useAuth } from '@/hooks/use-auth'
 import { setToken, setUsername } from '@/lib/storage'
+import { AuthProvider } from '@/providers/auth-provider'
+import { PreferencesProvider } from '@/providers/preferences-provider'
+
 import { server } from '../mocks/server'
-import { http, HttpResponse } from 'msw'
+
+import type { ReactNode } from 'react'
 
 const wrapper = ({ children }: { children: ReactNode }) => (
   <PreferencesProvider>
@@ -81,7 +84,10 @@ describe('useAuth', () => {
 
     await waitFor(() => {
       expect(result.current).toBeTruthy()
-      expect(result.current!.isLoading).toBe(false)
+      if (!result.current) {
+        throw new Error('Auth context not initialized')
+      }
+      expect(result.current.isLoading).toBe(false)
     })
 
     await expect(

@@ -1,5 +1,13 @@
 import { http, HttpResponse } from 'msw'
 
+const readUsername = (params: Record<string, unknown>) => {
+  const raw = params['username']
+  if (Array.isArray(raw)) {
+    return typeof raw[0] === 'string' ? raw[0] : ''
+  }
+  return typeof raw === 'string' ? raw : ''
+}
+
 export const handlers = [
   // Identity endpoint - does not return email per API docs
   http.get('https://api.discogs.com/oauth/identity', ({ request }) => {
@@ -19,10 +27,11 @@ export const handlers = [
   http.get('https://api.discogs.com/users/:username', ({ request, params }) => {
     const auth = request.headers.get('Authorization')
     if (auth === 'Discogs token=valid-token') {
+      const username = readUsername(params as Record<string, unknown>)
       return HttpResponse.json({
         id: 123,
-        username: params.username,
-        resource_url: `https://api.discogs.com/users/${params.username}`,
+        username,
+        resource_url: `https://api.discogs.com/users/${username}`,
         avatar_url:
           'https://www.gravatar.com/avatar/55502f40dc8b7c769880b10874abc9d0?s=52&r=pg&d=mm',
         email: 'testuser@example.com'
@@ -43,7 +52,7 @@ export const handlers = [
       const url = new URL(request.url)
       const page = parseInt(url.searchParams.get('page') || '1')
       const perPage = parseInt(url.searchParams.get('per_page') || '100')
-      const username = params.username as string
+      const username = readUsername(params as Record<string, unknown>)
 
       return HttpResponse.json(
         {

@@ -1,9 +1,8 @@
+import { useNavigate } from '@tanstack/react-router'
 import { ChevronsUpDown, LogOut } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from '@tanstack/react-router'
 import { toast } from 'sonner'
-import { useAuth } from '@/hooks/use-auth'
-import { usePreferences } from '@/hooks/use-preferences'
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -16,6 +15,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem
 } from '@/components/ui/sidebar'
+import { useAuth } from '@/hooks/use-auth'
+import { usePreferences } from '@/hooks/use-preferences'
 
 export function SidebarUser() {
   const { t } = useTranslation()
@@ -24,9 +25,9 @@ export function SidebarUser() {
   const navigate = useNavigate()
 
   const handleLogout = () => {
-    logout()
+    void logout()
     toast.success(t('auth.logoutSuccess'))
-    navigate({ to: '/login' })
+    void navigate({ to: '/login' })
   }
 
   const initials = username

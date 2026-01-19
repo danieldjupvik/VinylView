@@ -1,3 +1,8 @@
+import { createFileRoute } from '@tanstack/react-router'
+import { AlertCircle, RotateCw } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+
 import { CollectionToolbar } from '@/components/collection/collection-toolbar'
 import { PaginationControls } from '@/components/collection/pagination-controls'
 import { VinylGrid } from '@/components/collection/vinyl-grid'
@@ -6,10 +11,6 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useCollection } from '@/hooks/use-collection'
 import { useViewPreference } from '@/hooks/use-view-preference'
-import { createFileRoute } from '@tanstack/react-router'
-import { AlertCircle, RotateCw } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 
 export const Route = createFileRoute('/_authenticated/collection')({
   component: CollectionPage
@@ -213,10 +214,10 @@ function CollectionPage() {
 
   if (isError) {
     return (
-      <div className="flex flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in-95 duration-300">
-        <AlertCircle className="h-12 w-12 text-destructive" />
+      <div className="animate-in fade-in zoom-in-95 flex flex-col items-center justify-center p-6 text-center duration-300">
+        <AlertCircle className="text-destructive h-12 w-12" />
         <h2 className="mt-4 text-lg font-semibold">{t('errors.generic')}</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-2 text-sm">
           {error?.message || t('errors.network')}
         </p>
       </div>
@@ -228,7 +229,7 @@ function CollectionPage() {
       <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           <h1 className="text-2xl font-bold">{t('collection.title')}</h1>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="text-muted-foreground flex items-center gap-2 text-sm">
             <span className="tabular-nums">{lastUpdatedLabel}</span>
             <Button
               variant="ghost"
@@ -245,7 +246,7 @@ function CollectionPage() {
             </Button>
           </div>
         </div>
-        <div className="mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-sm text-muted-foreground">
+        <div className="text-muted-foreground mt-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-sm">
           <p className="tabular-nums">
             {t('collection.showing', {
               count: visibleCount,
@@ -255,7 +256,7 @@ function CollectionPage() {
             })}
           </p>
           {showNonVinyl ? (
-            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right duration-500">
+            <div className="animate-in fade-in slide-in-from-right flex items-center gap-2 duration-500">
               <span>{t('collection.nonVinylHidden')}</span>
               <Badge variant="secondary" className="font-normal">
                 {nonVinylSummary}
@@ -265,8 +266,8 @@ function CollectionPage() {
         </div>
       </div>
 
-      <div className="animate-in fade-in slide-in-from-bottom-3 duration-500 fill-mode-backwards delay-100">
-        <div className="rounded-xl border bg-card/60 p-4 shadow-sm backdrop-blur">
+      <div className="animate-in fade-in slide-in-from-bottom-3 fill-mode-backwards delay-100 duration-500">
+        <div className="bg-card/60 rounded-xl border p-4 shadow-sm backdrop-blur">
           <CollectionToolbar
             search={search}
             onSearchChange={handleSearchChange}
@@ -309,14 +310,14 @@ function CollectionPage() {
         />
       )}
 
-      {pagination && (
+      {pagination ? (
         <PaginationControls
           page={pagination.page}
           totalPages={pagination.pages}
           onPageChange={setPage}
           isLoading={isLoading}
         />
-      )}
+      ) : null}
     </div>
   )
 }

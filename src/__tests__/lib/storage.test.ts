@@ -1,4 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
+
+import { STORAGE_KEYS } from '@/lib/constants'
 import {
   getToken,
   setToken,
@@ -22,7 +24,6 @@ import {
   setViewMode,
   clearAuth
 } from '@/lib/storage'
-import { STORAGE_KEYS } from '@/lib/constants'
 import type { DiscogsIdentity, DiscogsUserProfile } from '@/types/discogs'
 
 describe('Storage utilities', () => {

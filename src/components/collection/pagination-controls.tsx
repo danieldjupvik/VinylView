@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+
 import { Button } from '@/components/ui/button'
 
 interface PaginationControlsProps {
@@ -24,7 +25,7 @@ export function PaginationControls({
   return (
     <nav
       aria-label={t('collection.pagination.navigation')}
-      className="flex items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-3 duration-500"
+      className="animate-in fade-in slide-in-from-bottom-3 flex items-center justify-center gap-4 duration-500"
     >
       <Button
         variant="outline"
@@ -36,7 +37,7 @@ export function PaginationControls({
         <ChevronLeft className="mr-1 h-4 w-4" />
         {t('collection.pagination.previous')}
       </Button>
-      <span className="text-sm text-muted-foreground tabular-nums">
+      <span className="text-muted-foreground text-sm tabular-nums">
         {t('collection.pagination.page', { current: page, total: totalPages })}
       </span>
       <Button

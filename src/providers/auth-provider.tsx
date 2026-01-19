@@ -1,9 +1,18 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode
+} from 'react'
+
 import {
   validateCredentials,
   getIdentity as fetchIdentity,
   getUserProfile
 } from '@/api/discogs'
+import { usePreferences } from '@/hooks/use-preferences'
 import {
   getToken,
   getUsername,
@@ -14,9 +23,9 @@ import {
   setUsername,
   clearAuth
 } from '@/lib/storage'
-import { AuthContext, type AuthState } from './auth-context'
 import type { DiscogsIdentity, DiscogsUserProfile } from '@/types/discogs'
-import { usePreferences } from '@/hooks/use-preferences'
+
+import { AuthContext, type AuthState } from './auth-context'
 
 interface AuthProviderProps {
   children: ReactNode
@@ -110,7 +119,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
     }
 
-    validateSession()
+    void validateSession()
 
     return () => {
       cancelledRef.current = true
@@ -189,9 +198,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
     })
   }, [])
 
-  return (
-    <AuthContext.Provider value={{ ...state, login, logout }}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({ ...state, login, logout }),
+    [state, login, logout]
   )
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

@@ -1,5 +1,6 @@
 import { SlidersHorizontal } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -12,12 +13,12 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Slider } from '@/components/ui/slider'
-import { useIsMobile } from '@/hooks/use-mobile'
-import { cn } from '@/lib/utils'
 import type {
   CollectionFilterOptions,
   FilterOption
 } from '@/hooks/use-collection'
+import { useIsMobile } from '@/hooks/use-mobile'
+import { cn } from '@/lib/utils'
 
 interface CollectionSelectedFilters {
   genres: string[]
@@ -81,7 +82,7 @@ function FilterGroup({
         )}
       </div>
       {options.length === 0 ? (
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           {t('collection.filters.empty')}
         </p>
       ) : (
@@ -102,8 +103,8 @@ function FilterGroup({
                     onChange(toggleValue(selected, option.value))
                   }
                 />
-                <span className="flex-1 line-clamp-1">
-                  <span className="text-xs text-muted-foreground tabular-nums">
+                <span className="line-clamp-1 flex-1">
+                  <span className="text-muted-foreground text-xs tabular-nums">
                     ({option.count})
                   </span>{' '}
                   {option.value}
@@ -135,7 +136,11 @@ function FilterContent({
 }) {
   const { t } = useTranslation()
   const yearBounds = options.yearBounds
+  const yearBoundsMin = yearBounds?.[0]
+  const yearBoundsMax = yearBounds?.[1]
   const yearRange = selected.yearRange ?? yearBounds
+  const yearRangeStart = yearRange?.[0]
+  const yearRangeEnd = yearRange?.[1]
   const hasActiveFilters = activeFilterCount > 0
   const isDesktop = layout === 'desktop'
   const groupColumns = isDesktop ? 'single' : 'double'
@@ -152,7 +157,7 @@ function FilterContent({
           <h3 className="text-sm font-semibold">
             {t('collection.filters.title')}
           </h3>
-          {hasActiveFilters && (
+          {activeFilterCount > 0 && (
             <Badge variant="secondary">{activeFilterCount}</Badge>
           )}
         </div>
@@ -165,7 +170,7 @@ function FilterContent({
           {t('collection.filters.clear')}
         </Button>
       </div>
-      <ScrollArea className="flex-1 min-h-0">
+      <ScrollArea className="min-h-0 flex-1">
         <div
           className={cn(
             isDesktop
@@ -178,25 +183,43 @@ function FilterContent({
               <h4 className="text-sm font-medium">
                 {t('collection.filters.yearRange')}
               </h4>
-              {yearRange && (
-                <span className="text-xs text-muted-foreground">
-                  {yearRange[0]}-{yearRange[1]}
+              {yearRangeStart !== undefined && yearRangeEnd !== undefined && (
+                <span className="text-muted-foreground text-xs">
+                  {yearRangeStart}-{yearRangeEnd}
                 </span>
               )}
             </div>
-            {yearBounds && yearRange ? (
-              <Slider
-                value={yearRange}
-                min={yearBounds[0]}
-                max={yearBounds[1]}
-                step={1}
-                onValueChange={(value) => setYearRange([value[0], value[1]])}
-              />
-            ) : (
-              <p className="text-xs text-muted-foreground">
-                {t('collection.filters.anyYear')}
-              </p>
-            )}
+            {(() => {
+              if (
+                yearBoundsMin !== undefined &&
+                yearBoundsMax !== undefined &&
+                yearRange
+              ) {
+                return (
+                  <Slider
+                    value={yearRange}
+                    min={yearBoundsMin}
+                    max={yearBoundsMax}
+                    step={1}
+                    onValueChange={(value) => {
+                      const [start, end] = value
+                      if (start === undefined || end === undefined) return
+                      setYearRange([start, end])
+                    }}
+                  />
+                )
+              }
+
+              if (!selected.yearRange) {
+                return (
+                  <p className="text-muted-foreground text-xs">
+                    {t('collection.filters.anyYear')}
+                  </p>
+                )
+              }
+
+              return null
+            })()}
           </div>
 
           <div className={cn(isDesktop ? 'col-span-full' : '')}>

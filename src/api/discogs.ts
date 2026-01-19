@@ -1,4 +1,3 @@
-import { apiClient } from './client'
 import { COLLECTION } from '@/lib/constants'
 import type {
   DiscogsIdentity,
@@ -28,6 +27,8 @@ import type {
   DiscogsPriceSuggestionsResponse,
   DiscogsMarketplaceStats
 } from '@/types/discogs'
+
+import { apiClient } from './client'
 
 /**
  * ==============================================================================

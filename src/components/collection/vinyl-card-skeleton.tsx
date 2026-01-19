@@ -9,7 +9,7 @@ export function VinylCardSkeleton({ className }: VinylCardSkeletonProps) {
   return (
     <div
       className={cn(
-        'overflow-hidden rounded-lg bg-card shadow-sm ring-1 ring-border/30',
+        'bg-card ring-border/30 overflow-hidden rounded-lg shadow-sm ring-1',
         className
       )}
     >

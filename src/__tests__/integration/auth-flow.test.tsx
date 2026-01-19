@@ -1,16 +1,17 @@
-import { render, screen } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import {
   createMemoryHistory,
   createRouter,
   RouterProvider
 } from '@tanstack/react-router'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
-import { routeTree } from '@/routeTree.gen'
-import { QueryProvider } from '@/providers/query-provider'
+
 import { AuthProvider } from '@/providers/auth-provider'
 import { PreferencesProvider } from '@/providers/preferences-provider'
+import { QueryProvider } from '@/providers/query-provider'
 import { ThemeProvider } from '@/providers/theme-provider'
+import { routeTree } from '@/routeTree.gen'
 
 const renderApp = (initialPath: string) => {
   const router = createRouter({

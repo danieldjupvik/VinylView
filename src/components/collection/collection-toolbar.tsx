@@ -1,5 +1,12 @@
 import { Search, ArrowDown, ArrowUp, Shuffle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+
+import {
+  CollectionFilters,
+  type CollectionFiltersProps
+} from '@/components/collection/collection-filters'
+import { ViewToggle } from '@/components/collection/view-toggle'
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -11,12 +18,6 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
-import { Button } from '@/components/ui/button'
-import {
-  CollectionFilters,
-  type CollectionFiltersProps
-} from '@/components/collection/collection-filters'
-import { ViewToggle } from '@/components/collection/view-toggle'
 import type { ViewMode } from '@/lib/storage'
 import type { CollectionSortKey, CollectionSortOrder } from '@/types/discogs'
 
@@ -84,7 +85,7 @@ export function CollectionToolbar({
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="group relative flex-1 sm:max-w-xs">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground transition-colors group-focus-within:text-foreground" />
+        <Search className="text-muted-foreground group-focus-within:text-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transition-colors" />
         <Input
           type="search"
           placeholder={t('collection.search')}
@@ -146,17 +147,21 @@ export function CollectionToolbar({
           variant="outline"
           size="icon-sm"
           onClick={toggleSortOrder}
-          disabled={isRandomSort && !canReshuffle}
+          disabled={Boolean(isRandomSort && !canReshuffle)}
           title={sortOrderLabel}
           aria-label={sortOrderLabel}
           className="transition-all duration-200 hover:scale-110"
         >
           {isRandomSort ? (
             <Shuffle className="h-4 w-4" />
-          ) : sortOrder === 'asc' ? (
-            <ArrowUp className="h-4 w-4" />
           ) : (
-            <ArrowDown className="h-4 w-4" />
+            <>
+              {sortOrder === 'asc' ? (
+                <ArrowUp className="h-4 w-4" />
+              ) : (
+                <ArrowDown className="h-4 w-4" />
+              )}
+            </>
           )}
         </Button>
       </div>

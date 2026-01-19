@@ -1,6 +1,7 @@
-import { Languages } from 'lucide-react'
 import { NO, US } from 'country-flag-icons/react/3x2'
+import { Languages } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -39,7 +40,7 @@ function LanguageFlag({
   return (
     <span
       className={cn(
-        'flex size-4 items-center justify-center overflow-hidden rounded-full ring-1 ring-border/50',
+        'ring-border/50 flex size-4 items-center justify-center overflow-hidden rounded-full ring-1',
         className
       )}
       aria-hidden="true"
@@ -71,7 +72,9 @@ export function LanguageToggle({ className }: LanguageToggleProps) {
       <DropdownMenuContent align="end">
         <DropdownMenuRadioGroup
           value={currentLanguage}
-          onValueChange={(value) => i18n.changeLanguage(value)}
+          onValueChange={(value) => {
+            void i18n.changeLanguage(value)
+          }}
         >
           <DropdownMenuRadioItem value="en">
             <span className="flex items-center gap-2">

@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { type ReactNode } from 'react'
+
 import { isAxiosError } from '@/api/client'
 
 const queryClient = new QueryClient({

@@ -1,6 +1,14 @@
-import { type ReactNode, useEffect, useState } from 'react'
-import type { Theme } from './theme-context'
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState
+} from 'react'
+
 import { ThemeProviderContext } from './theme-context'
+
+import type { Theme } from './theme-context'
 
 type ThemeProviderProps = {
   children: ReactNode
@@ -15,11 +23,15 @@ export function ThemeProvider({
   ...props
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {
-    const stored = localStorage.getItem(storageKey)
-    const validThemes: Theme[] = ['light', 'dark', 'system']
-    return validThemes.includes(stored as Theme)
-      ? (stored as Theme)
-      : defaultTheme
+    try {
+      const stored = localStorage.getItem(storageKey)
+      const validThemes: Theme[] = ['light', 'dark', 'system']
+      return validThemes.includes(stored as Theme)
+        ? (stored as Theme)
+        : defaultTheme
+    } catch {
+      return defaultTheme
+    }
   })
 
   useEffect(() => {
@@ -40,19 +52,32 @@ export function ThemeProvider({
     }
 
     root.classList.add(theme)
+    return undefined
   }, [theme])
 
-  const value = {
-    theme,
-    setTheme: (nextTheme: Theme) => {
+  const handleSetTheme = useCallback(
+    (nextTheme: Theme) => {
       const validThemes: Theme[] = ['light', 'dark', 'system']
       const safeTheme = validThemes.includes(nextTheme)
         ? nextTheme
         : defaultTheme
-      localStorage.setItem(storageKey, safeTheme)
+      try {
+        localStorage.setItem(storageKey, safeTheme)
+      } catch {
+        // Ignore storage errors
+      }
       setTheme(safeTheme)
-    }
-  }
+    },
+    [defaultTheme, storageKey]
+  )
+
+  const value = useMemo(
+    () => ({
+      theme,
+      setTheme: handleSetTheme
+    }),
+    [theme, handleSetTheme]
+  )
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>

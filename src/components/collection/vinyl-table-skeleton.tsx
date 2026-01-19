@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Table,
@@ -35,11 +36,12 @@ export function VinylTableSkeleton() {
       </TableHeader>
       <TableBody>
         {Array.from({ length: 8 }).map((_, index) => (
-          <TableRow key={index} className="group">
+          // eslint-disable-next-line react/no-array-index-key -- Skeleton items have no stable ID; index is safe for static placeholder list
+          <TableRow key={`skeleton-${index}`} className="group">
             <TableCell className="w-16 min-w-[64px]">
               <Skeleton className="h-10 w-10 rounded-sm" />
             </TableCell>
-            <TableCell className="w-auto sm:w-[40%] sm:min-w-[240px] whitespace-normal">
+            <TableCell className="w-auto whitespace-normal sm:w-[40%] sm:min-w-[240px]">
               <div className="space-y-2">
                 <Skeleton className="h-4 w-3/4" />
                 <Skeleton className="h-3 w-1/2" />
