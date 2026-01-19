@@ -385,6 +385,25 @@ Auth flow:
 3. Login validates credentials, stores token/username in localStorage
 4. Logout clears localStorage and resets state
 
+### Post-Login Redirect URL Preservation
+
+Users are returned to their original URL (including query params) after login. This works for:
+
+- **Unauthenticated access**: Visit `/collection?style=Rock` → redirect to `/login` → login → return to `/collection?style=Rock`
+- **Logout/re-login**: Be on `/collection?style=Rock` → logout → login → return to `/collection?style=Rock`
+
+Implementation uses sessionStorage (not URL params) for clean login URLs:
+
+- `src/lib/redirect-utils.ts` - Utilities: `storeRedirectUrl()`, `getAndClearRedirectUrl()`, `isValidRedirectUrl()`
+- `src/lib/constants.ts` - `SESSION_STORAGE_KEYS.REDIRECT_URL`
+- `src/routes/_authenticated.tsx` - Stores URL before redirecting to login
+- `src/components/layout/sidebar-user.tsx` - Stores URL before logout
+- `src/routes/login.tsx` - Reads redirect URL via `useEffect` when `isAuthenticated` becomes true
+
+**Security**: `isValidRedirectUrl()` prevents open redirect attacks by only allowing internal paths (starting with `/`) and blocking protocol-relative URLs, backslashes, and `/login` paths.
+
+**Important**: Navigation after login is handled by a `useEffect` watching `isAuthenticated`, not in the form submit handler. This avoids race conditions with `getAndClearRedirectUrl()` being called twice.
+
 ## Layout Components
 
 Layout components in `src/components/layout/`:

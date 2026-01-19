@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { AuthContext, type AuthContextValue } from '@/providers/auth-context'
 import { Route as LoginRoute } from '@/routes/login'
@@ -49,16 +49,13 @@ const renderLogin = (overrides: Partial<AuthContextValue> = {}) => {
 }
 
 describe('Login form', () => {
-  beforeEach(() => {
-    navigate.mockClear()
-  })
   it('disables submit when fields are empty', () => {
     renderLogin()
     const button = screen.getByRole('button', { name: /sign in/i })
     expect(button).toBeDisabled()
   })
 
-  it('submits credentials and navigates on success', async () => {
+  it('submits credentials and calls login with trimmed values', async () => {
     const user = userEvent.setup()
     const { login } = renderLogin()
 
@@ -72,6 +69,7 @@ describe('Login form', () => {
 
     await waitFor(() => expect(login).toHaveBeenCalled())
     expect(login).toHaveBeenCalledWith('testuser', 'token')
-    expect(navigate).toHaveBeenCalledWith({ to: '/collection' })
+    // Navigation is handled by useEffect when isAuthenticated changes,
+    // which is tested in integration/auth-flow.test.tsx
   })
 })

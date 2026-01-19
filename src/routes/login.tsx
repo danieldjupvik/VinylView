@@ -18,6 +18,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/hooks/use-auth'
+import { getAndClearRedirectUrl } from '@/lib/redirect-utils'
 
 export const Route = createFileRoute('/login')({
   component: LoginPage
@@ -35,7 +36,8 @@ function LoginPage() {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      void navigate({ to: '/collection' })
+      const redirectUrl = getAndClearRedirectUrl() ?? '/collection'
+      void navigate({ to: redirectUrl })
     }
   }, [isAuthenticated, navigate])
 
@@ -51,7 +53,7 @@ function LoginPage() {
     try {
       await login(username.trim(), token.trim())
       toast.success(t('auth.loginSuccess'))
-      void navigate({ to: '/collection' })
+      // Navigation is handled by the useEffect when isAuthenticated becomes true
     } catch {
       toast.error(t('auth.loginError'))
     } finally {
