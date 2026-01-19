@@ -1,4 +1,9 @@
-import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router'
+import {
+  createFileRoute,
+  Outlet,
+  useNavigate,
+  useRouterState
+} from '@tanstack/react-router'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
@@ -12,6 +17,7 @@ import {
   SidebarTrigger
 } from '@/components/ui/sidebar'
 import { useAuth } from '@/hooks/use-auth'
+import { storeRedirectUrl } from '@/lib/redirect-utils'
 
 export const Route = createFileRoute('/_authenticated')({
   component: AuthenticatedLayout
@@ -21,12 +27,22 @@ function AuthenticatedLayout() {
   const { isAuthenticated, isLoading } = useAuth()
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const location = useRouterState({ select: (s) => s.location })
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
+      const currentUrl = location.pathname + location.searchStr + location.hash
+      storeRedirectUrl(currentUrl)
       void navigate({ to: '/login' })
     }
-  }, [isAuthenticated, isLoading, navigate])
+  }, [
+    isAuthenticated,
+    isLoading,
+    navigate,
+    location.pathname,
+    location.searchStr,
+    location.hash
+  ])
 
   // Show loading state while checking auth
   if (isLoading) {

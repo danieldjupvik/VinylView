@@ -5,8 +5,9 @@ import {
 } from '@tanstack/react-router'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 
+import { SESSION_STORAGE_KEYS } from '@/lib/constants'
 import { AuthProvider } from '@/providers/auth-provider'
 import { PreferencesProvider } from '@/providers/preferences-provider'
 import { QueryProvider } from '@/providers/query-provider'
@@ -36,6 +37,11 @@ const renderApp = (initialPath: string) => {
 }
 
 describe('auth flow', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    sessionStorage.clear()
+  })
+
   it('redirects unauthenticated users to login', async () => {
     renderApp('/collection')
 
@@ -60,5 +66,41 @@ describe('auth flow', () => {
       await screen.findByRole('heading', { name: /my collection/i })
     ).toBeInTheDocument()
     expect(localStorage.getItem('vinyldeck_token')).toBe('valid-token')
+  })
+
+  it('stores redirect URL when accessing protected route while unauthenticated', async () => {
+    renderApp('/collection?style=Rock')
+
+    await screen.findByRole('button', { name: /sign in/i })
+
+    expect(sessionStorage.getItem(SESSION_STORAGE_KEYS.REDIRECT_URL)).toBe(
+      '/collection?style=Rock'
+    )
+  })
+
+  it('redirects to stored URL after login', async () => {
+    const user = userEvent.setup()
+    sessionStorage.setItem(
+      SESSION_STORAGE_KEYS.REDIRECT_URL,
+      '/collection?style=Rock'
+    )
+    const router = renderApp('/login')
+
+    await screen.findByLabelText(/username/i)
+    await user.type(screen.getByLabelText(/username/i), 'testuser')
+    await user.type(
+      screen.getByLabelText(/personal access token/i),
+      'valid-token'
+    )
+    await user.click(screen.getByRole('button', { name: /sign in/i }))
+
+    expect(
+      await screen.findByRole('heading', { name: /my collection/i })
+    ).toBeInTheDocument()
+    expect(sessionStorage.getItem(SESSION_STORAGE_KEYS.REDIRECT_URL)).toBeNull()
+
+    // Verify router navigated to correct URL with query params
+    expect(router.state.location.pathname).toBe('/collection')
+    expect(router.state.location.searchStr).toBe('?style=Rock')
   })
 })

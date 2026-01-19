@@ -13,6 +13,10 @@ export const STORAGE_KEYS = {
   VIEW_MODE: 'vinyldeck_view_mode'
 } as const
 
+export const SESSION_STORAGE_KEYS = {
+  REDIRECT_URL: 'vinyldeck_redirect_url'
+} as const
+
 /**
  * Discogs API Rate Limiting Configuration
  *

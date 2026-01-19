@@ -1,4 +1,4 @@
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate, useRouterState } from '@tanstack/react-router'
 import { ChevronsUpDown, LogOut } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -17,14 +17,19 @@ import {
 } from '@/components/ui/sidebar'
 import { useAuth } from '@/hooks/use-auth'
 import { usePreferences } from '@/hooks/use-preferences'
+import { storeRedirectUrl } from '@/lib/redirect-utils'
 
 export function SidebarUser() {
   const { t } = useTranslation()
   const { username, logout, avatarUrl } = useAuth()
   const { avatarSource, gravatarUrl } = usePreferences()
   const navigate = useNavigate()
+  const location = useRouterState({ select: (s) => s.location })
 
   const handleLogout = () => {
+    const currentUrl = location.pathname + location.searchStr + location.hash
+    storeRedirectUrl(currentUrl)
+
     void logout()
     toast.success(t('auth.logoutSuccess'))
     void navigate({ to: '/login' })
