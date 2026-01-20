@@ -8,11 +8,51 @@ declare const process: {
   env: {
     VITE_DISCOGS_CONSUMER_KEY?: string
     DISCOGS_CONSUMER_SECRET?: string
+    ALLOWED_CALLBACK_ORIGINS?: string
+    VERCEL_URL?: string
   }
 }
 
 const CONSUMER_KEY = process.env.VITE_DISCOGS_CONSUMER_KEY
 const CONSUMER_SECRET = process.env.DISCOGS_CONSUMER_SECRET
+
+/**
+ * Get allowed callback origins for OAuth flow.
+ * Prevents open redirect attacks by restricting where OAuth can redirect.
+ */
+function getAllowedCallbackOrigins(): string[] {
+  // Check for explicit allowlist first
+  if (process.env.ALLOWED_CALLBACK_ORIGINS) {
+    return process.env.ALLOWED_CALLBACK_ORIGINS.split(',').map((o) => o.trim())
+  }
+
+  // Default allowed origins for development and production
+  const origins: string[] = [
+    'http://localhost:5173', // Vite dev server
+    'http://localhost:4173' // Vite preview
+  ]
+
+  // Add Vercel URL if available (production/preview deployments)
+  if (process.env.VERCEL_URL) {
+    origins.push(`https://${process.env.VERCEL_URL}`)
+  }
+
+  return origins
+}
+
+/**
+ * Validates that a callback URL's origin is in the allowlist.
+ * Prevents OAuth phishing attacks using our consumer credentials.
+ */
+function validateCallbackUrl(callbackUrl: string): boolean {
+  try {
+    const url = new URL(callbackUrl)
+    const allowedOrigins = getAllowedCallbackOrigins()
+    return allowedOrigins.some((origin) => url.origin === origin)
+  } catch {
+    return false
+  }
+}
 
 function getDiscogsOAuth() {
   if (!CONSUMER_KEY || !CONSUMER_SECRET) {
@@ -43,6 +83,14 @@ export const oauthRouter = router({
       })
     )
     .mutation(async ({ input }) => {
+      // Validate callback URL against allowlist to prevent OAuth phishing
+      if (!validateCallbackUrl(input.callbackUrl)) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Invalid callback URL origin'
+        })
+      }
+
       const oauth = getDiscogsOAuth()
 
       try {

@@ -64,6 +64,7 @@ function LoginPage() {
     } catch {
       // Tokens were invalid, they've been cleared
       toast.error(t('auth.oauthSessionExpired'))
+    } finally {
       setIsValidating(false)
     }
   }

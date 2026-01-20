@@ -105,28 +105,24 @@ export const mockReleases = [
 ]
 
 /**
- * Parse tRPC batch input from URL query params.
- * Handles both default transformer ({ "0": { ...data } })
- * and superjson transformer ({ "0": { json: { ...data } } }).
+ * Parse tRPC mutation input from request body.
+ * All discogs endpoints use mutations (POST) for security - tokens in body, not URL.
  */
-function parseTRPCInput(url: URL): Record<string, unknown> {
-  const input = url.searchParams.get('input')
-  if (!input) return {}
-
+async function parseTRPCMutationInput(
+  request: Request
+): Promise<Record<string, unknown>> {
   try {
-    const parsed = JSON.parse(input) as Record<string, unknown>
-    // For batch requests, input is { "0": { ... } }
-    const firstInput = parsed['0']
+    const body = (await request.json()) as Record<string, unknown>
+    // For batch requests, input is { "0": { json: { ...data } } }
+    const firstInput = body['0']
     if (typeof firstInput === 'object' && firstInput !== null) {
-      // Check for superjson wrapper first
       const maybeJson = firstInput as { json?: unknown }
       if (maybeJson.json && typeof maybeJson.json === 'object') {
         return maybeJson.json as Record<string, unknown>
       }
-      // Default transformer - data is directly in firstInput
       return firstInput as Record<string, unknown>
     }
-    return parsed
+    return body
   } catch {
     return {}
   }
@@ -172,12 +168,11 @@ function validateTokens(input: Record<string, unknown>): boolean {
  * These mock the server-side tRPC procedures.
  */
 export const handlers = [
-  // tRPC: discogs.getIdentity
-  http.get(
+  // tRPC: discogs.getIdentity (mutation - POST for security)
+  http.post(
     'http://localhost:3000/api/trpc/discogs.getIdentity',
-    ({ request }) => {
-      const url = new URL(request.url)
-      const input = parseTRPCInput(url)
+    async ({ request }) => {
+      const input = await parseTRPCMutationInput(request)
 
       if (!validateTokens(input)) {
         return trpcError('UNAUTHORIZED', 'Invalid or expired OAuth tokens')
@@ -190,12 +185,11 @@ export const handlers = [
     }
   ),
 
-  // tRPC: discogs.getUserProfile
-  http.get(
+  // tRPC: discogs.getUserProfile (mutation - POST for security)
+  http.post(
     'http://localhost:3000/api/trpc/discogs.getUserProfile',
-    ({ request }) => {
-      const url = new URL(request.url)
-      const input = parseTRPCInput(url)
+    async ({ request }) => {
+      const input = await parseTRPCMutationInput(request)
 
       if (!validateTokens(input)) {
         return trpcError('UNAUTHORIZED', 'Invalid or expired OAuth tokens')
@@ -208,12 +202,11 @@ export const handlers = [
     }
   ),
 
-  // tRPC: discogs.getCollection
-  http.get(
+  // tRPC: discogs.getCollection (mutation - POST for security)
+  http.post(
     'http://localhost:3000/api/trpc/discogs.getCollection',
-    ({ request }) => {
-      const url = new URL(request.url)
-      const input = parseTRPCInput(url)
+    async ({ request }) => {
+      const input = await parseTRPCMutationInput(request)
 
       if (!validateTokens(input)) {
         return trpcError('UNAUTHORIZED', 'Invalid or expired OAuth tokens')

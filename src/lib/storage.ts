@@ -120,6 +120,9 @@ export function getOAuthTokens(): OAuthTokens | null {
   return { accessToken, accessTokenSecret }
 }
 
+// OAuth 1.0a tokens must be stored client-side for SPA flows. These tokens
+// are only useful when combined with the server-side consumer secret for
+// request signing. Security relies on XSS prevention (CSP, sanitization).
 export function setOAuthTokens(tokens: OAuthTokens): void {
   localStorage.setItem(STORAGE_KEYS.OAUTH_ACCESS_TOKEN, tokens.accessToken)
   localStorage.setItem(

@@ -18,6 +18,7 @@ export const discogsRouter = router({
   /**
    * Get the identity of the authenticated user.
    * Used to validate OAuth tokens and get the username.
+   * Uses mutation instead of query to avoid tokens in URL query params.
    */
   getIdentity: publicProcedure
     .input(
@@ -26,7 +27,7 @@ export const discogsRouter = router({
         accessTokenSecret: z.string()
       })
     )
-    .query(async ({ input }) => {
+    .mutation(async ({ input }) => {
       const client = createDiscogsClient(
         input.accessToken,
         input.accessTokenSecret
@@ -87,7 +88,7 @@ export const discogsRouter = router({
         sortOrder: z.enum(['asc', 'desc']).optional()
       })
     )
-    .query(async ({ input }) => {
+    .mutation(async ({ input }) => {
       const client = createDiscogsClient(
         input.accessToken,
         input.accessTokenSecret
@@ -137,7 +138,7 @@ export const discogsRouter = router({
         username: z.string()
       })
     )
-    .query(async ({ input }) => {
+    .mutation(async ({ input }) => {
       const client = createDiscogsClient(
         input.accessToken,
         input.accessTokenSecret

@@ -290,7 +290,7 @@ export function useCollection(
       const perPage = COLLECTION.PER_PAGE
 
       const fetchPage = async (pageNumber: number) => {
-        const result = await trpcUtils.client.discogs.getCollection.query({
+        const result = await trpcUtils.client.discogs.getCollection.mutate({
           accessToken: oauthTokens.accessToken,
           accessTokenSecret: oauthTokens.accessTokenSecret,
           username,
