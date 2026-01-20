@@ -112,16 +112,12 @@ export function SidebarUser(): React.JSX.Element {
 
       {/* User info row */}
       <SidebarMenuItem>
-        <SidebarMenuButton
-          size="lg"
-          tooltip={username ?? ''}
-          className="cursor-default group-data-[collapsible=icon]:justify-center hover:bg-transparent active:bg-transparent"
-        >
+        <div className="flex h-12 w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0! [&>span:last-child]:truncate">
           <Avatar className="h-8 w-8 rounded-lg group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5">
             {resolvedAvatar ? (
               <AvatarImage
                 src={resolvedAvatar}
-                alt={username ?? 'User'}
+                alt={username ?? t('user.fallback')}
                 className="rounded-lg object-cover"
               />
             ) : null}
@@ -130,7 +126,7 @@ export function SidebarUser(): React.JSX.Element {
           <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
             <span className="truncate font-medium">{username}</span>
           </div>
-        </SidebarMenuButton>
+        </div>
       </SidebarMenuItem>
     </SidebarMenu>
   )

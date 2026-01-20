@@ -191,5 +191,8 @@
     "rateLimit": "For mange forespørsler. Vent litt.",
     "unauthorized": "Økten er utløpt. Logg inn på nytt.",
     "notFound": "Siden ble ikke funnet"
+  },
+  "user": {
+    "fallback": "Bruker"
   }
 }
