@@ -133,7 +133,7 @@ DISCOGS_CONSUMER_SECRET=your_dev_consumer_secret
 | 6     | User Profile Endpoint                    | ✅     |
 | 7     | Collection Endpoint + Hook Migration     | ✅     |
 | 8     | Storage & PAT Cleanup                    | ✅     |
-| 9     | i18n Updates                             | ⬜     |
+| 9     | i18n Updates                             | ✅     |
 | 10    | Tests                                    | ⬜     |
 
 > **Architecture Note:** All Discogs API calls must go through the server because OAuth 1.0a requires the Consumer Secret to sign every request. The `@lionralfs/discogs-client` handles signing automatically when configured with OAuth credentials.
@@ -708,8 +708,8 @@ Total: ~115 lines of boilerplate for full type-safety.
 
 **Phase 9 (i18n):**
 
-- [ ] English strings render correctly
-- [ ] Norwegian strings render correctly
+- [x] English strings render correctly
+- [x] Norwegian strings render correctly
 
 **Phase 10 (Tests):**
 
