@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { Loader2 } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { BrandMark } from '@/components/layout/brand-mark'
@@ -12,12 +12,12 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card'
+import { useAuth } from '@/hooks/use-auth'
 import { getAndClearRedirectUrl } from '@/lib/redirect-utils'
 import {
   clearOAuthRequestTokens,
   getOAuthRequestTokens,
-  setOAuthTokens,
-  setUsername
+  setOAuthTokens
 } from '@/lib/storage'
 import { trpc } from '@/lib/trpc'
 
@@ -52,13 +52,23 @@ function OAuthCallbackPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { oauth_token, oauth_verifier, denied } = Route.useSearch()
+  const { validateOAuthTokens } = useAuth()
 
   const [status, setStatus] = useState<OAuthCallbackStatus>('loading')
   const [error, setError] = useState<OAuthError | null>(null)
 
+  // Prevent double execution in React StrictMode
+  const hasStartedRef = useRef(false)
+
   const getAccessToken = trpc.oauth.getAccessToken.useMutation()
 
   useEffect(() => {
+    // Guard against double execution (React StrictMode runs effects twice)
+    if (hasStartedRef.current) {
+      return
+    }
+    hasStartedRef.current = true
+
     const exchangeTokens = async () => {
       // Check if user denied authorization
       if (denied) {
@@ -112,9 +122,8 @@ function OAuthCallbackPage() {
         // Clear the temporary request tokens
         clearOAuthRequestTokens()
 
-        // For now, we'll store a placeholder username
-        // The auth provider will fetch the real identity on next load
-        setUsername('oauth_user')
+        // Validate tokens and fetch identity via auth provider
+        await validateOAuthTokens()
 
         setStatus('success')
 

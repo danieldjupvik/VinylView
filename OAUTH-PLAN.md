@@ -129,7 +129,7 @@ DISCOGS_CONSUMER_SECRET=your_dev_consumer_secret
 | 2     | OAuth Callback Route                     | ✅     |
 | 3     | Login Page Update                        | ✅     |
 | 4     | Server-side Discogs Client Helper        | ✅     |
-| 5     | Identity Endpoint + Auth Provider Update | ⬜     |
+| 5     | Identity Endpoint + Auth Provider Update | ✅     |
 | 6     | User Profile Endpoint                    | ⬜     |
 | 7     | Collection Endpoint + Hook Migration     | ⬜     |
 | 8     | Storage & PAT Cleanup                    | ⬜     |

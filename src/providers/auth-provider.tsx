@@ -7,23 +7,16 @@ import {
   type ReactNode
 } from 'react'
 
-import {
-  validateCredentials,
-  getIdentity as fetchIdentity,
-  getUserProfile
-} from '@/api/discogs'
 import { usePreferences } from '@/hooks/use-preferences'
 import {
-  getToken,
-  getUsername,
+  clearAuth,
+  getOAuthTokens,
   getStoredUserProfile,
-  setToken,
-  setStoredUserProfile,
   setStoredIdentity,
   setUsername,
-  clearAuth
+  type OAuthTokens
 } from '@/lib/storage'
-import type { DiscogsIdentity, DiscogsUserProfile } from '@/types/discogs'
+import { trpc } from '@/lib/trpc'
 
 import { AuthContext, type AuthState } from './auth-context'
 
@@ -39,138 +32,112 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isLoading: true,
     username: null,
     userId: null,
-    avatarUrl: null
+    avatarUrl: null,
+    oauthTokens: null
   })
+
+  // Get tRPC utils for direct client access
+  const trpcUtils = trpc.useUtils()
 
   useEffect(() => {
     latestGravatarEmailRef.current = gravatarEmail
   }, [gravatarEmail])
 
-  // Validate existing token on mount
-  useEffect(() => {
-    const cancelledRef = { current: false }
-
-    const validateSession = async () => {
-      const tokenSnapshot = getToken()
-      const usernameSnapshot = getUsername()
-      const isStale = () =>
-        getToken() !== tokenSnapshot ||
-        getUsername() !== usernameSnapshot ||
-        cancelledRef.current
-
-      if (!tokenSnapshot || !usernameSnapshot) {
-        if (isStale()) return
-        clearAuth()
-        setState({
-          isAuthenticated: false,
-          isLoading: false,
-          username: null,
-          userId: null,
-          avatarUrl: null
-        })
-        return
-      }
-
+  /**
+   * Validates OAuth tokens by fetching identity from the server.
+   * This is called on mount and after OAuth callback.
+   */
+  const validateSession = useCallback(
+    async (tokens: OAuthTokens) => {
       try {
-        // Always validate the token by fetching fresh identity
-        // This ensures expired or invalid tokens are caught
-        const identity = await fetchIdentity()
-        if (isStale()) return
-        setStoredIdentity(identity)
+        // Fetch identity via tRPC client directly with the tokens
+        // This avoids the useQuery stale input issue
+        const result = await trpcUtils.client.discogs.getIdentity.query({
+          accessToken: tokens.accessToken,
+          accessTokenSecret: tokens.accessTokenSecret
+        })
 
-        // Fetch user profile (use cached email if available)
-        const storedProfile = getStoredUserProfile()
-        let profile: DiscogsUserProfile | null = null
-        try {
-          profile = await getUserProfile(identity.username)
-          if (isStale()) return
-          setStoredUserProfile(profile)
-        } catch {
-          // If profile fetch fails, use cached profile if available
-          profile = storedProfile
-        }
+        const { identity } = result
+
+        // Store identity and username
+        setStoredIdentity(identity)
+        setUsername(identity.username)
+
+        // Try to get cached profile for avatar
+        const profile = getStoredUserProfile()
 
         // Update gravatar email from profile if not already set
-        if (!latestGravatarEmailRef.current && profile?.email && !isStale()) {
+        if (!latestGravatarEmailRef.current && profile?.email) {
           latestGravatarEmailRef.current = profile.email
           setGravatarEmail(profile.email)
         }
 
-        // Set authenticated state with validated data
-        if (isStale()) return
+        // Set authenticated state
+        // Note: /oauth/identity doesn't return avatar_url, only user profile does
         setState({
           isAuthenticated: true,
           isLoading: false,
           username: identity.username,
           userId: identity.id,
-          avatarUrl: profile?.avatar_url ?? identity.avatar_url ?? null
+          avatarUrl: profile?.avatar_url ?? null,
+          oauthTokens: tokens
         })
       } catch {
-        // Token is invalid or expired, clear everything
-        if (isStale()) return
+        // Tokens are invalid or expired
         clearAuth()
         setState({
           isAuthenticated: false,
           isLoading: false,
           username: null,
           userId: null,
-          avatarUrl: null
+          avatarUrl: null,
+          oauthTokens: null
         })
       }
-    }
-
-    void validateSession()
-
-    return () => {
-      cancelledRef.current = true
-    }
-  }, [setGravatarEmail])
-
-  const login = useCallback(
-    async (username: string, token: string): Promise<void> => {
-      // Validate the credentials first
-      let identity: DiscogsIdentity
-      try {
-        identity = await validateCredentials(token)
-      } catch {
-        throw new Error('Invalid credentials')
-      }
-
-      // Verify username matches
-      if (identity.username.toLowerCase() !== username.toLowerCase()) {
-        throw new Error('Username does not match token')
-      }
-
-      // Store token BEFORE calling getUserProfile so the API client can use it
-      setToken(token)
-      setUsername(identity.username)
-
-      let profile: DiscogsUserProfile | null = null
-      try {
-        profile = await getUserProfile(identity.username)
-      } catch {
-        profile = null
-      }
-
-      // Store identity and profile
-      setStoredIdentity(identity)
-      if (profile) {
-        setStoredUserProfile(profile)
-      }
-      if (!latestGravatarEmailRef.current && profile?.email) {
-        latestGravatarEmailRef.current = profile.email
-        setGravatarEmail(profile.email)
-      }
-      setState({
-        isAuthenticated: true,
-        isLoading: false,
-        username: identity.username,
-        userId: identity.id,
-        avatarUrl: profile?.avatar_url ?? identity.avatar_url ?? null
-      })
     },
-    [setGravatarEmail]
+    [trpcUtils.client.discogs.getIdentity, setGravatarEmail]
   )
+
+  // Validate session on mount
+  useEffect(() => {
+    const initializeAuth = async () => {
+      const tokens = getOAuthTokens()
+
+      if (!tokens) {
+        // No OAuth tokens, user is not authenticated
+        clearAuth()
+        setState({
+          isAuthenticated: false,
+          isLoading: false,
+          username: null,
+          userId: null,
+          avatarUrl: null,
+          oauthTokens: null
+        })
+        return
+      }
+
+      // Validate tokens
+      await validateSession(tokens)
+    }
+
+    void initializeAuth()
+  }, [validateSession])
+
+  /**
+   * Re-validate OAuth tokens.
+   * Called after OAuth callback stores new tokens in localStorage.
+   */
+  const validateOAuthTokens = useCallback(async () => {
+    const tokens = getOAuthTokens()
+
+    if (!tokens) {
+      throw new Error('No OAuth tokens found')
+    }
+
+    setState((prev) => ({ ...prev, isLoading: true }))
+    await validateSession(tokens)
+  }, [validateSession])
 
   const logout = useCallback(() => {
     clearAuth()
@@ -194,13 +161,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       isLoading: false,
       username: null,
       userId: null,
-      avatarUrl: null
+      avatarUrl: null,
+      oauthTokens: null
     })
   }, [])
 
   const value = useMemo(
-    () => ({ ...state, login, logout }),
-    [state, login, logout]
+    () => ({ ...state, validateOAuthTokens, logout }),
+    [state, validateOAuthTokens, logout]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

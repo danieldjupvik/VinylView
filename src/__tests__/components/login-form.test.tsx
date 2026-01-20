@@ -1,5 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { AuthContext, type AuthContextValue } from '@/providers/auth-context'
@@ -24,17 +23,32 @@ vi.mock('sonner', () => ({
   }
 }))
 
+// Mock tRPC for OAuth flow
+vi.mock('@/lib/trpc', () => ({
+  trpc: {
+    oauth: {
+      getRequestToken: {
+        useMutation: () => ({
+          mutateAsync: vi.fn(),
+          isPending: false
+        })
+      }
+    }
+  }
+}))
+
 const LoginComponent = LoginRoute.options.component!
 
 const renderLogin = (overrides: Partial<AuthContextValue> = {}) => {
-  const login = vi.fn().mockResolvedValue(undefined)
+  const validateOAuthTokens = vi.fn().mockResolvedValue(undefined)
   const authValue: AuthContextValue = {
     isAuthenticated: false,
     isLoading: false,
     username: null,
     userId: null,
     avatarUrl: null,
-    login,
+    oauthTokens: null,
+    validateOAuthTokens,
     logout: vi.fn(),
     ...overrides
   }
@@ -45,35 +59,33 @@ const renderLogin = (overrides: Partial<AuthContextValue> = {}) => {
     </AuthContext.Provider>
   )
 
-  return { login }
+  return { validateOAuthTokens }
 }
 
-describe('Login form', () => {
+// TODO: These tests need to be rewritten for OAuth flow
+// The old PAT-based login form tests are no longer applicable.
+// The login page now shows an OAuth button instead of username/token fields.
+// New tests should:
+// 1. Test that "Sign in with Discogs" button is rendered
+// 2. Test that clicking the button triggers OAuth flow
+// 3. Test loading states during OAuth redirect
+describe('Login page - OAuth', () => {
   afterEach(() => {
     navigate.mockClear()
   })
 
-  it('disables submit when fields are empty', () => {
+  it('renders sign in with Discogs button', () => {
     renderLogin()
-    const button = screen.getByRole('button', { name: /sign in/i })
-    expect(button).toBeDisabled()
+    const button = screen.getByRole('button', { name: /sign in with discogs/i })
+    expect(button).toBeInTheDocument()
   })
 
-  it('submits credentials and calls login with trimmed values', async () => {
-    const user = userEvent.setup()
-    const { login } = renderLogin()
+  it.skip('initiates OAuth flow when button is clicked', async () => {
+    // TODO: Test that clicking button calls trpc.oauth.getRequestToken
+    // and redirects to Discogs authorization URL
+  })
 
-    await user.type(screen.getByLabelText(/username/i), ' testuser ')
-    await user.type(screen.getByLabelText(/personal access token/i), ' token ')
-
-    const button = screen.getByRole('button', { name: /sign in/i })
-    expect(button).toBeEnabled()
-
-    await user.click(button)
-
-    await waitFor(() => expect(login).toHaveBeenCalled())
-    expect(login).toHaveBeenCalledWith('testuser', 'token')
-    // Navigation is handled by useEffect when isAuthenticated changes,
-    // which is tested in integration/auth-flow.test.tsx
+  it.skip('shows loading state during OAuth redirect', async () => {
+    // TODO: Test loading spinner/disabled state while redirecting
   })
 })

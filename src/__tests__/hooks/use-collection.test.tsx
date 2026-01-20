@@ -58,7 +58,11 @@ const createWrapper = (username = 'testuser') => {
     username,
     userId: 123,
     avatarUrl: null,
-    login: async () => {},
+    oauthTokens: {
+      accessToken: 'test-token',
+      accessTokenSecret: 'test-secret'
+    },
+    validateOAuthTokens: async () => {},
     logout: () => {}
   }
 
