@@ -132,7 +132,7 @@ DISCOGS_CONSUMER_SECRET=your_dev_consumer_secret
 | 5     | Identity Endpoint + Auth Provider Update | ✅     |
 | 6     | User Profile Endpoint                    | ✅     |
 | 7     | Collection Endpoint + Hook Migration     | ✅     |
-| 8     | Storage & PAT Cleanup                    | ⬜     |
+| 8     | Storage & PAT Cleanup                    | ✅     |
 | 9     | i18n Updates                             | ⬜     |
 | 10    | Tests                                    | ⬜     |
 
@@ -702,9 +702,9 @@ Total: ~115 lines of boilerplate for full type-safety.
 
 **Phase 8 (Cleanup):**
 
-- [ ] No PAT token references remain
-- [ ] `bun run lint` passes
-- [ ] `bun run build` succeeds
+- [x] No PAT token references remain
+- [x] `bun run lint` passes (excluding tests, updated in Phase 10)
+- [x] `bun run build` succeeds
 
 **Phase 9 (i18n):**
 

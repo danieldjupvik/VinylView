@@ -1,9 +1,6 @@
 export const APP_VERSION = __APP_VERSION__
 
-export const DISCOGS_API_URL = 'https://api.discogs.com'
-
 export const STORAGE_KEYS = {
-  TOKEN: 'vinyldeck_token',
   USERNAME: 'vinyldeck_username',
   AVATAR_SOURCE: 'vinyldeck_avatar_source',
   GRAVATAR_EMAIL: 'vinyldeck_gravatar_email',
