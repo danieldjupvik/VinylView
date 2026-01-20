@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0-beta.1](https://github.com/danieldjupvik/VinylDeck/compare/vinyldeck-v0.2.0-beta.1...vinyldeck-v0.3.0-beta.1) (2026-01-20)
+
+
+### Features
+
+* OAuth Login Integration & tRPC API Migration ([#30](https://github.com/danieldjupvik/VinylDeck/issues/30)) ([b0a9d7a](https://github.com/danieldjupvik/VinylDeck/commit/b0a9d7a03be66361711f5bdc736a2fcfdd1fac92))
+* preserve url after login ([#27](https://github.com/danieldjupvik/VinylDeck/issues/27)) ([5f7d0f5](https://github.com/danieldjupvik/VinylDeck/commit/5f7d0f56d65dc3ce125f4c71b66e694de35dc6b0))
+
 ## [0.2.0-beta.1](https://github.com/danieldjupvik/VinylView/compare/vinyldeck-v0.1.0-beta.1...vinyldeck-v0.2.0-beta.1) (2026-01-19)
 
 
