@@ -18,6 +18,19 @@ export interface AuthContextValue extends AuthState {
    * Called after OAuth callback stores tokens in localStorage.
    */
   validateOAuthTokens: () => Promise<void>
+  /**
+   * Sign out - ends session but preserves OAuth tokens.
+   * User will see "Welcome back" flow on next login.
+   */
+  signOut: () => void
+  /**
+   * Disconnect - fully removes Discogs authorization.
+   * User will need to re-authorize with Discogs on next login.
+   */
+  disconnect: () => void
+  /**
+   * @deprecated Use signOut() instead. Kept for backwards compatibility.
+   */
   logout: () => void
 }
 

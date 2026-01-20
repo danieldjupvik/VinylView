@@ -170,11 +170,53 @@ export function clearOAuthRequestTokens(): void {
   sessionStorage.removeItem(SESSION_STORAGE_KEYS.OAUTH_REQUEST_SECRET)
 }
 
-export function clearAuth(): void {
+// Session management
+// SESSION_ACTIVE tracks whether user has an active session (vs signed out but tokens preserved)
+
+export function isSessionActive(): boolean {
+  return localStorage.getItem(STORAGE_KEYS.SESSION_ACTIVE) === 'true'
+}
+
+export function setSessionActive(active: boolean): void {
+  if (active) {
+    localStorage.setItem(STORAGE_KEYS.SESSION_ACTIVE, 'true')
+  } else {
+    localStorage.removeItem(STORAGE_KEYS.SESSION_ACTIVE)
+  }
+}
+
+/**
+ * Sign out - ends session but preserves OAuth tokens for quick re-login.
+ * User will see "Welcome back" on next visit.
+ */
+export function signOut(): void {
+  setSessionActive(false)
+  // Keep OAuth tokens and username for "Welcome back" flow
+  // Only clear session-specific data
+  removeStoredIdentity()
+  removeStoredUserProfile()
+  removeAvatarSource()
+  removeGravatarEmail()
+}
+
+/**
+ * Disconnect Discogs - fully removes authorization.
+ * User will need to re-authorize with Discogs on next login.
+ */
+export function disconnectDiscogs(): void {
+  setSessionActive(false)
   removeUsername()
   removeAvatarSource()
   removeGravatarEmail()
   removeStoredIdentity()
   removeStoredUserProfile()
   removeOAuthTokens()
+}
+
+/**
+ * @deprecated Use signOut() or disconnectDiscogs() instead.
+ * Kept for backwards compatibility during migration.
+ */
+export function clearAuth(): void {
+  disconnectDiscogs()
 }

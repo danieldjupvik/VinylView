@@ -9,7 +9,8 @@ export const STORAGE_KEYS = {
   LANGUAGE: 'vinyldeck_language',
   VIEW_MODE: 'vinyldeck_view_mode',
   OAUTH_ACCESS_TOKEN: 'vinyldeck_oauth_token',
-  OAUTH_ACCESS_TOKEN_SECRET: 'vinyldeck_oauth_token_secret'
+  OAUTH_ACCESS_TOKEN_SECRET: 'vinyldeck_oauth_token_secret',
+  SESSION_ACTIVE: 'vinyldeck_session_active'
 } as const
 
 export const SESSION_STORAGE_KEYS = {

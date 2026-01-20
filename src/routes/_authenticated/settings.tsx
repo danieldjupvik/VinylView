@@ -1,9 +1,19 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { NO, US } from 'country-flag-icons/react/3x2'
-import { FileText, Monitor, Moon, Scale, Shield, Sun } from 'lucide-react'
+import {
+  FileText,
+  LogOut,
+  Monitor,
+  Moon,
+  Scale,
+  Shield,
+  Sun
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -91,12 +101,19 @@ function LanguageFlag({ lang }: { lang: 'en' | 'no' }) {
 
 function SettingsPage() {
   const { t, i18n } = useTranslation()
-  const { username, avatarUrl } = useAuth()
+  const { username, avatarUrl, disconnect } = useAuth()
   const { avatarSource, gravatarUrl, setAvatarSource } = usePreferences()
   const { theme, setTheme } = useTheme()
+  const navigate = useNavigate()
   const currentLanguage = normalizeLanguage(
     i18n.resolvedLanguage ?? i18n.language ?? 'en'
   )
+
+  const handleDisconnect = () => {
+    disconnect()
+    toast.success(t('settings.account.disconnectSuccess'))
+    void navigate({ to: '/login' })
+  }
 
   const initials = username
     ? username
@@ -344,6 +361,32 @@ function SettingsPage() {
                 </span>
                 <span className="font-mono text-sm">{APP_VERSION}</span>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Account Section */}
+        <Card className="animate-in fade-in slide-in-from-bottom-3 fill-mode-backwards delay-250 duration-500">
+          <CardHeader>
+            <CardTitle>{t('settings.account.title')}</CardTitle>
+            <CardDescription>
+              {t('settings.account.description')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-sm font-medium">
+                  {t('settings.account.disconnect.title')}
+                </h3>
+                <p className="text-muted-foreground text-sm">
+                  {t('settings.account.disconnect.description')}
+                </p>
+              </div>
+              <Button variant="destructive" onClick={handleDisconnect}>
+                <LogOut className="mr-2 size-4" />
+                {t('settings.account.disconnect.button')}
+              </Button>
             </div>
           </CardContent>
         </Card>

@@ -134,7 +134,8 @@ DISCOGS_CONSUMER_SECRET=your_dev_consumer_secret
 | 7     | Collection Endpoint + Hook Migration     | ✅     |
 | 8     | Storage & PAT Cleanup                    | ✅     |
 | 9     | i18n Updates                             | ✅     |
-| 10    | Tests                                    | ⬜     |
+| 10    | Session Management & Welcome Back Flow   | ✅     |
+| 11    | Tests                                    | ⬜     |
 
 > **Architecture Note:** All Discogs API calls must go through the server because OAuth 1.0a requires the Consumer Secret to sign every request. The `@lionralfs/discogs-client` handles signing automatically when configured with OAuth credentials.
 
@@ -539,7 +540,49 @@ const response = await trpc.discogs.getCollection.fetch({
 
 ---
 
-### Phase 10: Tests
+### Phase 10: Session Management & Welcome Back Flow ✅
+
+**Goal:** Implement proper session management to avoid repeated Discogs re-authorizations.
+
+**Problem solved:** OAuth 1.0a creates a new authorization entry on Discogs every time the user logs in. If we clear tokens on logout, users must re-authorize repeatedly, cluttering their Discogs Applications settings.
+
+**Solution:** Separate "session" (is user currently active) from "authorization" (has user authorized the app).
+
+**Changes:**
+
+1. **Storage layer** (`src/lib/storage.ts`):
+   - Add `SESSION_ACTIVE` flag to track active sessions
+   - `signOut()` - ends session but keeps OAuth tokens
+   - `disconnectDiscogs()` - fully removes authorization
+
+2. **Auth provider** (`src/providers/auth-provider.tsx`):
+   - Only auto-login on mount if session was active
+   - Expose `signOut()` and `disconnect()` methods
+
+3. **Login page** (`src/routes/login.tsx`):
+   - Detect existing tokens and show "Welcome back, {username}!" UI
+   - "Continue" button validates tokens instantly (no OAuth redirect)
+   - "Use different account" clears tokens and starts OAuth flow
+
+4. **Sidebar** (`src/components/layout/sidebar-user.tsx`):
+   - "Sign out" instead of "Logout" (uses `signOut()`)
+
+5. **Settings page** (`src/routes/_authenticated/settings.tsx`):
+   - New "Account" section with "Disconnect Discogs account" button
+   - Full disconnect requires re-authorization next login
+
+**Verification:**
+
+- [x] Sign out preserves OAuth tokens
+- [x] Returning user sees "Welcome back" flow
+- [x] "Continue" validates tokens without Discogs redirect
+- [x] "Use different account" starts fresh OAuth flow
+- [x] "Disconnect Discogs" fully removes authorization
+- [x] i18n strings for English and Norwegian
+
+---
+
+### Phase 11: Tests
 
 **Goal:** Update existing tests and add OAuth tests.
 
@@ -703,7 +746,7 @@ Total: ~115 lines of boilerplate for full type-safety.
 **Phase 8 (Cleanup):**
 
 - [x] No PAT token references remain
-- [x] `bun run lint` passes (excluding tests, updated in Phase 10)
+- [x] `bun run lint` passes (excluding tests, updated in Phase 11)
 - [x] `bun run build` succeeds
 
 **Phase 9 (i18n):**
@@ -711,7 +754,15 @@ Total: ~115 lines of boilerplate for full type-safety.
 - [x] English strings render correctly
 - [x] Norwegian strings render correctly
 
-**Phase 10 (Tests):**
+**Phase 10 (Session Management):**
+
+- [x] Sign out preserves OAuth tokens
+- [x] Returning user sees "Welcome back" flow
+- [x] "Continue" validates tokens without Discogs redirect
+- [x] "Use different account" starts fresh OAuth flow
+- [x] "Disconnect Discogs" fully removes authorization
+
+**Phase 11 (Tests):**
 
 - [ ] `bun run test:run` passes
 - [ ] CI pipeline green

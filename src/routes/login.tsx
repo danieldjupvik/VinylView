@@ -17,7 +17,12 @@ import {
 } from '@/components/ui/card'
 import { useAuth } from '@/hooks/use-auth'
 import { getAndClearRedirectUrl } from '@/lib/redirect-utils'
-import { setOAuthRequestTokens } from '@/lib/storage'
+import {
+  getOAuthTokens,
+  getUsername,
+  removeOAuthTokens,
+  setOAuthRequestTokens
+} from '@/lib/storage'
 import { trpc } from '@/lib/trpc'
 
 export const Route = createFileRoute('/login')({
@@ -26,10 +31,16 @@ export const Route = createFileRoute('/login')({
 
 function LoginPage() {
   const { t } = useTranslation()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, validateOAuthTokens } = useAuth()
   const navigate = useNavigate()
 
   const [isLoading, setIsLoading] = useState(false)
+  const [isValidating, setIsValidating] = useState(false)
+
+  // Check if user has existing tokens (signed out but can quick-login)
+  const existingTokens = getOAuthTokens()
+  const storedUsername = getUsername()
+  const hasExistingSession = existingTokens !== null && storedUsername !== null
 
   const getRequestToken = trpc.oauth.getRequestToken.useMutation()
 
@@ -41,6 +52,34 @@ function LoginPage() {
     }
   }, [isAuthenticated, navigate])
 
+  /**
+   * Continue with existing tokens (Welcome back flow)
+   */
+  const handleContinue = async () => {
+    setIsValidating(true)
+
+    try {
+      await validateOAuthTokens()
+      // Navigation handled by isAuthenticated effect
+    } catch {
+      // Tokens were invalid, they've been cleared
+      toast.error(t('auth.oauthSessionExpired'))
+      setIsValidating(false)
+    }
+  }
+
+  /**
+   * Use different account - clear tokens and start fresh OAuth flow
+   */
+  const handleUseDifferentAccount = () => {
+    removeOAuthTokens()
+    // Force re-render by triggering OAuth flow
+    void handleOAuthLogin()
+  }
+
+  /**
+   * Start new OAuth flow
+   */
   const handleOAuthLogin = async () => {
     setIsLoading(true)
 
@@ -89,20 +128,59 @@ function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Button
-            onClick={() => void handleOAuthLogin()}
-            className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards w-full delay-500 duration-500"
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {t('auth.redirecting')}
-              </>
-            ) : (
-              t('auth.signInWithDiscogs')
-            )}
-          </Button>
+          {hasExistingSession ? (
+            // Welcome back flow - user has existing tokens
+            <div className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards space-y-3 delay-500 duration-500">
+              <p className="text-muted-foreground text-center text-sm">
+                {t('auth.welcomeBack', { username: storedUsername })}
+              </p>
+              <Button
+                onClick={() => void handleContinue()}
+                className="w-full"
+                disabled={isValidating || isLoading}
+              >
+                {isValidating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {t('auth.loggingIn')}
+                  </>
+                ) : (
+                  t('auth.continue')
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleUseDifferentAccount}
+                className="w-full"
+                disabled={isValidating || isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {t('auth.redirecting')}
+                  </>
+                ) : (
+                  t('auth.useDifferentAccount')
+                )}
+              </Button>
+            </div>
+          ) : (
+            // Fresh login - no existing tokens
+            <Button
+              onClick={() => void handleOAuthLogin()}
+              className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards w-full delay-500 duration-500"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {t('auth.redirecting')}
+                </>
+              ) : (
+                t('auth.signInWithDiscogs')
+              )}
+            </Button>
+          )}
         </CardContent>
       </Card>
     </div>

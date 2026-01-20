@@ -26,11 +26,17 @@
   "auth": {
     "login": "Logg inn",
     "logout": "Logg ut",
+    "signOut": "Logg ut",
     "loginSuccess": "Innlogging vellykket",
     "logoutSuccess": "Logget ut",
+    "signOutSuccess": "Logget ut",
     "signInWithDiscogs": "Logg inn med Discogs",
     "redirecting": "Omdirigerer til Discogs...",
     "completingLogin": "Fullfører innlogging...",
+    "loggingIn": "Logger inn...",
+    "welcomeBack": "Velkommen tilbake, {{username}}!",
+    "continue": "Fortsett",
+    "useDifferentAccount": "Bruk en annen konto",
     "oauthError": "Kunne ikke koble til Discogs. Prøv igjen.",
     "oauthDenied": "Autorisasjon ble avvist.",
     "oauthMissingParams": "Manglende autentiseringsparametere.",
@@ -157,6 +163,16 @@
       "changelog": "Endringslogg",
       "privacy": "Personvernerklæring",
       "terms": "Vilkår for bruk"
+    },
+    "account": {
+      "title": "Konto",
+      "description": "Administrer Discogs-tilkoblingen din",
+      "disconnect": {
+        "title": "Koble fra Discogs",
+        "description": "Fjern Discogs-autorisasjonen din. Du må autorisere på nytt for å bruke VinylDeck igjen.",
+        "button": "Koble fra Discogs-konto"
+      },
+      "disconnectSuccess": "Discogs-konto frakoblet"
     }
   },
   "theme": {

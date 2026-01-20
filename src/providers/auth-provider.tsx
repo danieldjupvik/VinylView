@@ -9,12 +9,15 @@ import {
 
 import { usePreferences } from '@/hooks/use-preferences'
 import {
-  clearAuth,
+  disconnectDiscogs,
   getOAuthTokens,
   getStoredUserProfile,
+  isSessionActive,
+  setSessionActive,
   setStoredIdentity,
   setStoredUserProfile,
   setUsername,
+  signOut as signOutStorage,
   type OAuthTokens
 } from '@/lib/storage'
 import { trpc } from '@/lib/trpc'
@@ -46,7 +49,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   /**
    * Validates OAuth tokens by fetching identity and profile from the server.
-   * This is called on mount and after OAuth callback.
+   * This is called on mount (if session active) and after OAuth callback.
    */
   const validateSession = useCallback(
     async (tokens: OAuthTokens) => {
@@ -105,7 +108,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
           }
         }
 
-        // Set authenticated state
+        // Mark session as active and set authenticated state
+        setSessionActive(true)
         setState({
           isAuthenticated: true,
           isLoading: false,
@@ -115,8 +119,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
           oauthTokens: tokens
         })
       } catch {
-        // Tokens are invalid or expired
-        clearAuth()
+        // Tokens are invalid or expired - fully disconnect
+        disconnectDiscogs()
         setState({
           isAuthenticated: false,
           isLoading: false,
@@ -134,14 +138,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     ]
   )
 
-  // Validate session on mount
+  // Validate session on mount (only if session was active)
   useEffect(() => {
     const initializeAuth = async () => {
       const tokens = getOAuthTokens()
 
       if (!tokens) {
         // No OAuth tokens, user is not authenticated
-        clearAuth()
         setState({
           isAuthenticated: false,
           isLoading: false,
@@ -153,7 +156,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
         return
       }
 
-      // Validate tokens
+      // Only auto-login if session was active (user didn't sign out)
+      if (!isSessionActive()) {
+        // Tokens exist but user signed out - show "Welcome back" flow
+        setState({
+          isAuthenticated: false,
+          isLoading: false,
+          username: null,
+          userId: null,
+          avatarUrl: null,
+          oauthTokens: null
+        })
+        return
+      }
+
+      // Session was active, validate tokens
       await validateSession(tokens)
     }
 
@@ -175,10 +192,31 @@ export function AuthProvider({ children }: AuthProviderProps) {
     await validateSession(tokens)
   }, [validateSession])
 
-  const logout = useCallback(() => {
-    clearAuth()
+  /**
+   * Sign out - ends session but preserves OAuth tokens.
+   * User will see "Welcome back" flow on next login.
+   */
+  const signOut = useCallback(() => {
+    signOutStorage()
 
-    // Clear sensitive caches on logout
+    setState({
+      isAuthenticated: false,
+      isLoading: false,
+      username: null,
+      userId: null,
+      avatarUrl: null,
+      oauthTokens: null
+    })
+  }, [])
+
+  /**
+   * Disconnect - fully removes Discogs authorization.
+   * Clears all tokens and caches. User must re-authorize.
+   */
+  const disconnect = useCallback(() => {
+    disconnectDiscogs()
+
+    // Clear sensitive caches on disconnect
     if ('caches' in window) {
       const cacheNames = [
         'discogs-api-cache',
@@ -202,9 +240,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     })
   }, [])
 
+  // Backwards compatibility alias
+  const logout = signOut
+
   const value = useMemo(
-    () => ({ ...state, validateOAuthTokens, logout }),
-    [state, validateOAuthTokens, logout]
+    () => ({ ...state, validateOAuthTokens, signOut, disconnect, logout }),
+    [state, validateOAuthTokens, signOut, disconnect, logout]
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
