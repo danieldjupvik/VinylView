@@ -10,11 +10,25 @@ import type {
 } from '../../../types/discogs.js'
 
 /**
+ * Type guard for errors from @lionralfs/discogs-client.
+ * DiscogsError is not exported from the package, so we check for the statusCode property.
+ */
+function isDiscogsError(
+  error: unknown
+): error is Error & { statusCode: number } {
+  return (
+    error instanceof Error &&
+    'statusCode' in error &&
+    typeof (error as Error & { statusCode: unknown }).statusCode === 'number'
+  )
+}
+
+/**
  * Handles Discogs API errors and converts them to tRPC errors.
  * Checks for 401 errors (invalid/expired tokens) and returns appropriate error codes.
  */
 function handleDiscogsError(error: unknown, fallbackMessage: string): never {
-  if (error instanceof Error && error.message.includes('401')) {
+  if (isDiscogsError(error) && error.statusCode === 401) {
     throw new TRPCError({
       code: 'UNAUTHORIZED',
       message: 'Invalid or expired OAuth tokens'
