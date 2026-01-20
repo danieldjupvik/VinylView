@@ -10,11 +10,15 @@ export const STORAGE_KEYS = {
   IDENTITY: 'vinyldeck_identity',
   USER_PROFILE: 'vinyldeck_user_profile',
   LANGUAGE: 'vinyldeck_language',
-  VIEW_MODE: 'vinyldeck_view_mode'
+  VIEW_MODE: 'vinyldeck_view_mode',
+  OAUTH_ACCESS_TOKEN: 'vinyldeck_oauth_token',
+  OAUTH_ACCESS_TOKEN_SECRET: 'vinyldeck_oauth_token_secret'
 } as const
 
 export const SESSION_STORAGE_KEYS = {
-  REDIRECT_URL: 'vinyldeck_redirect_url'
+  REDIRECT_URL: 'vinyldeck_redirect_url',
+  OAUTH_REQUEST_TOKEN: 'vinyldeck_oauth_request_token',
+  OAUTH_REQUEST_SECRET: 'vinyldeck_oauth_request_secret'
 } as const
 
 /**

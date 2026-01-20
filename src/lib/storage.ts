@@ -1,6 +1,6 @@
 import type { DiscogsIdentity, DiscogsUserProfile } from '@/types/discogs'
 
-import { STORAGE_KEYS } from './constants'
+import { SESSION_STORAGE_KEYS, STORAGE_KEYS } from './constants'
 
 export type ViewMode = 'grid' | 'table'
 
@@ -113,6 +113,75 @@ export function setViewMode(mode: ViewMode): void {
   localStorage.setItem(STORAGE_KEYS.VIEW_MODE, mode)
 }
 
+// OAuth token storage (localStorage - persisted)
+export interface OAuthTokens {
+  accessToken: string
+  accessTokenSecret: string
+}
+
+export function getOAuthTokens(): OAuthTokens | null {
+  const accessToken = localStorage.getItem(STORAGE_KEYS.OAUTH_ACCESS_TOKEN)
+  const accessTokenSecret = localStorage.getItem(
+    STORAGE_KEYS.OAUTH_ACCESS_TOKEN_SECRET
+  )
+
+  if (!accessToken || !accessTokenSecret) {
+    return null
+  }
+
+  return { accessToken, accessTokenSecret }
+}
+
+export function setOAuthTokens(tokens: OAuthTokens): void {
+  localStorage.setItem(STORAGE_KEYS.OAUTH_ACCESS_TOKEN, tokens.accessToken)
+  localStorage.setItem(
+    STORAGE_KEYS.OAUTH_ACCESS_TOKEN_SECRET,
+    tokens.accessTokenSecret
+  )
+}
+
+export function removeOAuthTokens(): void {
+  localStorage.removeItem(STORAGE_KEYS.OAUTH_ACCESS_TOKEN)
+  localStorage.removeItem(STORAGE_KEYS.OAUTH_ACCESS_TOKEN_SECRET)
+}
+
+// OAuth request token storage (sessionStorage - temporary)
+export interface OAuthRequestTokens {
+  requestToken: string
+  requestTokenSecret: string
+}
+
+export function getOAuthRequestTokens(): OAuthRequestTokens | null {
+  const requestToken = sessionStorage.getItem(
+    SESSION_STORAGE_KEYS.OAUTH_REQUEST_TOKEN
+  )
+  const requestTokenSecret = sessionStorage.getItem(
+    SESSION_STORAGE_KEYS.OAUTH_REQUEST_SECRET
+  )
+
+  if (!requestToken || !requestTokenSecret) {
+    return null
+  }
+
+  return { requestToken, requestTokenSecret }
+}
+
+export function setOAuthRequestTokens(tokens: OAuthRequestTokens): void {
+  sessionStorage.setItem(
+    SESSION_STORAGE_KEYS.OAUTH_REQUEST_TOKEN,
+    tokens.requestToken
+  )
+  sessionStorage.setItem(
+    SESSION_STORAGE_KEYS.OAUTH_REQUEST_SECRET,
+    tokens.requestTokenSecret
+  )
+}
+
+export function clearOAuthRequestTokens(): void {
+  sessionStorage.removeItem(SESSION_STORAGE_KEYS.OAUTH_REQUEST_TOKEN)
+  sessionStorage.removeItem(SESSION_STORAGE_KEYS.OAUTH_REQUEST_SECRET)
+}
+
 export function clearAuth(): void {
   removeToken()
   removeUsername()
@@ -120,4 +189,5 @@ export function clearAuth(): void {
   removeGravatarEmail()
   removeStoredIdentity()
   removeStoredUserProfile()
+  removeOAuthTokens()
 }

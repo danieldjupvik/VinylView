@@ -34,7 +34,15 @@
     "loggingIn": "Logger inn...",
     "loginSuccess": "Innlogging vellykket",
     "loginError": "Ugyldig brukernavn eller token",
-    "logoutSuccess": "Logget ut"
+    "logoutSuccess": "Logget ut",
+    "signInWithDiscogs": "Logg inn med Discogs",
+    "redirecting": "Omdirigerer til Discogs...",
+    "completingLogin": "Fullfører innlogging...",
+    "oauthError": "Kunne ikke koble til Discogs. Prøv igjen.",
+    "oauthDenied": "Autorisasjon ble avvist.",
+    "oauthMissingParams": "Manglende autentiseringsparametere.",
+    "oauthSessionExpired": "Økten din er utløpt. Prøv igjen.",
+    "backToLogin": "Tilbake til innlogging"
   },
   "collection": {
     "title": "Min samling",

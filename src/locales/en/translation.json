@@ -34,7 +34,15 @@
     "loggingIn": "Signing in...",
     "loginSuccess": "Successfully logged in",
     "loginError": "Invalid username or token",
-    "logoutSuccess": "Successfully logged out"
+    "logoutSuccess": "Successfully logged out",
+    "signInWithDiscogs": "Sign in with Discogs",
+    "redirecting": "Redirecting to Discogs...",
+    "completingLogin": "Completing login...",
+    "oauthError": "Failed to connect to Discogs. Please try again.",
+    "oauthDenied": "Authorization was denied.",
+    "oauthMissingParams": "Missing authentication parameters.",
+    "oauthSessionExpired": "Your session expired. Please try again.",
+    "backToLogin": "Back to login"
   },
   "collection": {
     "title": "My Collection",
