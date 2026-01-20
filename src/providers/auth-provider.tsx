@@ -13,6 +13,7 @@ import {
   getOAuthTokens,
   getStoredUserProfile,
   setStoredIdentity,
+  setStoredUserProfile,
   setUsername,
   type OAuthTokens
 } from '@/lib/storage'
@@ -44,42 +45,73 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [gravatarEmail])
 
   /**
-   * Validates OAuth tokens by fetching identity from the server.
+   * Validates OAuth tokens by fetching identity and profile from the server.
    * This is called on mount and after OAuth callback.
    */
   const validateSession = useCallback(
     async (tokens: OAuthTokens) => {
       try {
         // Fetch identity via tRPC client directly with the tokens
-        // This avoids the useQuery stale input issue
-        const result = await trpcUtils.client.discogs.getIdentity.query({
-          accessToken: tokens.accessToken,
-          accessTokenSecret: tokens.accessTokenSecret
-        })
+        const identityResult = await trpcUtils.client.discogs.getIdentity.query(
+          {
+            accessToken: tokens.accessToken,
+            accessTokenSecret: tokens.accessTokenSecret
+          }
+        )
 
-        const { identity } = result
+        const { identity } = identityResult
 
         // Store identity and username
         setStoredIdentity(identity)
         setUsername(identity.username)
 
-        // Try to get cached profile for avatar
-        const profile = getStoredUserProfile()
+        // Fetch user profile for avatar_url and email
+        let avatarUrl: string | null = null
+        try {
+          const profileResult =
+            await trpcUtils.client.discogs.getUserProfile.query({
+              accessToken: tokens.accessToken,
+              accessTokenSecret: tokens.accessTokenSecret,
+              username: identity.username
+            })
 
-        // Update gravatar email from profile if not already set
-        if (!latestGravatarEmailRef.current && profile?.email) {
-          latestGravatarEmailRef.current = profile.email
-          setGravatarEmail(profile.email)
+          const { profile } = profileResult
+
+          // Store profile in localStorage
+          setStoredUserProfile({
+            id: profile.id,
+            username: profile.username,
+            resource_url: identity.resource_url,
+            avatar_url: profile.avatar_url,
+            num_collection: profile.num_collection,
+            num_wantlist: profile.num_wantlist,
+            ...(profile.email && { email: profile.email })
+          })
+
+          avatarUrl = profile.avatar_url ?? null
+
+          // Update gravatar email from profile if not already set
+          if (!latestGravatarEmailRef.current && profile.email) {
+            latestGravatarEmailRef.current = profile.email
+            setGravatarEmail(profile.email)
+          }
+        } catch {
+          // Profile fetch failed, try to use cached profile
+          const cachedProfile = getStoredUserProfile()
+          avatarUrl = cachedProfile?.avatar_url ?? null
+          if (!latestGravatarEmailRef.current && cachedProfile?.email) {
+            latestGravatarEmailRef.current = cachedProfile.email
+            setGravatarEmail(cachedProfile.email)
+          }
         }
 
         // Set authenticated state
-        // Note: /oauth/identity doesn't return avatar_url, only user profile does
         setState({
           isAuthenticated: true,
           isLoading: false,
           username: identity.username,
           userId: identity.id,
-          avatarUrl: profile?.avatar_url ?? null,
+          avatarUrl,
           oauthTokens: tokens
         })
       } catch {
@@ -95,7 +127,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         })
       }
     },
-    [trpcUtils.client.discogs.getIdentity, setGravatarEmail]
+    [
+      trpcUtils.client.discogs.getIdentity,
+      trpcUtils.client.discogs.getUserProfile,
+      setGravatarEmail
+    ]
   )
 
   // Validate session on mount

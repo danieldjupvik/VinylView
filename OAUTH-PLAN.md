@@ -130,7 +130,7 @@ DISCOGS_CONSUMER_SECRET=your_dev_consumer_secret
 | 3     | Login Page Update                        | ✅     |
 | 4     | Server-side Discogs Client Helper        | ✅     |
 | 5     | Identity Endpoint + Auth Provider Update | ✅     |
-| 6     | User Profile Endpoint                    | ⬜     |
+| 6     | User Profile Endpoint                    | ✅     |
 | 7     | Collection Endpoint + Hook Migration     | ⬜     |
 | 8     | Storage & PAT Cleanup                    | ⬜     |
 | 9     | i18n Updates                             | ⬜     |
@@ -263,8 +263,8 @@ export function createDiscogsClient(
 
 **Verification:**
 
-- [ ] File compiles without TypeScript errors
-- [ ] ESLint passes
+- [x] File compiles without TypeScript errors
+- [x] ESLint passes
 
 ---
 
@@ -330,11 +330,11 @@ export const discogsRouter = router({
 
 **Verification:**
 
-- [ ] Complete OAuth flow works: Login → Discogs → Callback → Collection
-- [ ] Refresh page maintains auth state (validates tokens)
-- [ ] Invalid/expired tokens redirect to login
-- [ ] TypeScript compiles without errors
-- [ ] ESLint passes
+- [x] Complete OAuth flow works: Login → Discogs → Callback → Collection
+- [x] Refresh page maintains auth state (validates tokens)
+- [x] Invalid/expired tokens redirect to login
+- [x] TypeScript compiles without errors
+- [x] ESLint passes
 
 ---
 
@@ -370,9 +370,9 @@ getUserProfile: publicProcedure
 
 **Verification:**
 
-- [ ] User avatar displays correctly after login
-- [ ] Gravatar email is extracted from profile
-- [ ] Rate limit headers are passed through
+- [x] User avatar displays correctly after login
+- [x] Gravatar email is extracted from profile
+- [x] Rate limit headers are passed through
 
 ---
 
@@ -682,15 +682,15 @@ Total: ~115 lines of boilerplate for full type-safety.
 
 **Phase 5 (Identity + Auth Provider):**
 
-- [ ] Complete OAuth flow: Login → Discogs → Callback → Collection
-- [ ] Refresh page maintains auth (validates tokens via tRPC)
-- [ ] Invalid tokens redirect to login
-- [ ] Logout clears all tokens
+- [x] Complete OAuth flow: Login → Discogs → Callback → Collection
+- [x] Refresh page maintains auth (validates tokens via tRPC)
+- [x] Invalid tokens redirect to login
+- [x] Logout clears all tokens
 
 **Phase 6 (User Profile):**
 
-- [ ] User avatar displays correctly
-- [ ] Gravatar email extracted from profile
+- [x] User avatar displays correctly
+- [x] Gravatar email extracted from profile
 
 **Phase 7 (Collection):**
 

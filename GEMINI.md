@@ -93,6 +93,7 @@ Use Conventional Commits so release-please generates clear changelog entries. Th
 - Hidden types still trigger release-please to update the PR, but won't add changelog entries
 - Use `feat` and `fix` for user-facing changes you want documented
 - Use `chore`, `docs`, `refactor`, etc. for internal work that users don't need to know about
+- **Do NOT include `Co-Authored-By:` trailers in commit messages** - keep commits clean without attribution metadata
 
 **Good examples (user-facing, imperative):**
 

@@ -36,13 +36,10 @@ export const discogsRouter = router({
             username: data.username,
             resource_url: data.resource_url,
             consumer_name: data.consumer_name
-            // Note: avatar_url is not returned by /oauth/identity endpoint
-            // Use getUserProfile to get avatar
           },
           rateLimit
         }
       } catch (error) {
-        // Handle Discogs API errors
         if (error instanceof Error && error.message.includes('401')) {
           throw new TRPCError({
             code: 'UNAUTHORIZED',
@@ -53,6 +50,57 @@ export const discogsRouter = router({
           code: 'INTERNAL_SERVER_ERROR',
           message:
             error instanceof Error ? error.message : 'Failed to get identity'
+        })
+      }
+    }),
+
+  /**
+   * Get a user's profile including avatar_url and email.
+   * Email is only visible when authenticated as the requested user.
+   */
+  getUserProfile: publicProcedure
+    .input(
+      z.object({
+        accessToken: z.string(),
+        accessTokenSecret: z.string(),
+        username: z.string()
+      })
+    )
+    .query(async ({ input }) => {
+      const client = createDiscogsClient(
+        input.accessToken,
+        input.accessTokenSecret
+      )
+
+      try {
+        const { data, rateLimit } = await client
+          .user()
+          .getProfile(input.username)
+
+        return {
+          profile: {
+            id: data.id,
+            username: data.username,
+            avatar_url: data.avatar_url,
+            email: data.email,
+            num_collection: data.num_collection,
+            num_wantlist: data.num_wantlist
+          },
+          rateLimit
+        }
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('401')) {
+          throw new TRPCError({
+            code: 'UNAUTHORIZED',
+            message: 'Invalid or expired OAuth tokens'
+          })
+        }
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message:
+            error instanceof Error
+              ? error.message
+              : 'Failed to get user profile'
         })
       }
     })
