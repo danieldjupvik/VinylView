@@ -110,6 +110,15 @@ function LanguageFlag({ lang }: { lang: 'en' | 'no' }) {
   )
 }
 
+/**
+ * Renders the user Settings page including profile, appearance, and about sections.
+ *
+ * The page allows selecting avatar source, changing language and theme, and shows
+ * app information. Invoking the disconnect action signs the user out, displays a
+ * success toast, and navigates to the login route.
+ *
+ * @returns The React element for the Settings page.
+ */
 function SettingsPage() {
   const { t, i18n } = useTranslation()
   const { username, avatarUrl, disconnect } = useAuth()

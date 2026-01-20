@@ -28,6 +28,20 @@ interface AuthProviderProps {
   children: ReactNode
 }
 
+/**
+ * Provides authentication state and actions to descendants via AuthContext.
+ *
+ * Exposes current authentication state (isAuthenticated, isLoading, username, userId, avatarUrl, oauthTokens)
+ * and actions (validateOAuthTokens, signOut, disconnect) to all child components.
+ *
+ * @param children - React children that will receive the AuthContext value
+ * @returns The AuthContext provider element wrapping `children`
+ *
+ * @example
+ * <AuthProvider>
+ *   <App />
+ * </AuthProvider>
+ */
 export function AuthProvider({ children }: AuthProviderProps) {
   const { gravatarEmail, setGravatarEmail } = usePreferences()
   const latestGravatarEmailRef = useRef(gravatarEmail)

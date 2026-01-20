@@ -5,8 +5,10 @@ import { useState, type ReactNode } from 'react'
 import { createTRPCClient, trpc } from '@/lib/trpc'
 
 /**
- * Extract the error code from a tRPC error.
- * Returns undefined if the error doesn't have a recognizable code.
+ * Extracts the `code` property from a tRPC client error when present.
+ *
+ * @param error - The value to inspect for a tRPC client error.
+ * @returns The string error code if found, `undefined` otherwise.
  */
 function getTRPCErrorCode(error: unknown): string | undefined {
   if (!(error instanceof TRPCClientError)) {
@@ -20,6 +22,15 @@ function getTRPCErrorCode(error: unknown): string | undefined {
   return undefined
 }
 
+/**
+ * Create a configured TanStack QueryClient using application defaults.
+ *
+ * The client sets queries to be considered fresh for 5 minutes and applies a retry
+ * policy that disables retries for tRPC error codes `UNAUTHORIZED`, `NOT_FOUND`,
+ * and `TOO_MANY_REQUESTS`; for other errors it allows up to 2 retry attempts.
+ *
+ * @returns A configured QueryClient with the described `staleTime` and retry policy.
+ */
 function createQueryClient() {
   return new QueryClient({
     defaultOptions: {
@@ -46,6 +57,17 @@ interface QueryProviderProps {
   children: ReactNode
 }
 
+/**
+ * Provides tRPC and TanStack Query contexts to descendant components.
+ *
+ * @param children - React nodes that will be rendered within the providers
+ * @returns The provider tree that supplies a tRPC client and a QueryClient to `children`
+ *
+ * @example
+ * <QueryProvider>
+ *   <App />
+ * </QueryProvider>
+ */
 export function QueryProvider({ children }: QueryProviderProps) {
   const [queryClient] = useState(createQueryClient)
   const [trpcClient] = useState(createTRPCClient)

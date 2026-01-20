@@ -36,6 +36,12 @@ interface OAuthCallbackSearch {
   denied: string | undefined
 }
 
+/**
+ * Normalize a URL search parameter value into a usable string.
+ *
+ * @param value - The raw search parameter value (often from router or URLSearchParams)
+ * @returns The string value when `value` is a string, otherwise `undefined`
+ */
 function parseSearchParam(value: unknown): string | undefined {
   return typeof value === 'string' ? value : undefined
 }
@@ -49,6 +55,16 @@ export const Route = createFileRoute('/oauth-callback')({
   component: OAuthCallbackPage
 })
 
+/**
+ * Handles the OAuth 1.0a callback flow: exchanges the temporary request token for access tokens,
+ * validates and persists the resulting tokens, and redirects the user based on outcome.
+ *
+ * The component reads OAuth callback search parameters, shows loading/error/success UI states,
+ * clears temporary request tokens on failure, and navigates to a stored redirect URL or the
+ * default collection route on success.
+ *
+ * @returns A React element that renders the OAuth callback status UI.
+ */
 function OAuthCallbackPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()

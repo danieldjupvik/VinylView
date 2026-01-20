@@ -163,6 +163,30 @@ interface UseCollectionReturn {
   hasCompleteCollection: boolean
 }
 
+/**
+ * Provides collection state, filtering, sorting, and pagination for a user's Discogs collection.
+ *
+ * Initializes and manages search, sort, selected filters, year range, client-side sorting/shuffling,
+ * server fetch behavior, and URL synchronization for collection-related UI.
+ *
+ * @param options - Initial UI options: `page`, `sort`, and `sortOrder`.
+ * @returns An object containing collection data and UI controls:
+ *  - `releases`: all fetched releases
+ *  - `vinylOnly`: releases filtered to vinyl formats
+ *  - `filteredReleases`: releases for the current page after search/filters/sort
+ *  - `pagination`: current pagination metadata or `null`
+ *  - `search`, `setSearch` — search state and updater
+ *  - `sort`, `setSort` — sort key and updater (uses deterministic reshuffle for `random`)
+ *  - `sortOrder`, `setSortOrder` — sort order and updater
+ *  - `filterOptions`: available filter option lists and year bounds
+ *  - `selectedFilters` and setters for each filter category (`setSelectedGenres`, `setSelectedStyles`, `setSelectedLabels`, `setSelectedTypes`, `setSelectedSizes`, `setSelectedCountries`, `setYearRange`)
+ *  - `clearFilters` — reset all filters
+ *  - `reshuffleRandom` — re-seed deterministic random sort
+ *  - `activeFilterCount` — number of active filters
+ *  - `nonVinylCount`, `nonVinylBreakdown` — stats for non-vinyl releases
+ *  - `hasCompleteCollection` — whether the hook has or is using the full collection client-side
+ *  - data-fetching and UI flags: `isLoading`, `isFetching`, `isError`, `error`, `dataUpdatedAt`, `refetch`, `shouldAnimateCards`
+ */
 export function useCollection(
   options: UseCollectionOptions = {}
 ): UseCollectionReturn {

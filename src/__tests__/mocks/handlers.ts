@@ -38,7 +38,21 @@ export const mockRateLimit = {
 }
 
 /**
- * Build a mock release for testing.
+ * Construct a deterministic mock release object suitable for tests.
+ *
+ * @param id - Release identifier used in both top-level `id` and nested `basic_information.id`
+ * @param instanceId - Instance identifier placed on `instance_id`
+ * @param title - Release title
+ * @param artist - Primary artist name included in `basic_information.artists`
+ * @param genres - Array of genre names; defaults to `['Rock']`
+ * @param styles - Array of style names; defaults to `[]`
+ * @param formats - Array of format objects (name, qty, optional descriptions); defaults to one vinyl format
+ * @param year - Release year; defaults to `2020`
+ * @param country - Release country code; defaults to `'US'`
+ * @returns A release-shaped object containing `id`, `instance_id`, `date_added`, and a `basic_information` block populated with the provided values and deterministic mock URLs/images.
+ *
+ * @example
+ * buildMockRelease({ id: 1, instanceId: 101, title: 'Test Album', artist: 'Artist Name' })
  */
 export function buildMockRelease({
   id,
@@ -105,8 +119,14 @@ export const mockReleases = [
 ]
 
 /**
- * Parse tRPC mutation input from request body.
- * All discogs endpoints use mutations (POST) for security - tokens in body, not URL.
+ * Extracts the tRPC mutation input object from an incoming request's JSON body.
+ *
+ * Handles both standard mutation payloads and tRPC batch-format payloads where the input
+ * appears under the `"0"` entry (optionally nested in a `json` field). Returns an empty
+ * object when the body is not valid JSON or the input cannot be parsed.
+ *
+ * @param request - The incoming Request whose JSON body contains the tRPC mutation input
+ * @returns The parsed input object, or an empty object if parsing fails or no input is found
  */
 async function parseTRPCMutationInput(
   request: Request
@@ -129,14 +149,24 @@ async function parseTRPCMutationInput(
 }
 
 /**
- * Create a tRPC success response.
+ * Create a tRPC-style success response containing the provided data.
+ *
+ * @param data - The payload to include as the tRPC result
+ * @returns An HttpResponse whose JSON body is an array with a single `{ result: { data } }` object
+ *
+ * @example
+ * // body: [{ result: { data: { id: 1 } } }]
  */
 function trpcSuccess(data: unknown) {
   return HttpResponse.json([{ result: { data } }])
 }
 
 /**
- * Create a tRPC error response.
+ * Generate a tRPC-style error HTTP response.
+ *
+ * @param code - Error code string included in the response `data.code`; when equal to `'UNAUTHORIZED'` the response `data.httpStatus` is `401`, otherwise `500`.
+ * @param message - Human-readable error message to include in the response `error.message`.
+ * @returns An HttpResponse whose JSON body is an array with a single error object: `{ error: { message, code: -32600, data: { code, httpStatus } } }`.
  */
 function trpcError(code: string, message: string) {
   return HttpResponse.json([
@@ -154,7 +184,10 @@ function trpcError(code: string, message: string) {
 }
 
 /**
- * Validate OAuth tokens from tRPC input.
+ * Checks whether `input` contains OAuth tokens that match the mock tokens used in tests.
+ *
+ * @param input - tRPC input object expected to include `accessToken` and `accessTokenSecret`
+ * @returns `true` if `accessToken` and `accessTokenSecret` match the mock tokens, `false` otherwise.
  */
 function validateTokens(input: Record<string, unknown>): boolean {
   return (

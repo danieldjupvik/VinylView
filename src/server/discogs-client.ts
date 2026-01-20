@@ -16,14 +16,12 @@ const CONSUMER_KEY = process.env.VITE_DISCOGS_CONSUMER_KEY
 const CONSUMER_SECRET = process.env.DISCOGS_CONSUMER_SECRET
 
 /**
- * Creates an authenticated DiscogsClient instance for making API calls.
- * The client is configured with OAuth 1.0a credentials and handles
- * request signing automatically.
+ * Create an authenticated DiscogsClient configured for OAuth using application consumer credentials and the provided user access token.
  *
- * @param accessToken - The user's OAuth access token
- * @param accessTokenSecret - The user's OAuth access token secret
- * @returns An authenticated DiscogsClient instance
- * @throws TRPCError if consumer credentials are missing
+ * @param accessToken - User's OAuth access token.
+ * @param accessTokenSecret - User's OAuth access token secret.
+ * @returns An authenticated DiscogsClient instance.
+ * @throws TRPCError if Discogs consumer key or secret are not configured.
  */
 export function createDiscogsClient(
   accessToken: string,

@@ -10,8 +10,9 @@ import type {
 } from '../../../types/discogs.js'
 
 /**
- * Type guard for errors from @lionralfs/discogs-client.
- * DiscogsError is not exported from the package, so we check for the statusCode property.
+ * Narrow an unknown value to an Error that includes a numeric `statusCode`.
+ *
+ * @returns `true` if `error` is an `Error` object with a numeric `statusCode`, `false` otherwise.
  */
 function isDiscogsError(
   error: unknown
@@ -24,8 +25,11 @@ function isDiscogsError(
 }
 
 /**
- * Handles Discogs API errors and converts them to tRPC errors.
- * Checks for 401 errors (invalid/expired tokens) and returns appropriate error codes.
+ * Convert a Discogs client error into a tRPC error and throw it.
+ *
+ * @param error - The caught error value; may be a Discogs API error with a numeric `statusCode`.
+ * @param fallbackMessage - Message to use when `error` is not an `Error` instance.
+ * @throws TRPCError - Throws a `UNAUTHORIZED` error when `statusCode` is `401`; otherwise throws an `INTERNAL_SERVER_ERROR` whose message is `error.message` if available, or `fallbackMessage`.
  */
 function handleDiscogsError(error: unknown, fallbackMessage: string): never {
   if (isDiscogsError(error) && error.statusCode === 401) {

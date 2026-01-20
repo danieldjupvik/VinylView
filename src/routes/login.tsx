@@ -29,6 +29,21 @@ export const Route = createFileRoute('/login')({
   component: LoginPage
 })
 
+/**
+ * Login page component that handles Discogs OAuth sign-in and a "welcome back" quick-login when stored OAuth tokens and a username are present.
+ *
+ * The component detects an existing session and offers:
+ * - Continue: validates stored OAuth tokens and proceeds to the authenticated area.
+ * - Use Different Account: clears stored tokens and starts a fresh OAuth authorization flow.
+ *
+ * When no existing session is found the component starts a new OAuth flow by obtaining request tokens and redirecting the browser to the Discogs authorization URL.
+ *
+ * @returns The rendered login page as a React JSX element
+ *
+ * @example
+ * // Route usage
+ * <Route path="/login" element={<LoginPage />} />
+ */
 function LoginPage(): React.JSX.Element {
   const { t } = useTranslation()
   const { isAuthenticated, validateOAuthTokens } = useAuth()

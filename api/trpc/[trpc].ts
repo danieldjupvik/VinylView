@@ -5,8 +5,9 @@ import { appRouter } from '../../src/server/trpc/index.js'
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
 /**
- * Vercel Serverless Function handler for tRPC requests.
- * Converts Node.js request to Web Request for the fetch adapter.
+ * Handle incoming Vercel HTTP requests and forward them to the application's tRPC router via the fetch adapter.
+ *
+ * Builds an absolute Web Request from the Vercel request (including protocol, host, headers, and body for methods other than GET/HEAD), calls the tRPC fetchRequestHandler with the app router, and proxies the adapter's status, headers, and body back to the Vercel response.
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Construct absolute URL from the request

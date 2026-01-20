@@ -4,6 +4,11 @@ import { SESSION_STORAGE_KEYS, STORAGE_KEYS } from './constants'
 
 export type ViewMode = 'grid' | 'table'
 
+/**
+ * Retrieve the stored Discogs username from localStorage.
+ *
+ * @returns The username string if present, otherwise `null`.
+ */
 export function getUsername(): string | null {
   return localStorage.getItem(STORAGE_KEYS.USERNAME)
 }
@@ -93,6 +98,13 @@ export function getViewMode(): ViewMode {
   return stored === 'table' ? 'table' : 'grid'
 }
 
+/**
+ * Persist the user's preferred view mode.
+ *
+ * Stores the provided view mode so it can be restored on subsequent visits; no-op outside a browser environment.
+ *
+ * @param mode - The desired view mode, either `'grid'` or `'table'`
+ */
 export function setViewMode(mode: ViewMode): void {
   if (typeof window === 'undefined') {
     return
@@ -107,6 +119,11 @@ export interface OAuthTokens {
   accessTokenSecret: string
 }
 
+/**
+ * Retrieve the stored OAuth access token and its secret.
+ *
+ * @returns An object with `accessToken` and `accessTokenSecret`, or `null` if either value is missing.
+ */
 export function getOAuthTokens(): OAuthTokens | null {
   const accessToken = localStorage.getItem(STORAGE_KEYS.OAUTH_ACCESS_TOKEN)
   const accessTokenSecret = localStorage.getItem(
@@ -122,7 +139,14 @@ export function getOAuthTokens(): OAuthTokens | null {
 
 // OAuth 1.0a tokens must be stored client-side for SPA flows. These tokens
 // are only useful when combined with the server-side consumer secret for
-// request signing. Security relies on XSS prevention (CSP, sanitization).
+/**
+ * Store the OAuth access token and its secret in localStorage.
+ *
+ * @param tokens - An object containing `accessToken` and `accessTokenSecret` to be persisted for authenticated requests.
+ *
+ * @example
+ * setOAuthTokens({ accessToken: 'abc', accessTokenSecret: 'def' })
+ */
 export function setOAuthTokens(tokens: OAuthTokens): void {
   localStorage.setItem(STORAGE_KEYS.OAUTH_ACCESS_TOKEN, tokens.accessToken)
   localStorage.setItem(
@@ -131,6 +155,11 @@ export function setOAuthTokens(tokens: OAuthTokens): void {
   )
 }
 
+/**
+ * Remove the stored OAuth access token and access token secret from localStorage.
+ *
+ * This clears both STORAGE_KEYS.OAUTH_ACCESS_TOKEN and STORAGE_KEYS.OAUTH_ACCESS_TOKEN_SECRET so no OAuth credentials remain in localStorage.
+ */
 export function removeOAuthTokens(): void {
   localStorage.removeItem(STORAGE_KEYS.OAUTH_ACCESS_TOKEN)
   localStorage.removeItem(STORAGE_KEYS.OAUTH_ACCESS_TOKEN_SECRET)
@@ -142,6 +171,17 @@ export interface OAuthRequestTokens {
   requestTokenSecret: string
 }
 
+/**
+ * Retrieves temporary OAuth request tokens stored in sessionStorage.
+ *
+ * @returns An object containing `requestToken` and `requestTokenSecret`, or `null` if either value is missing.
+ *
+ * @example
+ * const tokens = getOAuthRequestTokens()
+ * if (tokens) {
+ *   // use tokens.requestToken and tokens.requestTokenSecret
+ * }
+ */
 export function getOAuthRequestTokens(): OAuthRequestTokens | null {
   const requestToken = sessionStorage.getItem(
     SESSION_STORAGE_KEYS.OAUTH_REQUEST_TOKEN
@@ -157,6 +197,14 @@ export function getOAuthRequestTokens(): OAuthRequestTokens | null {
   return { requestToken, requestTokenSecret }
 }
 
+/**
+ * Stores the OAuth request token and request token secret in sessionStorage.
+ *
+ * @param tokens - Object containing the `requestToken` and `requestTokenSecret` to store
+ *
+ * @example
+ * setOAuthRequestTokens({ requestToken: 'abc', requestTokenSecret: 'def' })
+ */
 export function setOAuthRequestTokens(tokens: OAuthRequestTokens): void {
   sessionStorage.setItem(
     SESSION_STORAGE_KEYS.OAUTH_REQUEST_TOKEN,
@@ -168,18 +216,33 @@ export function setOAuthRequestTokens(tokens: OAuthRequestTokens): void {
   )
 }
 
+/**
+ * Remove the temporary OAuth request token and secret from sessionStorage.
+ *
+ * Clears the session-stored credentials used during the OAuth handshake by removing
+ * SESSION_STORAGE_KEYS.OAUTH_REQUEST_TOKEN and SESSION_STORAGE_KEYS.OAUTH_REQUEST_SECRET.
+ */
 export function clearOAuthRequestTokens(): void {
   sessionStorage.removeItem(SESSION_STORAGE_KEYS.OAUTH_REQUEST_TOKEN)
   sessionStorage.removeItem(SESSION_STORAGE_KEYS.OAUTH_REQUEST_SECRET)
 }
 
 // Session management
-// SESSION_ACTIVE tracks whether user has an active session (vs signed out but tokens preserved)
+/**
+ * Checks whether a persistent session flag is set in localStorage.
+ *
+ * @returns `true` if the stored session flag equals `'true'`, `false` otherwise.
+ */
 
 export function isSessionActive(): boolean {
   return localStorage.getItem(STORAGE_KEYS.SESSION_ACTIVE) === 'true'
 }
 
+/**
+ * Sets whether the session is active.
+ *
+ * @param active - `true` to mark the session as active, `false` to mark it as inactive
+ */
 export function setSessionActive(active: boolean): void {
   if (active) {
     localStorage.setItem(STORAGE_KEYS.SESSION_ACTIVE, 'true')
@@ -189,8 +252,9 @@ export function setSessionActive(active: boolean): void {
 }
 
 /**
- * Sign out - ends session but preserves OAuth tokens for quick re-login.
- * User will see "Welcome back" on next visit.
+ * End the current session while preserving OAuth tokens and username for a quick re-login flow.
+ *
+ * Clears stored identity, user profile, avatar source, and gravatar email, and marks the session as inactive.
  */
 export function signOut(): void {
   setSessionActive(false)
@@ -203,8 +267,10 @@ export function signOut(): void {
 }
 
 /**
- * Disconnect Discogs - fully removes authorization.
- * User will need to re-authorize with Discogs on next login.
+ * Remove all locally stored Discogs authorization and user data so the user must re-authorize on next login.
+ *
+ * This clears the persistent session flag, username, avatar source, gravatar email, stored identity, stored user
+ * profile, and OAuth tokens from web storage.
  */
 export function disconnectDiscogs(): void {
   setSessionActive(false)

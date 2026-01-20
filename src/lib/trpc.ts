@@ -15,8 +15,9 @@ import type { AppRouter } from '@/server/trpc/index.ts'
 export const trpc = createTRPCReact<AppRouter>()
 
 /**
- * Get the tRPC client links configuration.
- * Uses httpBatchLink to batch multiple requests together.
+ * Determine the base URL for API requests depending on the runtime environment.
+ *
+ * @returns `''` when running in a browser (use relative URLs); otherwise `'http://localhost:3000'` for server-side usage.
  */
 function getBaseUrl() {
   if (typeof window !== 'undefined') {
@@ -26,8 +27,12 @@ function getBaseUrl() {
 }
 
 /**
- * Creates a tRPC client for use outside of React components.
- * This is useful for calling tRPC procedures in non-React contexts.
+ * Create a tRPC client for use outside of React components.
+ *
+ * @returns A tRPC client instance configured to call the application's tRPC HTTP API.
+ * @example
+ * const client = createTRPCClient();
+ * // use client to call procedures, e.g. client.query('someRouter.someProcedure', { ... })
  */
 export function createTRPCClient(): ReturnType<typeof trpc.createClient> {
   return trpc.createClient({

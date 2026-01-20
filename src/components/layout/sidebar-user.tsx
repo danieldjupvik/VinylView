@@ -19,6 +19,18 @@ import { useAuth } from '@/hooks/use-auth'
 import { usePreferences } from '@/hooks/use-preferences'
 import { storeRedirectUrl } from '@/lib/redirect-utils'
 
+/**
+ * Render a sidebar user button that displays the current user's avatar (image or initials),
+ * username, and a dropdown menu containing a sign-out action.
+ *
+ * The sign-out action stores the current URL for post-login redirect, invokes the authentication
+ * sign-out handler, shows a success toast, and navigates to the login page.
+ *
+ * @returns A React element containing the sidebar user menu with avatar, username, and sign-out item.
+ *
+ * @example
+ * <SidebarUser />
+ */
 export function SidebarUser() {
   const { t } = useTranslation()
   const { username, signOut, avatarUrl } = useAuth()

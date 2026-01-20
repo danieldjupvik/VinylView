@@ -17,8 +17,14 @@ const CONSUMER_KEY = process.env.VITE_DISCOGS_CONSUMER_KEY
 const CONSUMER_SECRET = process.env.DISCOGS_CONSUMER_SECRET
 
 /**
- * Get allowed callback origins for OAuth flow.
- * Prevents open redirect attacks by restricting where OAuth can redirect.
+ * Determine the list of allowed OAuth callback origins.
+ *
+ * Reads the `ALLOWED_CALLBACK_ORIGINS` environment variable (comma-separated) if present; otherwise returns a default set including localhost dev origins and, if `VERCEL_URL` is set, the corresponding https origin.
+ *
+ * @returns An array of origin strings permitted for OAuth callback redirects.
+ * @example
+ * // From ALLOWED_CALLBACK_ORIGINS
+ * // "https://app.example.com,https://staging.example.com" -> ["https://app.example.com", "https://staging.example.com"]
  */
 function getAllowedCallbackOrigins(): string[] {
   // Check for explicit allowlist first
@@ -41,8 +47,15 @@ function getAllowedCallbackOrigins(): string[] {
 }
 
 /**
- * Validates that a callback URL's origin is in the allowlist.
- * Prevents OAuth phishing attacks using our consumer credentials.
+ * Checks whether the origin of a callback URL is allowed for OAuth callbacks.
+ *
+ * @param callbackUrl - The full callback URL to validate
+ * @returns `true` if the URL's origin is included in the allowlist, `false` otherwise (including when the URL cannot be parsed)
+ *
+ * @example
+ * ```ts
+ * validateCallbackUrl('https://example.com/auth/callback') // true or false
+ * ```
  */
 function validateCallbackUrl(callbackUrl: string): boolean {
   try {
@@ -54,6 +67,12 @@ function validateCallbackUrl(callbackUrl: string): boolean {
   }
 }
 
+/**
+ * Create a DiscogsOAuth client using the configured consumer key and secret.
+ *
+ * @returns An initialized `DiscogsOAuth` instance configured with `CONSUMER_KEY` and `CONSUMER_SECRET`.
+ * @throws TRPCError with code `INTERNAL_SERVER_ERROR` if the consumer key or secret are not defined.
+ */
 function getDiscogsOAuth() {
   if (!CONSUMER_KEY || !CONSUMER_SECRET) {
     throw new TRPCError({
