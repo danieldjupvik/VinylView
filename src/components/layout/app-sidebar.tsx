@@ -26,6 +26,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
   useSidebar
 } from '@/components/ui/sidebar'
 
@@ -63,7 +64,7 @@ export function AppSidebar(): React.JSX.Element {
     }
 
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarHeader className="pt-3">
         <SidebarMenu>
           <SidebarMenuItem>
@@ -182,6 +183,7 @@ export function AppSidebar(): React.JSX.Element {
       <SidebarFooter className="pb-3">
         <SidebarUser />
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   )
 }

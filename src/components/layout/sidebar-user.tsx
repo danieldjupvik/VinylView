@@ -86,7 +86,11 @@ export function SidebarUser(): React.JSX.Element {
     <SidebarMenu>
       {/* Settings */}
       <SidebarMenuItem>
-        <SidebarMenuButton asChild isActive={isActive('/settings')}>
+        <SidebarMenuButton
+          asChild
+          isActive={isActive('/settings')}
+          tooltip={t('nav.settings')}
+        >
           <Link
             to="/settings"
             viewTransition
@@ -100,7 +104,7 @@ export function SidebarUser(): React.JSX.Element {
 
       {/* Sign Out */}
       <SidebarMenuItem>
-        <SidebarMenuButton onClick={handleSignOut}>
+        <SidebarMenuButton onClick={handleSignOut} tooltip={t('auth.signOut')}>
           <LogOut />
           <span>{t('auth.signOut')}</span>
         </SidebarMenuButton>
@@ -110,9 +114,10 @@ export function SidebarUser(): React.JSX.Element {
       <SidebarMenuItem>
         <SidebarMenuButton
           size="lg"
-          className="cursor-default hover:bg-transparent active:bg-transparent"
+          tooltip={username ?? ''}
+          className="cursor-default group-data-[collapsible=icon]:justify-center hover:bg-transparent active:bg-transparent"
         >
-          <Avatar className="h-8 w-8 rounded-lg">
+          <Avatar className="h-8 w-8 rounded-lg group-data-[collapsible=icon]:h-5 group-data-[collapsible=icon]:w-5">
             {resolvedAvatar ? (
               <AvatarImage
                 src={resolvedAvatar}
@@ -122,7 +127,7 @@ export function SidebarUser(): React.JSX.Element {
             ) : null}
             <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
           </Avatar>
-          <div className="grid flex-1 text-left text-sm leading-tight">
+          <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
             <span className="truncate font-medium">{username}</span>
           </div>
         </SidebarMenuButton>
