@@ -50,7 +50,9 @@ function LanguageFlag({
   )
 }
 
-export function LanguageToggle({ className }: LanguageToggleProps) {
+export function LanguageToggle({
+  className
+}: LanguageToggleProps): React.JSX.Element {
   const { i18n, t } = useTranslation()
   const currentLanguage = normalizeLanguage(
     i18n.resolvedLanguage ?? i18n.language ?? 'en'

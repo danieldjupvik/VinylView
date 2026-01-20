@@ -35,7 +35,7 @@ import { SidebarUser } from './sidebar-user'
 
 import type { MouseEvent } from 'react'
 
-export function AppSidebar() {
+export function AppSidebar(): React.JSX.Element {
   const { t } = useTranslation()
   const location = useLocation()
   const { isMobile, setOpenMobile } = useSidebar()

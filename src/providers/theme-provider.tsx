@@ -21,7 +21,7 @@ export function ThemeProvider({
   defaultTheme = 'system',
   storageKey = 'vinyldeck-theme',
   ...props
-}: ThemeProviderProps) {
+}: ThemeProviderProps): React.JSX.Element {
   const [theme, setTheme] = useState<Theme>(() => {
     try {
       const stored = localStorage.getItem(storageKey)

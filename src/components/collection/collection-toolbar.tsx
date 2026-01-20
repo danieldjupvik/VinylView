@@ -45,7 +45,7 @@ export function CollectionToolbar({
   viewMode,
   onViewToggle,
   filters
-}: CollectionToolbarProps) {
+}: CollectionToolbarProps): React.JSX.Element {
   const { t } = useTranslation()
 
   const toggleSortOrder = () => {

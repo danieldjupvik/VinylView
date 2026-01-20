@@ -28,7 +28,9 @@ interface AuthProviderProps {
   children: ReactNode
 }
 
-export function AuthProvider({ children }: AuthProviderProps) {
+export function AuthProvider({
+  children
+}: AuthProviderProps): React.JSX.Element {
   const { gravatarEmail, setGravatarEmail } = usePreferences()
   const latestGravatarEmailRef = useRef(gravatarEmail)
   const [state, setState] = useState<AuthState>({

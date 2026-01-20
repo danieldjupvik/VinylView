@@ -19,20 +19,27 @@ const CONSUMER_SECRET = process.env.DISCOGS_CONSUMER_SECRET
 /**
  * Get allowed callback origins for OAuth flow.
  * Prevents open redirect attacks by restricting where OAuth can redirect.
+ *
+ * Always includes VERCEL_URL (for preview deployments) plus any explicitly
+ * configured origins from ALLOWED_CALLBACK_ORIGINS.
  */
 function getAllowedCallbackOrigins(): string[] {
-  // Check for explicit allowlist first
+  const origins: string[] = []
+
+  // Add explicitly configured origins (production domains)
   if (process.env.ALLOWED_CALLBACK_ORIGINS) {
-    return process.env.ALLOWED_CALLBACK_ORIGINS.split(',').map((o) => o.trim())
+    origins.push(
+      ...process.env.ALLOWED_CALLBACK_ORIGINS.split(',').map((o) => o.trim())
+    )
+  } else {
+    // Default localhost origins for development (only when no explicit config)
+    origins.push(
+      'http://localhost:5173', // Vite dev server
+      'http://localhost:4173' // Vite preview
+    )
   }
 
-  // Default allowed origins for development and production
-  const origins: string[] = [
-    'http://localhost:5173', // Vite dev server
-    'http://localhost:4173' // Vite preview
-  ]
-
-  // Add Vercel URL if available (production/preview deployments)
+  // Always add Vercel URL if available (enables preview deployments)
   if (process.env.VERCEL_URL) {
     origins.push(`https://${process.env.VERCEL_URL}`)
   }

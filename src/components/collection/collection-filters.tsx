@@ -298,7 +298,7 @@ export function CollectionFilters({
   clearFilters,
   activeFilterCount,
   className
-}: CollectionFiltersProps) {
+}: CollectionFiltersProps): React.JSX.Element {
   const { t } = useTranslation()
   const isMobile = useIsMobile()
 

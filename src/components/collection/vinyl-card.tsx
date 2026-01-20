@@ -213,7 +213,10 @@ function extractVinylInfo(
   return info
 }
 
-export function VinylCard({ release, className }: VinylCardProps) {
+export function VinylCard({
+  release,
+  className
+}: VinylCardProps): React.JSX.Element {
   const [imageErrored, setImageErrored] = useState(false)
   const { basic_information: info } = release
   const artistName = info.artists.map((a) => a.name).join(', ')

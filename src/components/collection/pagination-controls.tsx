@@ -15,7 +15,7 @@ export function PaginationControls({
   totalPages,
   onPageChange,
   isLoading
-}: PaginationControlsProps) {
+}: PaginationControlsProps): React.JSX.Element | null {
   const { t } = useTranslation()
 
   if (totalPages <= 1) {

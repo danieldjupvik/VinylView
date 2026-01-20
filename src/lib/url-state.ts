@@ -2,10 +2,10 @@ const isBrowser = typeof window !== 'undefined'
 
 export type SearchParamValue = string | string[] | null | undefined
 
-export const readSearchParams = () =>
+export const readSearchParams = (): URLSearchParams =>
   new URLSearchParams(isBrowser ? window.location.search : '')
 
-export const readParamList = (params: URLSearchParams, key: string) =>
+export const readParamList = (params: URLSearchParams, key: string): string[] =>
   params.getAll(key)
 
 export const readParamRange = (
@@ -30,7 +30,7 @@ export const readParamRange = (
 export const updateSearchParams = (
   updates: Record<string, SearchParamValue>,
   options: { replace?: boolean } = {}
-) => {
+): void => {
   if (!isBrowser) return
   const params = new URLSearchParams(window.location.search)
 

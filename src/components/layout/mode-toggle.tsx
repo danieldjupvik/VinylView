@@ -12,7 +12,7 @@ import {
 import { useTheme } from '@/hooks/use-theme'
 import type { Theme } from '@/providers/theme-context'
 
-export function ModeToggle() {
+export function ModeToggle(): React.JSX.Element {
   const { t } = useTranslation()
   const { theme, setTheme } = useTheme()
 

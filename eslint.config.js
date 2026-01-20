@@ -50,6 +50,16 @@ export default defineConfig([
       }
     },
     rules: {
+      // Require explicit return types on exported functions for better documentation
+      '@typescript-eslint/explicit-module-boundary-types': [
+        'warn',
+        {
+          allowArgumentsExplicitlyTypedAsAny: false,
+          allowDirectConstAssertionInArrowFunctions: true,
+          allowHigherOrderFunctions: true,
+          allowTypedFunctionExpressions: true
+        }
+      ],
       // Catch components defined inside render that cause state loss
       'react/no-unstable-nested-components': 'warn',
       // Catch new objects/arrays in context providers causing unnecessary re-renders
@@ -99,14 +109,18 @@ export default defineConfig([
     rules: {
       // Allow shadcn/ui components to keep literal strings and exports.
       'i18next/no-literal-string': 'off',
-      'react-refresh/only-export-components': 'off'
+      'react-refresh/only-export-components': 'off',
+      // shadcn/ui components are generated, don't require explicit return types
+      '@typescript-eslint/explicit-module-boundary-types': 'off'
     }
   },
   {
     files: ['vite.config.ts', 'eslint.config.js', 'scripts/**/*.{js,ts}'],
     rules: {
       // Permit Node.js builtins in tooling and config files.
-      'import-x/no-nodejs-modules': 'off'
+      'import-x/no-nodejs-modules': 'off',
+      // Config files don't need explicit return types
+      '@typescript-eslint/explicit-module-boundary-types': 'off'
     }
   },
   {
@@ -121,32 +135,6 @@ export default defineConfig([
       'react-refresh/only-export-components': 'off',
       // Server code doesn't need i18n
       'i18next/no-literal-string': 'off'
-    }
-  },
-  {
-    files: ['src/__tests__/**/*.{ts,tsx}'],
-    languageOptions: {
-      globals: {
-        ...globals.node,
-        // Vitest globals
-        describe: 'readonly',
-        it: 'readonly',
-        test: 'readonly',
-        expect: 'readonly',
-        vi: 'readonly',
-        beforeAll: 'readonly',
-        afterAll: 'readonly',
-        beforeEach: 'readonly',
-        afterEach: 'readonly'
-      }
-    },
-    rules: {
-      // Test files don't need i18n
-      'i18next/no-literal-string': 'off',
-      // Test files can export test utilities
-      'react-refresh/only-export-components': 'off',
-      // Allow non-null assertions in tests for cleaner assertions
-      '@typescript-eslint/no-non-null-assertion': 'off'
     }
   },
   // turn off prettier rules that conflict with eslint rules

@@ -19,7 +19,7 @@ import { useAuth } from '@/hooks/use-auth'
 import { usePreferences } from '@/hooks/use-preferences'
 import { storeRedirectUrl } from '@/lib/redirect-utils'
 
-export function SidebarUser() {
+export function SidebarUser(): React.JSX.Element {
   const { t } = useTranslation()
   const { username, signOut, avatarUrl } = useAuth()
   const { avatarSource, gravatarUrl } = usePreferences()

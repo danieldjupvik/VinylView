@@ -7,10 +7,6 @@ This file provides guidance for automated agents and AI assistants when working 
 - `bun run lint` - Run ESLint
 - `bun run lint --fix` - Run ESLint and automatically fix issues
 - `bun run preview` - Preview production build locally
-- `bun run test` - Run tests in watch mode
-- `bun run test:run` - Run tests once
-- `bun run test:coverage` - Run tests with coverage report
-- `bun run test:ui` - Run tests with UI
 - `vercel build` - Test Vercel build locally (requires `vercel pull --yes` first)
 
 ### Testing Vercel Builds Locally
@@ -39,7 +35,7 @@ This project uses **Trunk-Based Development** with a single `main` branch:
 1. Create a feature branch from `main`: `git checkout -b feat/my-feature`
 2. Make commits using Conventional Commits format
 3. Open a PR targeting `main`
-4. CI runs tests automatically
+4. CI runs lint and build checks automatically
 5. **Squash merge** the PR into `main`
 6. release-please automatically creates/updates a release PR
 7. When ready to release, **squash merge** the release-please PR
@@ -75,7 +71,7 @@ This project uses release-please and GitHub releases for versioning:
 
 - **Releases happen only from `main`** via release-please
 - **Beta phase:** releases are marked as GitHub pre-releases (tags like `v0.2.0-beta`)
-- CI runs tests on PRs and pushes to `main`
+- CI runs lint and build checks on PRs and pushes to `main`
 - Do not manually bump versions or edit `CHANGELOG.md` for release entries; release-please does it
 - `CHANGELOG.md` remains the canonical changelog and can be rendered in the app
 
@@ -201,7 +197,6 @@ Squash merge is the only strategy that gives you full control over the changelog
 - **tRPC** for type-safe API calls via Vercel Serverless Functions
 - **i18next** for internationalization
 - **country-flag-icons** for lightweight flag icons
-- **Vitest** + **React Testing Library** + **MSW** for testing
 - **PWA** via vite-plugin-pwa
 
 ## Project Structure
@@ -219,7 +214,6 @@ Squash merge is the only strategy that gives you full control over the changelog
 - `src/providers/` - React context providers (auth, theme, preferences, query/tRPC, i18n)
 - `src/routes/` - TanStack Router file-based routes
 - `src/types/` - TypeScript type definitions
-- `src/__tests__/` - Test files and mocks
 
 ## Path Aliases
 
@@ -251,15 +245,6 @@ Routes are defined in `src/routes/` using TanStack Router's file-based routing:
 - `_authenticated.tsx` - Layout route with auth guard, redirects to `/login` if not authenticated
 - `_authenticated/collection.tsx` - Collection page (full implementation)
 - `_authenticated/settings.tsx` - Settings page with app version
-
-## Testing
-
-Tests use Vitest with React Testing Library and MSW for API mocking:
-
-- `src/__tests__/setup.ts` - Test setup with MSW server
-- `src/__tests__/mocks/` - MSW handlers and server config
-- Tests are organized under `src/__tests__/{api,hooks,components,integration}`
-- `src/__tests__/hooks/use-collection.test.tsx` covers client-side filter + pagination interactions
 
 ## Code Quality & Linting
 

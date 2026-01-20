@@ -23,7 +23,7 @@ export function BrandMark({
   spinning = false,
   className,
   iconClassName
-}: BrandMarkProps) {
+}: BrandMarkProps): React.JSX.Element {
   const classes = sizeClasses[size]
 
   return (

@@ -8,7 +8,10 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
  * Vercel Serverless Function handler for tRPC requests.
  * Converts Node.js request to Web Request for the fetch adapter.
  */
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+export default async function handler(
+  req: VercelRequest,
+  res: VercelResponse
+): Promise<void> {
   // Construct absolute URL from the request
   const protoHeader = req.headers['x-forwarded-proto']
   const protocol = Array.isArray(protoHeader)

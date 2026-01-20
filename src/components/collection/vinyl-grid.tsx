@@ -16,7 +16,7 @@ export function VinylGrid({
   isLoading,
   shouldAnimate,
   animationClassName
-}: VinylGridProps) {
+}: VinylGridProps): React.JSX.Element {
   if (isLoading) {
     return (
       <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">

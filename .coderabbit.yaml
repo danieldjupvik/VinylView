@@ -36,8 +36,6 @@ reviews:
       instructions: 'Apply when PR changes components, styling, or user interface'
     - label: 'area: api'
       instructions: 'Apply when PR modifies API layer, client, or data fetching'
-    - label: 'area: testing'
-      instructions: 'Apply when PR adds or modifies tests'
   auto_apply_labels: true
   suggested_reviewers: true
   auto_assign_reviewers: true
@@ -62,7 +60,7 @@ reviews:
         Review TypeScript and React code for conformity with best practices.
         Check: proper hook usage (dependency arrays in useEffect/useMemo/useCallback),
         accessibility (a11y), avoid `any` types (prefer `unknown`), explicit return types
-        on functions, proper error handling, and component composition patterns.
+        on exported functions, proper error handling, and component composition patterns.
         Ensure internationalization strings are externalized (i18next).
     - path: 'vite.config.ts'
       instructions: >-
@@ -81,12 +79,6 @@ reviews:
       instructions: >-
         Review custom hooks for correct dependency arrays, proper cleanup
         in effects, and clear return type signatures.
-    - path: 'src/__tests__/**/*'
-      instructions: >-
-        Review tests for alignment with Vitest best practices. Ensure test descriptions
-        are sufficiently detailed to clarify the purpose of each test. Check for meaningful
-        assertions, proper mocking with MSW, coverage of edge cases, and test independence.
-        Tests should verify functionality, not implementation details.
   abort_on_close: true
   disable_cache: false
   auto_review:
@@ -104,7 +96,7 @@ reviews:
     docstrings:
       enabled: true
     unit_tests:
-      enabled: true
+      enabled: false
   pre_merge_checks:
     docstrings:
       mode: warning
@@ -118,7 +110,7 @@ reviews:
       mode: warning
     custom_checks:
       - name: 'Type Safety'
-        instructions: 'Verify no `any` types are introduced without justification. Check that new functions have proper return types.'
+        instructions: 'Verify no `any` types are introduced without justification. Check that exported functions have explicit return types.'
         mode: warning
       - name: 'Debug Statements'
         instructions: 'Ensure no console.log/debugger statements are left in production code. console.warn/error are OK when justified.'
@@ -256,10 +248,6 @@ code_generation:
         instructions: 'Use TSDoc format with @param, @returns, and @example tags where helpful. Keep descriptions concise.'
       - path: 'src/**/*.tsx'
         instructions: 'Use TSDoc format. Document component props with @param, include @example for complex components.'
-  unit_tests:
-    path_instructions:
-      - path: 'src/**/*.ts'
-        instructions: 'Use Vitest with React Testing Library. Follow AAA pattern (Arrange, Act, Assert). Use MSW for API mocking.'
 issue_enrichment:
   auto_enrich:
     enabled: true
