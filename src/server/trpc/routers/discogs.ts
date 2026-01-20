@@ -1,6 +1,11 @@
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
+import type {
+  DiscogsCollectionRelease,
+  DiscogsPagination
+} from '@/types/discogs'
+
 import { createDiscogsClient } from '../../discogs-client.ts'
 import { publicProcedure, router } from '../init.ts'
 
@@ -50,6 +55,72 @@ export const discogsRouter = router({
           code: 'INTERNAL_SERVER_ERROR',
           message:
             error instanceof Error ? error.message : 'Failed to get identity'
+        })
+      }
+    }),
+
+  /**
+   * Get a user's collection releases.
+   * Supports pagination and sorting.
+   */
+  getCollection: publicProcedure
+    .input(
+      z.object({
+        accessToken: z.string(),
+        accessTokenSecret: z.string(),
+        username: z.string(),
+        folderId: z.number().optional().default(0),
+        page: z.number().optional().default(1),
+        perPage: z.number().optional().default(50),
+        sort: z
+          .enum([
+            'label',
+            'artist',
+            'title',
+            'catno',
+            'format',
+            'rating',
+            'added',
+            'year'
+          ])
+          .optional(),
+        sortOrder: z.enum(['asc', 'desc']).optional()
+      })
+    )
+    .query(async ({ input }) => {
+      const client = createDiscogsClient(
+        input.accessToken,
+        input.accessTokenSecret
+      )
+
+      try {
+        const { data, rateLimit } = await client
+          .user()
+          .collection()
+          .getReleases(input.username, input.folderId, {
+            page: input.page,
+            per_page: input.perPage,
+            ...(input.sort && { sort: input.sort }),
+            ...(input.sortOrder && { sort_order: input.sortOrder })
+          })
+
+        // Cast to our types - the library types are incomplete but the API returns these fields
+        return {
+          releases: data.releases as unknown as DiscogsCollectionRelease[],
+          pagination: data.pagination as unknown as DiscogsPagination,
+          rateLimit
+        }
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('401')) {
+          throw new TRPCError({
+            code: 'UNAUTHORIZED',
+            message: 'Invalid or expired OAuth tokens'
+          })
+        }
+        throw new TRPCError({
+          code: 'INTERNAL_SERVER_ERROR',
+          message:
+            error instanceof Error ? error.message : 'Failed to get collection'
         })
       }
     }),

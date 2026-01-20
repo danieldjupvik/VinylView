@@ -51,5 +51,5 @@ export const RATE_LIMIT = {
 } as const
 
 export const COLLECTION = {
-  PER_PAGE: 100 // Discogs API max
+  PER_PAGE: 100
 } as const

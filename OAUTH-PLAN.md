@@ -131,7 +131,7 @@ DISCOGS_CONSUMER_SECRET=your_dev_consumer_secret
 | 4     | Server-side Discogs Client Helper        | ✅     |
 | 5     | Identity Endpoint + Auth Provider Update | ✅     |
 | 6     | User Profile Endpoint                    | ✅     |
-| 7     | Collection Endpoint + Hook Migration     | ⬜     |
+| 7     | Collection Endpoint + Hook Migration     | ✅     |
 | 8     | Storage & PAT Cleanup                    | ⬜     |
 | 9     | i18n Updates                             | ⬜     |
 | 10    | Tests                                    | ⬜     |
@@ -694,11 +694,11 @@ Total: ~115 lines of boilerplate for full type-safety.
 
 **Phase 7 (Collection):**
 
-- [ ] Collection page loads releases
-- [ ] Pagination works
-- [ ] Client-side filtering works (batch fetching)
-- [ ] Server-side and client-side sorting works
-- [ ] Rate limiting tracked correctly
+- [x] Collection page loads releases
+- [x] Pagination works
+- [x] Client-side filtering works (batch fetching)
+- [x] Server-side and client-side sorting works
+- [x] Rate limiting tracked correctly
 
 **Phase 8 (Cleanup):**
 
