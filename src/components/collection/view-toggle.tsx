@@ -9,7 +9,10 @@ interface ViewToggleProps {
   onToggle: () => void
 }
 
-export function ViewToggle({ viewMode, onToggle }: ViewToggleProps) {
+export function ViewToggle({
+  viewMode,
+  onToggle
+}: ViewToggleProps): React.JSX.Element {
   const { t } = useTranslation()
   const isGrid = viewMode === 'grid'
   const label = isGrid ? t('collection.view.table') : t('collection.view.grid')

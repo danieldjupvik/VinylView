@@ -22,7 +22,9 @@ interface PreferencesProviderProps {
 
 const DEFAULT_AVATAR_SOURCE: AvatarSource = 'discogs'
 
-export function PreferencesProvider({ children }: PreferencesProviderProps) {
+export function PreferencesProvider({
+  children
+}: PreferencesProviderProps): React.JSX.Element {
   const [avatarSource, setAvatarSourceState] = useState<AvatarSource>(() => {
     const stored = getAvatarSource()
     return stored === 'gravatar' ? 'gravatar' : DEFAULT_AVATAR_SOURCE

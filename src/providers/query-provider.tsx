@@ -46,7 +46,9 @@ interface QueryProviderProps {
   children: ReactNode
 }
 
-export function QueryProvider({ children }: QueryProviderProps) {
+export function QueryProvider({
+  children
+}: QueryProviderProps): React.JSX.Element {
   const [queryClient] = useState(createQueryClient)
   const [trpcClient] = useState(createTRPCClient)
 

@@ -1,7 +1,7 @@
 import { Disc3 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-export function CollectionEmptyState() {
+export function CollectionEmptyState(): React.JSX.Element {
   const { t } = useTranslation()
 
   return (

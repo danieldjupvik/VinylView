@@ -5,7 +5,9 @@ interface VinylCardSkeletonProps {
   className?: string
 }
 
-export function VinylCardSkeleton({ className }: VinylCardSkeletonProps) {
+export function VinylCardSkeleton({
+  className
+}: VinylCardSkeletonProps): React.JSX.Element {
   return (
     <div
       className={cn(

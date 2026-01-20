@@ -2,7 +2,14 @@ import { useEffect, useState } from 'react'
 
 import { getViewMode, setViewMode, type ViewMode } from '@/lib/storage'
 
-export function useViewPreference() {
+interface ViewPreference {
+  viewMode: ViewMode
+  toggleView: () => void
+  isGrid: boolean
+  isTable: boolean
+}
+
+export function useViewPreference(): ViewPreference {
   const [viewMode, setViewModeState] = useState<ViewMode>(() => getViewMode())
 
   useEffect(() => {

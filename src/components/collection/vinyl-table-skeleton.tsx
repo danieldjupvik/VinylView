@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table'
-export function VinylTableSkeleton() {
+export function VinylTableSkeleton(): React.JSX.Element {
   const { t } = useTranslation()
 
   return (

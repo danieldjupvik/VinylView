@@ -127,7 +127,7 @@ export function VinylTable({
   releases,
   isLoading,
   shouldAnimate
-}: VinylTableProps) {
+}: VinylTableProps): React.JSX.Element {
   const { t } = useTranslation()
 
   if (isLoading) {
