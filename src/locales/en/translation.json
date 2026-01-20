@@ -191,5 +191,8 @@
     "rateLimit": "Rate limit exceeded. Please wait a moment.",
     "unauthorized": "Session expired. Please log in again.",
     "notFound": "Page not found"
+  },
+  "user": {
+    "fallback": "User"
   }
 }

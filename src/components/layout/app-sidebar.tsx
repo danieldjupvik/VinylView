@@ -5,7 +5,6 @@ import {
   DollarSign,
   Disc3,
   Heart,
-  Settings,
   Shuffle
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -27,6 +26,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
   useSidebar
 } from '@/components/ui/sidebar'
 
@@ -64,7 +64,7 @@ export function AppSidebar(): React.JSX.Element {
     }
 
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarHeader className="pt-3">
         <SidebarMenu>
           <SidebarMenuItem>
@@ -181,26 +181,9 @@ export function AppSidebar(): React.JSX.Element {
       </SidebarContent>
 
       <SidebarFooter className="pb-3">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton
-              asChild
-              isActive={isActive('/settings')}
-              tooltip={t('nav.settings')}
-            >
-              <Link
-                to="/settings"
-                viewTransition
-                onClick={handleNavClick('/settings')}
-              >
-                <Settings />
-                <span>{t('nav.settings')}</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
         <SidebarUser />
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   )
 }

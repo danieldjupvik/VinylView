@@ -70,7 +70,7 @@ function AuthenticatedLayout() {
         <div className="relative z-10 flex min-h-svh flex-col">
           <header className="bg-background/80 supports-[backdrop-filter]:bg-background/60 flex h-14 items-center justify-between border-b px-4 backdrop-blur">
             <div className="flex items-center gap-2">
-              <SidebarTrigger className="md:hidden" />
+              <SidebarTrigger />
               <div className="flex items-center gap-2 md:hidden">
                 <BrandMark size="sm" />
                 <span className="font-semibold">{t('app.name')}</span>
