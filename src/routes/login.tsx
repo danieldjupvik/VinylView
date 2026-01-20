@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Loader2 } from 'lucide-react'
-import { type FormEvent, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
@@ -15,10 +15,10 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { useAuth } from '@/hooks/use-auth'
 import { getAndClearRedirectUrl } from '@/lib/redirect-utils'
+import { setOAuthRequestTokens } from '@/lib/storage'
+import { trpc } from '@/lib/trpc'
 
 export const Route = createFileRoute('/login')({
   component: LoginPage
@@ -26,12 +26,12 @@ export const Route = createFileRoute('/login')({
 
 function LoginPage() {
   const { t } = useTranslation()
-  const { login, isAuthenticated } = useAuth()
+  const { isAuthenticated } = useAuth()
   const navigate = useNavigate()
 
-  const [username, setUsername] = useState('')
-  const [token, setToken] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+
+  const getRequestToken = trpc.oauth.getRequestToken.useMutation()
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -41,22 +41,26 @@ function LoginPage() {
     }
   }, [isAuthenticated, navigate])
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-
-    if (!username.trim() || !token.trim()) {
-      return
-    }
-
+  const handleOAuthLogin = async () => {
     setIsLoading(true)
 
     try {
-      await login(username.trim(), token.trim())
-      toast.success(t('auth.loginSuccess'))
-      // Navigation is handled by the useEffect when isAuthenticated becomes true
+      // Build the callback URL based on current origin
+      const callbackUrl = `${window.location.origin}/oauth-callback`
+
+      // Get request token from server
+      const result = await getRequestToken.mutateAsync({ callbackUrl })
+
+      // Store request tokens in sessionStorage for the callback
+      setOAuthRequestTokens({
+        requestToken: result.requestToken,
+        requestTokenSecret: result.requestTokenSecret
+      })
+
+      // Redirect to Discogs authorization page
+      window.location.href = result.authorizeUrl
     } catch {
-      toast.error(t('auth.loginError'))
-    } finally {
+      toast.error(t('auth.oauthError'))
       setIsLoading(false)
     }
   }
@@ -85,53 +89,20 @@ function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form
-            onSubmit={(event) => {
-              void handleSubmit(event)
-            }}
-            className="space-y-4"
+          <Button
+            onClick={() => void handleOAuthLogin()}
+            className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards w-full delay-500 duration-500"
+            disabled={isLoading}
           >
-            <div className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards space-y-3 delay-500 duration-500">
-              <Label htmlFor="username">{t('auth.username')}</Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder={t('auth.usernamePlaceholder')}
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                disabled={isLoading}
-                autoComplete="username"
-                className="transition-all duration-200 focus:scale-[1.01]"
-              />
-            </div>
-            <div className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards space-y-3 delay-600 duration-500">
-              <Label htmlFor="token">{t('auth.token')}</Label>
-              <Input
-                id="token"
-                type="password"
-                placeholder={t('auth.tokenPlaceholder')}
-                value={token}
-                onChange={(e) => setToken(e.target.value)}
-                disabled={isLoading}
-                autoComplete="current-password"
-                className="transition-all duration-200 focus:scale-[1.01]"
-              />
-            </div>
-            <Button
-              type="submit"
-              className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards w-full duration-500"
-              disabled={isLoading || !username.trim() || !token.trim()}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t('auth.loggingIn')}
-                </>
-              ) : (
-                t('auth.loginButton')
-              )}
-            </Button>
-          </form>
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {t('auth.redirecting')}
+              </>
+            ) : (
+              t('auth.signInWithDiscogs')
+            )}
+          </Button>
         </CardContent>
       </Card>
     </div>

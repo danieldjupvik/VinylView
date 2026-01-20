@@ -105,7 +105,7 @@ DISCOGS_CONSUMER_SECRET=your_dev_consumer_secret
 | ----- | ----------------------------- | ------ |
 | 1     | Serverless API Infrastructure | ✅     |
 | 2     | OAuth Callback Route          | ✅     |
-| 3     | Login Page Update             | ⬜     |
+| 3     | Login Page Update             | ✅     |
 | 4     | Storage Updates               | ⬜     |
 | 5     | API Client Update             | ⬜     |
 | 6     | Auth Provider Update          | ⬜     |
