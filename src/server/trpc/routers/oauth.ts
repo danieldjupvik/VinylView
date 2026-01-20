@@ -2,7 +2,7 @@ import { DiscogsOAuth } from '@lionralfs/discogs-client'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
-import { publicProcedure, router } from '../init.ts'
+import { publicProcedure, router } from '../init.js'
 
 declare const process: {
   env: {

@@ -1,13 +1,13 @@
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
+import { createDiscogsClient } from '../../discogs-client.js'
+import { publicProcedure, router } from '../init.js'
+
 import type {
   DiscogsCollectionRelease,
   DiscogsPagination
-} from '@/types/discogs'
-
-import { createDiscogsClient } from '../../discogs-client.ts'
-import { publicProcedure, router } from '../init.ts'
+} from '../../../types/discogs.js'
 
 /**
  * Discogs API router for proxying authenticated requests.

@@ -11,6 +11,19 @@ This file provides guidance for automated agents and AI assistants when working 
 - `bun run test:run` - Run tests once
 - `bun run test:coverage` - Run tests with coverage report
 - `bun run test:ui` - Run tests with UI
+- `vercel build` - Test Vercel build locally (requires `vercel pull --yes` first)
+
+### Testing Vercel Builds Locally
+
+Always run `vercel build` locally before pushing to catch Vercel-specific build errors. The local `bun run build` uses different TypeScript settings than Vercel's Edge Function compiler, so some errors only appear on Vercel.
+
+```bash
+# First time setup (pulls project settings)
+vercel pull --yes
+
+# Test the full Vercel build
+vercel build
+```
 
 ## Branching Strategy: Trunk-Based Development
 
@@ -214,6 +227,8 @@ import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 ```
 
+**Exception: Server-side code** - See "Vercel Edge Functions" section below for import requirements in `api/` and `src/server/`.
+
 ## Adding shadcn Components
 
 ```bash
@@ -408,6 +423,37 @@ The Discogs API client is in `src/api/`:
 Storage helpers in `src/lib/storage.ts` handle token/username persistence in localStorage.
 
 Constants in `src/lib/constants.ts` define app version, API URL, storage keys, and rate limit config.
+
+## Vercel Edge Functions
+
+The `api/` directory contains Vercel Edge Functions for server-side tRPC routes. These are compiled separately by Vercel using `moduleResolution: "node16"`, which has stricter import requirements than the client-side code.
+
+**Import requirements for `api/` and `src/server/`:**
+
+1. **Use `.js` extensions** on all relative imports (even though source files are `.ts`)
+2. **No `@/` path aliases** - use relative paths only
+3. **Use standard `Request` type** for Edge runtime (not `VercelRequest` from `@vercel/node`)
+
+```typescript
+// ❌ Wrong - will fail on Vercel
+import { router } from './init'
+import { router } from './init.ts'
+import type { Foo } from '@/types/foo'
+
+// ✅ Correct - works on Vercel
+import { router } from './init.js'
+import type { Foo } from '../../../types/foo.js'
+```
+
+**Why this differs from client code:**
+
+| Setting             | Client (`tsconfig.app.json`) | Vercel Edge Functions |
+| ------------------- | ---------------------------- | --------------------- |
+| `moduleResolution`  | `bundler`                    | `node16`              |
+| Path aliases (`@/`) | ✓ Supported                  | ✗ Not supported       |
+| Import extensions   | Optional                     | Required (`.js`)      |
+
+The local `tsc -b` command uses `tsconfig.server.json` with `moduleResolution: "bundler"`, so these errors only appear when running `vercel build`.
 
 ## Authentication
 
