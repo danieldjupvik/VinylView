@@ -10,7 +10,8 @@
   },
   "common": {
     "comingSoon": "(Kommer snart)",
-    "soon": "Snart"
+    "soon": "Snart",
+    "cancel": "Avbryt"
   },
   "nav": {
     "collection": "Samling",
@@ -26,15 +27,23 @@
   "auth": {
     "login": "Logg inn",
     "logout": "Logg ut",
-    "username": "Brukernavn",
-    "token": "Personlig tilgangstoken",
-    "tokenPlaceholder": "Skriv inn Discogs PAT",
-    "usernamePlaceholder": "Skriv inn Discogs-brukernavn",
-    "loginButton": "Logg inn",
-    "loggingIn": "Logger inn...",
+    "signOut": "Logg ut",
     "loginSuccess": "Innlogging vellykket",
-    "loginError": "Ugyldig brukernavn eller token",
-    "logoutSuccess": "Logget ut"
+    "logoutSuccess": "Logget ut",
+    "signOutSuccess": "Logget ut",
+    "signInWithDiscogs": "Logg inn med Discogs",
+    "redirecting": "Omdirigerer til Discogs...",
+    "completingLogin": "Fullfører innlogging...",
+    "loggingIn": "Logger inn...",
+    "welcomeBack": "Velkommen tilbake, {{username}}!",
+    "continue": "Fortsett",
+    "useDifferentAccount": "Bruk en annen konto",
+    "oauthError": "Kunne ikke koble til Discogs. Prøv igjen.",
+    "oauthDenied": "Autorisasjon ble avvist.",
+    "oauthMissingParams": "Manglende autentiseringsparametere.",
+    "oauthSessionExpired": "Økten din er utløpt. Prøv igjen.",
+    "oauthValidationFailed": "Kunne ikke bekrefte økten din. Prøv igjen.",
+    "backToLogin": "Tilbake til innlogging"
   },
   "collection": {
     "title": "Min samling",
@@ -156,6 +165,18 @@
       "changelog": "Endringslogg",
       "privacy": "Personvernerklæring",
       "terms": "Vilkår for bruk"
+    },
+    "account": {
+      "title": "Konto",
+      "description": "Administrer Discogs-tilkoblingen din",
+      "disconnect": {
+        "title": "Koble fra Discogs",
+        "description": "Fjern Discogs-autorisasjonen din. Du må autorisere på nytt for å bruke VinylDeck igjen.",
+        "button": "Koble fra Discogs-konto",
+        "confirmTitle": "Koble fra Discogs-konto?",
+        "confirmDescription": "Dette vil fjerne Discogs-autorisasjonen din. Du må logge inn på nytt for å bruke VinylDeck."
+      },
+      "disconnectSuccess": "Discogs-konto frakoblet"
     }
   },
   "theme": {

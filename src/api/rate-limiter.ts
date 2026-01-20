@@ -57,6 +57,38 @@ class RateLimiter {
   }
 
   /**
+   * Update rate limit state from tRPC response rateLimit object.
+   * Used when API calls go through the server via tRPC.
+   */
+  updateFromRateLimit(rateLimit: {
+    limit?: number
+    used?: number
+    remaining?: number
+  }): void {
+    let updated = false
+
+    if (rateLimit.limit !== undefined && Number.isFinite(rateLimit.limit)) {
+      this.state.limit = rateLimit.limit
+      updated = true
+    }
+    if (rateLimit.used !== undefined && Number.isFinite(rateLimit.used)) {
+      this.state.used = rateLimit.used
+      updated = true
+    }
+    if (
+      rateLimit.remaining !== undefined &&
+      Number.isFinite(rateLimit.remaining)
+    ) {
+      this.state.remaining = rateLimit.remaining
+      updated = true
+    }
+
+    if (updated) {
+      this.state.lastUpdated = Date.now()
+    }
+  }
+
+  /**
    * Update rate limit state from Discogs response headers.
    *
    * Discogs provides these headers in every response:

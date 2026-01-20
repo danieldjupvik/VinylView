@@ -11,6 +11,19 @@ This file provides guidance for automated agents and AI assistants when working 
 - `bun run test:run` - Run tests once
 - `bun run test:coverage` - Run tests with coverage report
 - `bun run test:ui` - Run tests with UI
+- `vercel build` - Test Vercel build locally (requires `vercel pull --yes` first)
+
+### Testing Vercel Builds Locally
+
+Always run `vercel build` locally before pushing to catch Vercel-specific build errors. The local `bun run build` uses different TypeScript settings than Vercel's Serverless Function compiler, so some errors only appear on Vercel.
+
+```bash
+# First time setup (pulls project settings)
+vercel pull --yes
+
+# Test the full Vercel build
+vercel build
+```
 
 ## Branching Strategy: Trunk-Based Development
 
@@ -93,6 +106,7 @@ Use Conventional Commits so release-please generates clear changelog entries. Th
 - Hidden types still trigger release-please to update the PR, but won't add changelog entries
 - Use `feat` and `fix` for user-facing changes you want documented
 - Use `chore`, `docs`, `refactor`, etc. for internal work that users don't need to know about
+- **Do NOT include `Co-Authored-By:` trailers in commit messages** - keep commits clean without attribution metadata
 
 **Good examples (user-facing, imperative):**
 
@@ -184,6 +198,7 @@ Squash merge is the only strategy that gives you full control over the changelog
 - **Bun** as the package manager
 - **TanStack Router** for file-based routing
 - **TanStack Query** for server state management
+- **tRPC** for type-safe API calls via Vercel Serverless Functions
 - **i18next** for internationalization
 - **country-flag-icons** for lightweight flag icons
 - **Vitest** + **React Testing Library** + **MSW** for testing
@@ -191,15 +206,17 @@ Squash merge is the only strategy that gives you full control over the changelog
 
 ## Project Structure
 
-- `src/api/` - API client, rate limiter, and Discogs API functions
+- `api/` - Vercel Serverless Functions (tRPC handler)
+- `src/server/` - Server-side code (tRPC routers, Discogs client factory)
+- `src/api/` - Client-side API helpers and rate limiter utilities
 - `src/components/ui/` - shadcn/ui components (added via `bunx shadcn add <component>`)
 - `src/components/layout/` - Layout components (sidebar, brand mark, toggles)
 - `src/components/collection/` - Collection view components
 - `src/components/auth/` - Authentication components
 - `src/hooks/` - Custom React hooks (auth, collection, preferences, theme)
-- `src/lib/` - Utility functions, constants, storage, gravatar helpers
+- `src/lib/` - Utility functions, constants, storage, tRPC client, gravatar helpers
 - `src/locales/` - i18n translation files
-- `src/providers/` - React context providers (auth, theme, preferences, query, i18n)
+- `src/providers/` - React context providers (auth, theme, preferences, query/tRPC, i18n)
 - `src/routes/` - TanStack Router file-based routes
 - `src/types/` - TypeScript type definitions
 - `src/__tests__/` - Test files and mocks
@@ -212,6 +229,8 @@ Use `@/` to import from `src/`:
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 ```
+
+**Exception: Server-side code** - See "Vercel Serverless Functions" section below for import requirements in `api/` and `src/server/`.
 
 ## Adding shadcn Components
 
@@ -227,7 +246,8 @@ Routes are defined in `src/routes/` using TanStack Router's file-based routing:
 
 - `__root.tsx` - Root layout with dark mode, toaster, and 404 handler
 - `index.tsx` - Redirects to `/collection` if authenticated, `/login` if not
-- `login.tsx` - Login page with username/token form
+- `login.tsx` - Login page with Discogs OAuth flow
+- `oauth-callback.tsx` - OAuth callback handler (processes verifier from Discogs)
 - `_authenticated.tsx` - Layout route with auth guard, redirects to `/login` if not authenticated
 - `_authenticated/collection.tsx` - Collection page (full implementation)
 - `_authenticated/settings.tsx` - Settings page with app version
@@ -396,32 +416,109 @@ export function getSafeRedirectUrl(
  */
 ````
 
-## API Layer
+## API Layer (tRPC)
 
-The Discogs API client is in `src/api/`:
+All Discogs API calls go through tRPC serverless functions. This is required because OAuth 1.0a needs the Consumer Secret to sign every request, and the secret must never be exposed to the client.
 
-- `client.ts` - Axios instance with auth interceptor and rate limiting
-- `discogs.ts` - API functions (`getIdentity`, `validateCredentials`, `getCollection`)
-- `rate-limiter.ts` - Tracks Discogs rate limits (60 req/min) from response headers
+**Architecture:**
 
-Storage helpers in `src/lib/storage.ts` handle token/username persistence in localStorage.
+```
+Client (React) → tRPC Client → Vercel Serverless Function → Discogs API
+```
 
-Constants in `src/lib/constants.ts` define app version, API URL, storage keys, and rate limit config.
+**Server-side (`src/server/`):**
+
+- `discogs-client.ts` - Factory to create authenticated `DiscogsClient` instances
+- `trpc/init.ts` - tRPC router and procedure definitions
+- `trpc/index.ts` - Root router combining all sub-routers
+- `trpc/routers/oauth.ts` - OAuth 1.0a token exchange procedures
+- `trpc/routers/discogs.ts` - Discogs API proxy procedures (getIdentity, getCollection, getUserProfile)
+
+**Client-side (`src/lib/`):**
+
+- `trpc.ts` - tRPC React client setup with httpBatchLink
+- `storage.ts` - OAuth tokens and user data persistence in localStorage/sessionStorage
+
+**Vercel handler (`api/trpc/[trpc].ts`):**
+
+- Single serverless function handling all tRPC routes
+- Converts VercelRequest to Web Request for tRPC fetch adapter
+
+**Available tRPC procedures:**
+
+- `oauth.getRequestToken` - Step 1 of OAuth: get request token and authorization URL
+- `oauth.getAccessToken` - Step 2 of OAuth: exchange request token for access token
+- `discogs.getIdentity` - Get authenticated user's identity
+- `discogs.getUserProfile` - Get user profile (avatar, email, collection stats)
+- `discogs.getCollection` - Get user's collection releases with pagination
+
+Constants in `src/lib/constants.ts` define app version, storage keys, and rate limit config.
+
+## Vercel Serverless Functions
+
+The `api/` directory contains Vercel Node.js Serverless Functions for server-side tRPC routes. These are compiled separately by Vercel using `moduleResolution: "node16"`, which has stricter import requirements than the client-side code.
+
+**Why Node.js Serverless (not Edge Functions):** The `@lionralfs/discogs-client` library uses `window.crypto` in its browser build. Edge Functions pick the browser bundle (no way to override), causing "window is not defined" errors. Node.js Serverless Functions properly use the Node.js bundle.
+
+**Import requirements for `api/` and `src/server/`:**
+
+1. **Use `.js` extensions** on all relative imports (even though source files are `.ts`)
+2. **No `@/` path aliases** - use relative paths only
+
+```typescript
+// ❌ Wrong - will fail on Vercel
+import { router } from './init'
+import { router } from './init.ts'
+import type { Foo } from '@/types/foo'
+
+// ✅ Correct - works on Vercel
+import { router } from './init.js'
+import type { Foo } from '../../../types/foo.js'
+```
+
+**Why this differs from client code:**
+
+| Setting             | Client (`tsconfig.app.json`) | Vercel Serverless Functions |
+| ------------------- | ---------------------------- | --------------------------- |
+| `moduleResolution`  | `bundler`                    | `node16`                    |
+| Path aliases (`@/`) | ✓ Supported                  | ✗ Not supported             |
+| Import extensions   | Optional                     | Required (`.js`)            |
+
+The local `tsc -b` command uses `tsconfig.server.json` with `moduleResolution: "bundler"`, so these errors only appear when running `vercel build`.
 
 ## Authentication
 
 Auth is managed via React Context in `src/providers/`:
 
-- `auth-context.ts` - AuthContext definition
-- `auth-provider.tsx` - AuthProvider with login/logout/token validation
+- `auth-context.ts` - AuthContext definition with OAuth state
+- `auth-provider.tsx` - AuthProvider with OAuth validation and session management
 - Use the `useAuth()` hook from `src/hooks/use-auth.ts`
 
-Auth flow:
+**OAuth 1.0a Flow:**
 
-1. On mount, always validates stored token via `/oauth/identity` (never trusts cached identity)
-2. Cached user profile is only used after successful token validation
-3. Login validates credentials, stores token/username in localStorage
-4. Logout clears localStorage and resets state
+1. User clicks "Login with Discogs"
+2. Client calls `oauth.getRequestToken` via tRPC → gets request token + authorization URL
+3. Client stores request token secret in sessionStorage, redirects to Discogs
+4. User authorizes app on Discogs, redirected back with `oauth_verifier`
+5. Client calls `oauth.getAccessToken` with request token + verifier → gets access token
+6. Access token stored in localStorage for persistent authentication
+
+**Session Management (Two-tier system):**
+
+| Action                 | Where              | What Happens                         | Next Login                                  |
+| ---------------------- | ------------------ | ------------------------------------ | ------------------------------------------- |
+| **Sign Out**           | Sidebar dropdown   | Ends session, preserves OAuth tokens | "Welcome back" with Continue/Switch account |
+| **Disconnect Discogs** | Settings → Account | Fully removes authorization          | Must re-authorize with Discogs              |
+
+- **Sign Out** (`signOut()`) - Quick logout for temporary breaks. User can quickly continue or switch accounts on next visit.
+- **Disconnect** (`disconnect()`) - Full deauthorization. Clears all tokens and caches. Use when switching Discogs accounts or revoking access.
+- On mount, if session was active, validates tokens via `discogs.getIdentity`
+- Cached profile only used after successful token validation
+
+**Login Page States:**
+
+1. **Fresh login** - No existing tokens → "Sign in with Discogs" button
+2. **Welcome back** - Tokens exist but signed out → Shows username with "Continue" or "Use different account"
 
 ### Post-Login Redirect URL Preservation
 

@@ -1,9 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
 
-import { getCollection, isVinylRecord } from '@/api/discogs'
+import { isVinylRecord } from '@/api/discogs'
+import { rateLimiter } from '@/api/rate-limiter'
 import { useAuth } from '@/hooks/use-auth'
 import { COLLECTION } from '@/lib/constants'
+import { trpc } from '@/lib/trpc'
 import {
   readParamList,
   readParamRange,
@@ -164,7 +166,8 @@ interface UseCollectionReturn {
 export function useCollection(
   options: UseCollectionOptions = {}
 ): UseCollectionReturn {
-  const { username } = useAuth()
+  const { username, oauthTokens } = useAuth()
+  const trpcUtils = trpc.useUtils()
   const urlFilters = useMemo(() => readFiltersFromUrl(), [])
   const [search, setSearch] = useState('')
   const [sort, setSort] = useState<CollectionSortKey>(options.sort ?? 'added')
@@ -280,18 +283,30 @@ export function useCollection(
     ],
     placeholderData: (previousData) => previousData,
     queryFn: async () => {
-      if (!username) {
-        throw new Error('Username is required')
+      if (!username || !oauthTokens) {
+        throw new Error('Username and OAuth tokens are required')
       }
 
       const perPage = COLLECTION.PER_PAGE
-      const fetchPage = (pageNumber: number) =>
-        getCollection(username, {
+
+      const fetchPage = async (pageNumber: number) => {
+        const result = await trpcUtils.client.discogs.getCollection.mutate({
+          accessToken: oauthTokens.accessToken,
+          accessTokenSecret: oauthTokens.accessTokenSecret,
+          username,
           page: pageNumber,
           perPage,
           sort: serverSort,
           sortOrder: serverSortOrder
         })
+
+        // Update rate limiter from response
+        if (result.rateLimit) {
+          rateLimiter.updateFromRateLimit(result.rateLimit)
+        }
+
+        return result
+      }
 
       if (!shouldFetchAllPages) {
         return fetchPage(page)
@@ -323,7 +338,7 @@ export function useCollection(
 
       return { ...firstPage, releases }
     },
-    enabled: !!username,
+    enabled: !!username && !!oauthTokens,
     staleTime: 5 * 60 * 1000 // 5 minutes
   })
 

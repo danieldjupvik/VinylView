@@ -1,187 +1,130 @@
-import { renderHook, waitFor, act } from '@testing-library/react'
-import { http, HttpResponse } from 'msw'
-import { describe, expect, it, beforeEach } from 'vitest'
+import { renderHook, act } from '@testing-library/react'
+import { describe, expect, it, beforeEach, vi } from 'vitest'
 
 import { useAuth } from '@/hooks/use-auth'
-import { setToken, setUsername } from '@/lib/storage'
-import { AuthProvider } from '@/providers/auth-provider'
-import { PreferencesProvider } from '@/providers/preferences-provider'
+import { setOAuthTokens, setSessionActive, getOAuthTokens } from '@/lib/storage'
+import { AuthContext, type AuthContextValue } from '@/providers/auth-context'
 
-import { server } from '../mocks/server'
+import { mockOAuthTokens } from '../mocks/handlers'
 
 import type { ReactNode } from 'react'
 
-const wrapper = ({ children }: { children: ReactNode }) => (
-  <PreferencesProvider>
-    <AuthProvider>{children}</AuthProvider>
-  </PreferencesProvider>
-)
+/**
+ * Creates a mock auth wrapper for testing useAuth hook behavior.
+ * Uses a mock AuthContext instead of the real AuthProvider to avoid tRPC dependencies.
+ */
+function createMockAuthWrapper(overrides: Partial<AuthContextValue> = {}) {
+  const defaultValue: AuthContextValue = {
+    isAuthenticated: false,
+    isLoading: false,
+    username: null,
+    userId: null,
+    avatarUrl: null,
+    oauthTokens: null,
+    validateOAuthTokens: async () => {},
+    signOut: () => {},
+    disconnect: () => {},
+    ...overrides
+  }
 
-describe('useAuth', () => {
+  return function MockAuthWrapper({ children }: { children: ReactNode }) {
+    return (
+      <AuthContext.Provider value={defaultValue}>
+        {children}
+      </AuthContext.Provider>
+    )
+  }
+}
+
+describe('useAuth - with mocked context', () => {
   beforeEach(() => {
     localStorage.clear()
+    sessionStorage.clear()
   })
 
-  it('starts unauthenticated when no token is stored', async () => {
-    const { result } = renderHook(() => useAuth(), { wrapper })
+  it('returns unauthenticated state when context is not authenticated', () => {
+    const { result } = renderHook(() => useAuth(), {
+      wrapper: createMockAuthWrapper({ isAuthenticated: false })
+    })
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false))
     expect(result.current.isAuthenticated).toBe(false)
     expect(result.current.username).toBeNull()
   })
 
-  it('logs in and updates auth state', async () => {
-    const { result } = renderHook(() => useAuth(), { wrapper })
-
-    await waitFor(() => expect(result.current.isLoading).toBe(false))
-
-    await act(async () => {
-      await result.current.login('testuser', 'valid-token')
+  it('returns authenticated state when context is authenticated', () => {
+    const { result } = renderHook(() => useAuth(), {
+      wrapper: createMockAuthWrapper({
+        isAuthenticated: true,
+        username: 'testuser',
+        userId: 123,
+        oauthTokens: mockOAuthTokens
+      })
     })
 
     expect(result.current.isAuthenticated).toBe(true)
     expect(result.current.username).toBe('testuser')
-    expect(localStorage.getItem('vinyldeck_token')).toBe('valid-token')
+    expect(result.current.userId).toBe(123)
+    expect(result.current.oauthTokens).toEqual(mockOAuthTokens)
   })
 
-  it('logs out and clears auth state', async () => {
-    const { result } = renderHook(() => useAuth(), { wrapper })
-
-    await waitFor(() => expect(result.current.isLoading).toBe(false))
-
-    await act(async () => {
-      await result.current.login('testuser', 'valid-token')
+  it('exposes signOut function', () => {
+    const signOut = vi.fn()
+    const { result } = renderHook(() => useAuth(), {
+      wrapper: createMockAuthWrapper({
+        isAuthenticated: true,
+        signOut
+      })
     })
 
     act(() => {
-      result.current.logout()
+      result.current.signOut()
     })
 
-    expect(result.current.isAuthenticated).toBe(false)
-    expect(result.current.username).toBeNull()
-    expect(localStorage.getItem('vinyldeck_token')).toBeNull()
+    expect(signOut).toHaveBeenCalled()
   })
 
-  it('throws error when login credentials are invalid', async () => {
-    const { result } = renderHook(() => useAuth(), { wrapper })
-
-    await waitFor(() => expect(result.current.isLoading).toBe(false))
-
-    await expect(
-      act(async () => {
-        await result.current.login('testuser', 'invalid-token')
+  it('exposes disconnect function', () => {
+    const disconnect = vi.fn()
+    const { result } = renderHook(() => useAuth(), {
+      wrapper: createMockAuthWrapper({
+        isAuthenticated: true,
+        disconnect
       })
-    ).rejects.toThrow('Invalid credentials')
-
-    expect(result.current.isAuthenticated).toBe(false)
-  })
-
-  // TODO: Investigate why result.current is null in this specific test case.
-  // Although other tests use useAuth successfully, this one fails with "expected null to be truthy"
-  // when checking result.current.
-  it.skip('throws error when username does not match token', async () => {
-    const { result } = renderHook(() => useAuth(), { wrapper })
-
-    await waitFor(() => {
-      expect(result.current).toBeTruthy()
-      if (!result.current) {
-        throw new Error('Auth context not initialized')
-      }
-      expect(result.current.isLoading).toBe(false)
     })
 
-    await expect(
-      act(async () => {
-        await result.current.login('wronguser', 'valid-token')
-      })
-    ).rejects.toThrow('Username does not match token')
-
-    expect(result.current.isAuthenticated).toBe(false)
-  })
-
-  it('handles getUserProfile failure gracefully during login', async () => {
-    server.use(
-      http.get('https://api.discogs.com/users/:username', () => {
-        return new HttpResponse(null, { status: 500 })
-      })
-    )
-
-    const { result } = renderHook(() => useAuth(), { wrapper })
-
-    await waitFor(() => expect(result.current.isLoading).toBe(false))
-
-    await act(async () => {
-      await result.current.login('testuser', 'valid-token')
+    act(() => {
+      result.current.disconnect()
     })
 
-    // Should still login successfully even if profile fetch fails
-    expect(result.current.isAuthenticated).toBe(true)
-    expect(result.current.username).toBe('testuser')
+    expect(disconnect).toHaveBeenCalled()
   })
 
-  it('validates token on mount and authenticates if valid', async () => {
-    setToken('valid-token')
-    setUsername('testuser')
+  it('throws when used outside of AuthProvider', () => {
+    expect(() => {
+      renderHook(() => useAuth())
+    }).toThrow('useAuth must be used within an AuthProvider')
+  })
+})
 
-    const { result } = renderHook(() => useAuth(), { wrapper })
-
-    await waitFor(() => expect(result.current.isLoading).toBe(false))
-
-    expect(result.current.isAuthenticated).toBe(true)
-    expect(result.current.username).toBe('testuser')
+describe('OAuth token storage behavior', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    sessionStorage.clear()
   })
 
-  it('clears auth on mount when token is invalid', async () => {
-    setToken('invalid-token')
-    setUsername('testuser')
-
-    const { result } = renderHook(() => useAuth(), { wrapper })
-
-    await waitFor(() => expect(result.current.isLoading).toBe(false))
-
-    expect(result.current.isAuthenticated).toBe(false)
-    expect(result.current.username).toBeNull()
-    expect(localStorage.getItem('vinyldeck_token')).toBeNull()
+  it('stores OAuth tokens correctly', () => {
+    setOAuthTokens(mockOAuthTokens)
+    expect(getOAuthTokens()).toEqual(mockOAuthTokens)
   })
 
-  it('handles getUserProfile failure on mount by using cached profile', async () => {
-    setToken('valid-token')
-    setUsername('testuser')
+  it('preserves tokens when session becomes inactive', () => {
+    setOAuthTokens(mockOAuthTokens)
+    setSessionActive(true)
 
-    server.use(
-      http.get('https://api.discogs.com/users/:username', () => {
-        return new HttpResponse(null, { status: 500 })
-      })
-    )
+    // Simulate sign out (session inactive but tokens preserved)
+    setSessionActive(false)
 
-    const { result } = renderHook(() => useAuth(), { wrapper })
-
-    await waitFor(() => expect(result.current.isLoading).toBe(false))
-
-    // Should still authenticate even if profile fetch fails
-    expect(result.current.isAuthenticated).toBe(true)
-    expect(result.current.username).toBe('testuser')
-  })
-
-  it('clears auth when no token exists on mount', async () => {
-    setUsername('testuser')
-
-    const { result } = renderHook(() => useAuth(), { wrapper })
-
-    await waitFor(() => expect(result.current.isLoading).toBe(false))
-
-    expect(result.current.isAuthenticated).toBe(false)
-    expect(localStorage.getItem('vinyldeck_username')).toBeNull()
-  })
-
-  it('clears auth when no username exists on mount', async () => {
-    setToken('valid-token')
-
-    const { result } = renderHook(() => useAuth(), { wrapper })
-
-    await waitFor(() => expect(result.current.isLoading).toBe(false))
-
-    expect(result.current.isAuthenticated).toBe(false)
-    expect(localStorage.getItem('vinyldeck_token')).toBeNull()
+    // Tokens should still be there
+    expect(getOAuthTokens()).toEqual(mockOAuthTokens)
   })
 })

@@ -1,20 +1,22 @@
 export const APP_VERSION = __APP_VERSION__
 
-export const DISCOGS_API_URL = 'https://api.discogs.com'
-
 export const STORAGE_KEYS = {
-  TOKEN: 'vinyldeck_token',
   USERNAME: 'vinyldeck_username',
   AVATAR_SOURCE: 'vinyldeck_avatar_source',
   GRAVATAR_EMAIL: 'vinyldeck_gravatar_email',
   IDENTITY: 'vinyldeck_identity',
   USER_PROFILE: 'vinyldeck_user_profile',
   LANGUAGE: 'vinyldeck_language',
-  VIEW_MODE: 'vinyldeck_view_mode'
+  VIEW_MODE: 'vinyldeck_view_mode',
+  OAUTH_ACCESS_TOKEN: 'vinyldeck_oauth_token',
+  OAUTH_ACCESS_TOKEN_SECRET: 'vinyldeck_oauth_token_secret',
+  SESSION_ACTIVE: 'vinyldeck_session_active'
 } as const
 
 export const SESSION_STORAGE_KEYS = {
-  REDIRECT_URL: 'vinyldeck_redirect_url'
+  REDIRECT_URL: 'vinyldeck_redirect_url',
+  OAUTH_REQUEST_TOKEN: 'vinyldeck_oauth_request_token',
+  OAUTH_REQUEST_SECRET: 'vinyldeck_oauth_request_secret'
 } as const
 
 /**
@@ -47,5 +49,5 @@ export const RATE_LIMIT = {
 } as const
 
 export const COLLECTION = {
-  PER_PAGE: 100 // Discogs API max
+  PER_PAGE: 100
 } as const

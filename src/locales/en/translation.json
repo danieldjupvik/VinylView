@@ -10,7 +10,8 @@
   },
   "common": {
     "comingSoon": "(Coming soon)",
-    "soon": "Soon"
+    "soon": "Soon",
+    "cancel": "Cancel"
   },
   "nav": {
     "collection": "Collection",
@@ -26,15 +27,23 @@
   "auth": {
     "login": "Login",
     "logout": "Logout",
-    "username": "Username",
-    "token": "Personal Access Token",
-    "tokenPlaceholder": "Enter your Discogs PAT",
-    "usernamePlaceholder": "Enter your Discogs username",
-    "loginButton": "Sign In",
-    "loggingIn": "Signing in...",
+    "signOut": "Sign out",
     "loginSuccess": "Successfully logged in",
-    "loginError": "Invalid username or token",
-    "logoutSuccess": "Successfully logged out"
+    "logoutSuccess": "Successfully logged out",
+    "signOutSuccess": "Signed out",
+    "signInWithDiscogs": "Sign in with Discogs",
+    "redirecting": "Redirecting to Discogs...",
+    "completingLogin": "Completing login...",
+    "loggingIn": "Signing in...",
+    "welcomeBack": "Welcome back, {{username}}!",
+    "continue": "Continue",
+    "useDifferentAccount": "Use different account",
+    "oauthError": "Failed to connect to Discogs. Please try again.",
+    "oauthDenied": "Authorization was denied.",
+    "oauthMissingParams": "Missing authentication parameters.",
+    "oauthSessionExpired": "Your session expired. Please try again.",
+    "oauthValidationFailed": "Could not verify your session. Please try again.",
+    "backToLogin": "Back to login"
   },
   "collection": {
     "title": "My Collection",
@@ -156,6 +165,18 @@
       "changelog": "Changelog",
       "privacy": "Privacy Policy",
       "terms": "Terms of Service"
+    },
+    "account": {
+      "title": "Account",
+      "description": "Manage your Discogs connection",
+      "disconnect": {
+        "title": "Disconnect Discogs",
+        "description": "Remove your Discogs authorization. You'll need to re-authorize to use VinylDeck again.",
+        "button": "Disconnect Discogs account",
+        "confirmTitle": "Disconnect Discogs account?",
+        "confirmDescription": "This will remove your Discogs authorization. You'll need to sign in again to use VinylDeck."
+      },
+      "disconnectSuccess": "Discogs account disconnected"
     }
   },
   "theme": {

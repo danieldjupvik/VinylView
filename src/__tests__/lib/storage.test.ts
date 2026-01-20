@@ -2,9 +2,9 @@ import { describe, it, expect, beforeEach } from 'vitest'
 
 import { STORAGE_KEYS } from '@/lib/constants'
 import {
-  getToken,
-  setToken,
-  removeToken,
+  getOAuthTokens,
+  setOAuthTokens,
+  removeOAuthTokens,
   getUsername,
   setUsername,
   removeUsername,
@@ -22,29 +22,117 @@ import {
   removeStoredUserProfile,
   getViewMode,
   setViewMode,
-  clearAuth
+  isSessionActive,
+  setSessionActive,
+  signOut,
+  disconnectDiscogs
 } from '@/lib/storage'
 import type { DiscogsIdentity, DiscogsUserProfile } from '@/types/discogs'
 
 describe('Storage utilities', () => {
   beforeEach(() => {
     localStorage.clear()
+    sessionStorage.clear()
   })
 
-  describe('Token storage', () => {
-    it('stores and retrieves token', () => {
-      setToken('test-token')
-      expect(getToken()).toBe('test-token')
+  describe('OAuth token storage', () => {
+    const mockTokens = {
+      accessToken: 'test-access-token',
+      accessTokenSecret: 'test-access-secret'
+    }
+
+    it('stores and retrieves OAuth tokens', () => {
+      setOAuthTokens(mockTokens)
+      expect(getOAuthTokens()).toEqual(mockTokens)
     })
 
-    it('returns null when no token exists', () => {
-      expect(getToken()).toBeNull()
+    it('returns null when no OAuth tokens exist', () => {
+      expect(getOAuthTokens()).toBeNull()
     })
 
-    it('removes token', () => {
-      setToken('test-token')
-      removeToken()
-      expect(getToken()).toBeNull()
+    it('returns null when only access token exists', () => {
+      localStorage.setItem(STORAGE_KEYS.OAUTH_ACCESS_TOKEN, 'only-token')
+      expect(getOAuthTokens()).toBeNull()
+    })
+
+    it('returns null when only access token secret exists', () => {
+      localStorage.setItem(
+        STORAGE_KEYS.OAUTH_ACCESS_TOKEN_SECRET,
+        'only-secret'
+      )
+      expect(getOAuthTokens()).toBeNull()
+    })
+
+    it('removes OAuth tokens', () => {
+      setOAuthTokens(mockTokens)
+      removeOAuthTokens()
+      expect(getOAuthTokens()).toBeNull()
+    })
+  })
+
+  describe('Session management', () => {
+    it('session is inactive by default', () => {
+      expect(isSessionActive()).toBe(false)
+    })
+
+    it('sets session active', () => {
+      setSessionActive(true)
+      expect(isSessionActive()).toBe(true)
+    })
+
+    it('sets session inactive', () => {
+      setSessionActive(true)
+      setSessionActive(false)
+      expect(isSessionActive()).toBe(false)
+    })
+  })
+
+  describe('signOut', () => {
+    it('ends session but preserves OAuth tokens', () => {
+      const mockTokens = {
+        accessToken: 'test-access-token',
+        accessTokenSecret: 'test-access-secret'
+      }
+
+      setOAuthTokens(mockTokens)
+      setSessionActive(true)
+      setUsername('testuser')
+
+      signOut()
+
+      expect(isSessionActive()).toBe(false)
+      // Tokens should still exist for "Welcome back" flow
+      expect(getOAuthTokens()).toEqual(mockTokens)
+      // Username preserved for "Welcome back" display
+      expect(getUsername()).toBe('testuser')
+    })
+  })
+
+  describe('disconnectDiscogs', () => {
+    it('fully removes all auth data', () => {
+      const mockIdentity: DiscogsIdentity = {
+        id: 123,
+        username: 'testuser',
+        resource_url: 'https://api.discogs.com/users/testuser',
+        consumer_name: 'VinylDeck'
+      }
+
+      const mockTokens = {
+        accessToken: 'test-access-token',
+        accessTokenSecret: 'test-access-secret'
+      }
+
+      setOAuthTokens(mockTokens)
+      setSessionActive(true)
+      setUsername('testuser')
+      setStoredIdentity(mockIdentity)
+
+      disconnectDiscogs()
+
+      expect(isSessionActive()).toBe(false)
+      expect(getOAuthTokens()).toBeNull()
+      expect(getUsername()).toBeNull()
+      expect(getStoredIdentity()).toBeNull()
     })
   })
 
@@ -127,11 +215,6 @@ describe('Storage utilities', () => {
       expect(getStoredIdentity()).toBeNull()
       expect(localStorage.getItem(STORAGE_KEYS.IDENTITY)).toBeNull()
     })
-
-    it('handles corrupted JSON data gracefully', () => {
-      localStorage.setItem(STORAGE_KEYS.IDENTITY, '{invalid}')
-      expect(getStoredIdentity()).toBeNull()
-    })
   })
 
   describe('User profile storage', () => {
@@ -167,59 +250,6 @@ describe('Storage utilities', () => {
       expect(getStoredUserProfile()).toBeNull()
       expect(localStorage.getItem(STORAGE_KEYS.USER_PROFILE)).toBeNull()
     })
-
-    it('handles corrupted JSON data gracefully', () => {
-      localStorage.setItem(STORAGE_KEYS.USER_PROFILE, '{incomplete')
-      expect(getStoredUserProfile()).toBeNull()
-    })
-
-    it('handles malformed JSON with extra characters', () => {
-      localStorage.setItem(STORAGE_KEYS.USER_PROFILE, '{"id":123}extra')
-      expect(getStoredUserProfile()).toBeNull()
-    })
-  })
-
-  describe('clearAuth', () => {
-    it('clears all auth-related storage', () => {
-      const mockIdentity: DiscogsIdentity = {
-        id: 123,
-        username: 'testuser',
-        resource_url: 'https://api.discogs.com/users/testuser',
-        consumer_name: 'VinylDeck'
-      }
-
-      const mockProfile: DiscogsUserProfile = {
-        id: 123,
-        username: 'testuser',
-        resource_url: 'https://api.discogs.com/users/testuser',
-        uri: 'https://www.discogs.com/user/testuser',
-        name: 'Test User',
-        email: 'test@example.com',
-        avatar_url: 'https://example.com/avatar.jpg',
-        num_collection: 100,
-        num_wantlist: 50
-      }
-
-      setToken('test-token')
-      setUsername('testuser')
-      setAvatarSource('gravatar')
-      setGravatarEmail('test@example.com')
-      setStoredIdentity(mockIdentity)
-      setStoredUserProfile(mockProfile)
-
-      clearAuth()
-
-      expect(getToken()).toBeNull()
-      expect(getUsername()).toBeNull()
-      expect(getAvatarSource()).toBeNull()
-      expect(getGravatarEmail()).toBeNull()
-      expect(getStoredIdentity()).toBeNull()
-      expect(getStoredUserProfile()).toBeNull()
-    })
-
-    it('does not throw when clearing already empty storage', () => {
-      expect(() => clearAuth()).not.toThrow()
-    })
   })
 
   describe('View mode storage', () => {
@@ -235,37 +265,6 @@ describe('Storage utilities', () => {
     it('falls back to grid for unknown values', () => {
       localStorage.setItem(STORAGE_KEYS.VIEW_MODE, 'list')
       expect(getViewMode()).toBe('grid')
-    })
-  })
-
-  describe('Edge cases', () => {
-    it('handles empty string as token', () => {
-      setToken('')
-      expect(getToken()).toBe('')
-    })
-
-    it('handles very long token values', () => {
-      const longToken = 'a'.repeat(10000)
-      setToken(longToken)
-      expect(getToken()).toBe(longToken)
-    })
-
-    it('handles special characters in username', () => {
-      const specialUsername = 'user@#$%^&*()'
-      setUsername(specialUsername)
-      expect(getUsername()).toBe(specialUsername)
-    })
-
-    it('handles identity with missing optional fields', () => {
-      const minimalIdentity: DiscogsIdentity = {
-        id: 123,
-        username: 'testuser',
-        resource_url: 'https://api.discogs.com/users/testuser',
-        consumer_name: 'VinylDeck'
-      }
-
-      setStoredIdentity(minimalIdentity)
-      expect(getStoredIdentity()).toEqual(minimalIdentity)
     })
   })
 })

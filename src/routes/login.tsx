@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Loader2 } from 'lucide-react'
-import { type FormEvent, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
@@ -15,23 +15,34 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { useAuth } from '@/hooks/use-auth'
 import { getAndClearRedirectUrl } from '@/lib/redirect-utils'
+import {
+  getOAuthTokens,
+  getUsername,
+  removeOAuthTokens,
+  setOAuthRequestTokens
+} from '@/lib/storage'
+import { trpc } from '@/lib/trpc'
 
 export const Route = createFileRoute('/login')({
   component: LoginPage
 })
 
-function LoginPage() {
+function LoginPage(): React.JSX.Element {
   const { t } = useTranslation()
-  const { login, isAuthenticated } = useAuth()
+  const { isAuthenticated, validateOAuthTokens } = useAuth()
   const navigate = useNavigate()
 
-  const [username, setUsername] = useState('')
-  const [token, setToken] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isValidating, setIsValidating] = useState(false)
+
+  // Check if user has existing tokens (signed out but can quick-login)
+  const existingTokens = getOAuthTokens()
+  const storedUsername = getUsername()
+  const hasExistingSession = existingTokens !== null && storedUsername !== null
+
+  const getRequestToken = trpc.oauth.getRequestToken.useMutation()
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -41,22 +52,55 @@ function LoginPage() {
     }
   }, [isAuthenticated, navigate])
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  /**
+   * Continue with existing tokens (Welcome back flow)
+   */
+  const handleContinue = async () => {
+    setIsValidating(true)
 
-    if (!username.trim() || !token.trim()) {
-      return
+    try {
+      await validateOAuthTokens()
+      // Navigation handled by isAuthenticated effect
+    } catch {
+      // Tokens were invalid, they've been cleared
+      toast.error(t('auth.oauthSessionExpired'))
+    } finally {
+      setIsValidating(false)
     }
+  }
 
+  /**
+   * Use different account - clear tokens and start fresh OAuth flow
+   */
+  const handleUseDifferentAccount = () => {
+    removeOAuthTokens()
+    // Force re-render by triggering OAuth flow
+    void handleOAuthLogin()
+  }
+
+  /**
+   * Start new OAuth flow
+   */
+  const handleOAuthLogin = async () => {
     setIsLoading(true)
 
     try {
-      await login(username.trim(), token.trim())
-      toast.success(t('auth.loginSuccess'))
-      // Navigation is handled by the useEffect when isAuthenticated becomes true
+      // Build the callback URL based on current origin
+      const callbackUrl = `${window.location.origin}/oauth-callback`
+
+      // Get request token from server
+      const result = await getRequestToken.mutateAsync({ callbackUrl })
+
+      // Store request tokens in sessionStorage for the callback
+      setOAuthRequestTokens({
+        requestToken: result.requestToken,
+        requestTokenSecret: result.requestTokenSecret
+      })
+
+      // Redirect to Discogs authorization page
+      window.location.href = result.authorizeUrl
     } catch {
-      toast.error(t('auth.loginError'))
-    } finally {
+      toast.error(t('auth.oauthError'))
       setIsLoading(false)
     }
   }
@@ -85,53 +129,59 @@ function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form
-            onSubmit={(event) => {
-              void handleSubmit(event)
-            }}
-            className="space-y-4"
-          >
+          {hasExistingSession ? (
+            // Welcome back flow - user has existing tokens
             <div className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards space-y-3 delay-500 duration-500">
-              <Label htmlFor="username">{t('auth.username')}</Label>
-              <Input
-                id="username"
-                type="text"
-                placeholder={t('auth.usernamePlaceholder')}
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                disabled={isLoading}
-                autoComplete="username"
-                className="transition-all duration-200 focus:scale-[1.01]"
-              />
+              <p className="text-muted-foreground text-center text-sm">
+                {t('auth.welcomeBack', { username: storedUsername })}
+              </p>
+              <Button
+                onClick={() => void handleContinue()}
+                className="w-full"
+                disabled={isValidating || isLoading}
+              >
+                {isValidating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {t('auth.loggingIn')}
+                  </>
+                ) : (
+                  t('auth.continue')
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleUseDifferentAccount}
+                className="w-full"
+                disabled={isValidating || isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {t('auth.redirecting')}
+                  </>
+                ) : (
+                  t('auth.useDifferentAccount')
+                )}
+              </Button>
             </div>
-            <div className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards space-y-3 delay-600 duration-500">
-              <Label htmlFor="token">{t('auth.token')}</Label>
-              <Input
-                id="token"
-                type="password"
-                placeholder={t('auth.tokenPlaceholder')}
-                value={token}
-                onChange={(e) => setToken(e.target.value)}
-                disabled={isLoading}
-                autoComplete="current-password"
-                className="transition-all duration-200 focus:scale-[1.01]"
-              />
-            </div>
+          ) : (
+            // Fresh login - no existing tokens
             <Button
-              type="submit"
-              className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards w-full duration-500"
-              disabled={isLoading || !username.trim() || !token.trim()}
+              onClick={() => void handleOAuthLogin()}
+              className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards w-full delay-500 duration-500"
+              disabled={isLoading}
             >
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t('auth.loggingIn')}
+                  {t('auth.redirecting')}
                 </>
               ) : (
-                t('auth.loginButton')
+                t('auth.signInWithDiscogs')
               )}
             </Button>
-          </form>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -21,17 +21,17 @@ import { storeRedirectUrl } from '@/lib/redirect-utils'
 
 export function SidebarUser() {
   const { t } = useTranslation()
-  const { username, logout, avatarUrl } = useAuth()
+  const { username, signOut, avatarUrl } = useAuth()
   const { avatarSource, gravatarUrl } = usePreferences()
   const navigate = useNavigate()
   const location = useRouterState({ select: (s) => s.location })
 
-  const handleLogout = () => {
+  const handleSignOut = () => {
     const currentUrl = location.pathname + location.searchStr + location.hash
     storeRedirectUrl(currentUrl)
 
-    void logout()
-    toast.success(t('auth.logoutSuccess'))
+    signOut()
+    toast.success(t('auth.signOutSuccess'))
     void navigate({ to: '/login' })
   }
 
@@ -82,9 +82,9 @@ export function SidebarUser() {
             align="start"
             sideOffset={4}
           >
-            <DropdownMenuItem onClick={handleLogout}>
+            <DropdownMenuItem onClick={handleSignOut}>
               <LogOut className="mr-2 size-4" />
-              {t('auth.logout')}
+              {t('auth.signOut')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

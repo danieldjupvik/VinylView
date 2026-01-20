@@ -86,8 +86,10 @@ const renderSettings = (
     username: 'testuser',
     userId: 123,
     avatarUrl: 'https://example.com/avatar.jpg',
-    login: vi.fn(),
-    logout: vi.fn(),
+    oauthTokens: null,
+    validateOAuthTokens: vi.fn(),
+    signOut: vi.fn(),
+    disconnect: vi.fn(),
     ...authOverrides
   }
 

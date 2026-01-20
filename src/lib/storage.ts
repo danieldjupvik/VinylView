@@ -1,20 +1,8 @@
 import type { DiscogsIdentity, DiscogsUserProfile } from '@/types/discogs'
 
-import { STORAGE_KEYS } from './constants'
+import { SESSION_STORAGE_KEYS, STORAGE_KEYS } from './constants'
 
 export type ViewMode = 'grid' | 'table'
-
-export function getToken(): string | null {
-  return localStorage.getItem(STORAGE_KEYS.TOKEN)
-}
-
-export function setToken(token: string): void {
-  localStorage.setItem(STORAGE_KEYS.TOKEN, token)
-}
-
-export function removeToken(): void {
-  localStorage.removeItem(STORAGE_KEYS.TOKEN)
-}
 
 export function getUsername(): string | null {
   return localStorage.getItem(STORAGE_KEYS.USERNAME)
@@ -113,11 +101,125 @@ export function setViewMode(mode: ViewMode): void {
   localStorage.setItem(STORAGE_KEYS.VIEW_MODE, mode)
 }
 
-export function clearAuth(): void {
-  removeToken()
+// OAuth token storage (localStorage - persisted)
+export interface OAuthTokens {
+  accessToken: string
+  accessTokenSecret: string
+}
+
+export function getOAuthTokens(): OAuthTokens | null {
+  const accessToken = localStorage.getItem(STORAGE_KEYS.OAUTH_ACCESS_TOKEN)
+  const accessTokenSecret = localStorage.getItem(
+    STORAGE_KEYS.OAUTH_ACCESS_TOKEN_SECRET
+  )
+
+  if (!accessToken || !accessTokenSecret) {
+    return null
+  }
+
+  return { accessToken, accessTokenSecret }
+}
+
+// OAuth 1.0a tokens must be stored client-side for SPA flows. These tokens
+// are only useful when combined with the server-side consumer secret for
+// request signing. Security relies on XSS prevention (CSP, sanitization).
+export function setOAuthTokens(tokens: OAuthTokens): void {
+  localStorage.setItem(STORAGE_KEYS.OAUTH_ACCESS_TOKEN, tokens.accessToken)
+  localStorage.setItem(
+    STORAGE_KEYS.OAUTH_ACCESS_TOKEN_SECRET,
+    tokens.accessTokenSecret
+  )
+}
+
+export function removeOAuthTokens(): void {
+  localStorage.removeItem(STORAGE_KEYS.OAUTH_ACCESS_TOKEN)
+  localStorage.removeItem(STORAGE_KEYS.OAUTH_ACCESS_TOKEN_SECRET)
+}
+
+// OAuth request token storage (sessionStorage - temporary)
+export interface OAuthRequestTokens {
+  requestToken: string
+  requestTokenSecret: string
+}
+
+export function getOAuthRequestTokens(): OAuthRequestTokens | null {
+  const requestToken = sessionStorage.getItem(
+    SESSION_STORAGE_KEYS.OAUTH_REQUEST_TOKEN
+  )
+  const requestTokenSecret = sessionStorage.getItem(
+    SESSION_STORAGE_KEYS.OAUTH_REQUEST_SECRET
+  )
+
+  if (!requestToken || !requestTokenSecret) {
+    return null
+  }
+
+  return { requestToken, requestTokenSecret }
+}
+
+export function setOAuthRequestTokens(tokens: OAuthRequestTokens): void {
+  sessionStorage.setItem(
+    SESSION_STORAGE_KEYS.OAUTH_REQUEST_TOKEN,
+    tokens.requestToken
+  )
+  sessionStorage.setItem(
+    SESSION_STORAGE_KEYS.OAUTH_REQUEST_SECRET,
+    tokens.requestTokenSecret
+  )
+}
+
+export function clearOAuthRequestTokens(): void {
+  sessionStorage.removeItem(SESSION_STORAGE_KEYS.OAUTH_REQUEST_TOKEN)
+  sessionStorage.removeItem(SESSION_STORAGE_KEYS.OAUTH_REQUEST_SECRET)
+}
+
+// Session management
+// SESSION_ACTIVE tracks whether user has an active session (vs signed out but tokens preserved)
+
+export function isSessionActive(): boolean {
+  return localStorage.getItem(STORAGE_KEYS.SESSION_ACTIVE) === 'true'
+}
+
+export function setSessionActive(active: boolean): void {
+  if (active) {
+    localStorage.setItem(STORAGE_KEYS.SESSION_ACTIVE, 'true')
+  } else {
+    localStorage.removeItem(STORAGE_KEYS.SESSION_ACTIVE)
+  }
+}
+
+/**
+ * Sign out - ends session but preserves OAuth tokens for quick re-login.
+ * User will see "Welcome back" on next visit.
+ */
+export function signOut(): void {
+  setSessionActive(false)
+  // Keep OAuth tokens and username for "Welcome back" flow
+  // Only clear session-specific data
+  removeStoredIdentity()
+  removeStoredUserProfile()
+  removeAvatarSource()
+  removeGravatarEmail()
+}
+
+/**
+ * Disconnect Discogs - fully removes authorization.
+ * User will need to re-authorize with Discogs on next login.
+ */
+export function disconnectDiscogs(): void {
+  setSessionActive(false)
   removeUsername()
   removeAvatarSource()
   removeGravatarEmail()
   removeStoredIdentity()
   removeStoredUserProfile()
+  removeOAuthTokens()
+}
+
+/**
+ * @deprecated Use signOut() or disconnectDiscogs() instead.
+ * Kept for backwards compatibility during migration.
+ */
+export function clearAuth(): void {
+  disconnectDiscogs()
 }

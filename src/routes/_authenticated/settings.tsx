@@ -1,9 +1,30 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { NO, US } from 'country-flag-icons/react/3x2'
-import { FileText, Monitor, Moon, Scale, Shield, Sun } from 'lucide-react'
+import {
+  FileText,
+  LogOut,
+  Monitor,
+  Moon,
+  Scale,
+  Shield,
+  Sun
+} from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { toast } from 'sonner'
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from '@/components/ui/alert-dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
@@ -91,12 +112,19 @@ function LanguageFlag({ lang }: { lang: 'en' | 'no' }) {
 
 function SettingsPage() {
   const { t, i18n } = useTranslation()
-  const { username, avatarUrl } = useAuth()
+  const { username, avatarUrl, disconnect } = useAuth()
   const { avatarSource, gravatarUrl, setAvatarSource } = usePreferences()
   const { theme, setTheme } = useTheme()
+  const navigate = useNavigate()
   const currentLanguage = normalizeLanguage(
     i18n.resolvedLanguage ?? i18n.language ?? 'en'
   )
+
+  const handleDisconnect = (): void => {
+    disconnect()
+    toast.success(t('settings.account.disconnectSuccess'))
+    void navigate({ to: '/login' })
+  }
 
   const initials = username
     ? username
@@ -199,6 +227,47 @@ function SettingsPage() {
                   </div>
                 </button>
               </div>
+            </div>
+
+            <Separator />
+
+            {/* Disconnect Discogs */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h3 className="text-sm font-medium">
+                  {t('settings.account.disconnect.title')}
+                </h3>
+                <p className="text-muted-foreground text-sm">
+                  {t('settings.account.disconnect.description')}
+                </p>
+              </div>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" className="w-full sm:w-auto">
+                    <LogOut className="mr-2 size-4" />
+                    {t('settings.account.disconnect.button')}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      {t('settings.account.disconnect.confirmTitle')}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {t('settings.account.disconnect.confirmDescription')}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDisconnect}
+                      className="bg-destructive hover:bg-destructive/90 text-white"
+                    >
+                      {t('settings.account.disconnect.button')}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </CardContent>
         </Card>
