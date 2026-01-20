@@ -41,6 +41,7 @@
     "oauthDenied": "Authorization was denied.",
     "oauthMissingParams": "Missing authentication parameters.",
     "oauthSessionExpired": "Your session expired. Please try again.",
+    "oauthValidationFailed": "Could not verify your session. Please try again.",
     "backToLogin": "Back to login"
   },
   "collection": {

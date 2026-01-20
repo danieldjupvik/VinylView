@@ -41,6 +41,7 @@
     "oauthDenied": "Autorisasjon ble avvist.",
     "oauthMissingParams": "Manglende autentiseringsparametere.",
     "oauthSessionExpired": "Økten din er utløpt. Prøv igjen.",
+    "oauthValidationFailed": "Kunne ikke bekrefte økten din. Prøv igjen.",
     "backToLogin": "Tilbake til innlogging"
   },
   "collection": {

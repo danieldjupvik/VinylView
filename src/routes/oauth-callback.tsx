@@ -28,6 +28,7 @@ type OAuthError =
   | 'missing_params'
   | 'session_expired'
   | 'exchange_failed'
+  | 'validation_failed'
 
 interface OAuthCallbackSearch {
   oauth_token: string | undefined
@@ -123,7 +124,13 @@ function OAuthCallbackPage() {
         clearOAuthRequestTokens()
 
         // Validate tokens and fetch identity via auth provider
-        await validateOAuthTokens()
+        try {
+          await validateOAuthTokens()
+        } catch {
+          setError('validation_failed')
+          setStatus('error')
+          return
+        }
 
         setStatus('success')
 
@@ -151,6 +158,8 @@ function OAuthCallbackPage() {
         return t('auth.oauthSessionExpired')
       case 'exchange_failed':
         return t('auth.oauthError')
+      case 'validation_failed':
+        return t('auth.oauthValidationFailed')
       default:
         return t('auth.oauthError')
     }

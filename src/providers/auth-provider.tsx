@@ -118,7 +118,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           avatarUrl,
           oauthTokens: tokens
         })
-      } catch {
+      } catch (error) {
         // Tokens are invalid or expired - fully disconnect
         disconnectDiscogs()
         setState({
@@ -129,6 +129,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
           avatarUrl: null,
           oauthTokens: null
         })
+        // Rethrow so callers can handle the failure (e.g., show error UI, prevent redirect)
+        throw error
       }
     },
     [
@@ -171,7 +173,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
 
       // Session was active, validate tokens
-      await validateSession(tokens)
+      // Catch errors silently on mount - state is already set to unauthenticated by validateSession
+      try {
+        await validateSession(tokens)
+      } catch {
+        // Error already handled by validateSession (disconnects and sets state)
+      }
     }
 
     void initializeAuth()
