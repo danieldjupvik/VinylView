@@ -3,6 +3,16 @@
     "name": "VinylDeck",
     "description": "Bla gjennom Discogs-vinylsamlingen din"
   },
+  "login": {
+    "subtitle": "Din vinylsamling, vakkert organisert",
+    "connectAccount": "Koble til Discogs-kontoen din",
+    "publicBrowse": {
+      "title": "Eller bla gjennom en offentlig samling",
+      "placeholder": "Skriv inn Discogs-brukernavn",
+      "button": "Bla gjennom",
+      "comingSoon": "Kommer snart! Offentlig surfing vil snart være tilgjengelig."
+    }
+  },
   "language": {
     "label": "Språk",
     "english": "Engelsk",

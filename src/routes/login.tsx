@@ -15,6 +15,7 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import { useAuth } from '@/hooks/use-auth'
 import { getAndClearRedirectUrl } from '@/lib/redirect-utils'
 import {
@@ -29,6 +30,58 @@ export const Route = createFileRoute('/login')({
   component: LoginPage
 })
 
+/**
+ * Visual vinyl record showcase component for desktop view
+ */
+function VinylShowcase(): React.JSX.Element {
+  return (
+    <div className="relative" aria-hidden="true">
+      {/* Vinyl record container */}
+      <div className="relative h-80 w-80 xl:h-96 xl:w-96">
+        {/* Spinning vinyl record */}
+        <div className="animate-vinyl-spin-slow absolute inset-0">
+          {/* Outer ring / vinyl body */}
+          <div className="dark:from-foreground/25 dark:to-foreground/10 absolute inset-0 rounded-full bg-gradient-to-br from-zinc-900 to-zinc-800" />
+
+          {/* Groove rings */}
+          <div className="dark:border-foreground/20 absolute inset-4 rounded-full border border-zinc-700" />
+          <div className="dark:border-foreground/15 absolute inset-6 rounded-full border border-zinc-600" />
+          <div className="dark:border-foreground/20 absolute inset-8 rounded-full border border-zinc-700" />
+          <div className="dark:border-foreground/15 absolute inset-10 rounded-full border border-zinc-600" />
+          <div className="dark:border-foreground/20 absolute inset-12 rounded-full border border-zinc-700" />
+          <div className="dark:border-foreground/15 absolute inset-14 rounded-full border border-zinc-600" />
+          <div className="dark:border-foreground/20 absolute inset-16 rounded-full border border-zinc-700" />
+          <div className="dark:border-foreground/15 absolute inset-20 rounded-full border border-zinc-600" />
+          <div className="dark:border-foreground/20 absolute inset-24 rounded-full border border-zinc-700" />
+
+          {/* Center label */}
+          <div className="from-primary/50 to-primary/30 absolute inset-[35%] rounded-full bg-gradient-to-br" />
+          {/* Small vinyl icon - positioned at top of label */}
+          <div className="absolute top-[39%] left-1/2 -translate-x-1/2">
+            <svg
+              viewBox="0 0 24 24"
+              className="dark:text-primary-foreground/90 h-3 w-3 text-zinc-900 xl:h-4 xl:w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <circle cx="12" cy="12" r="3" />
+              <path d="M12 5c3.87 0 7 3.13 7 7" strokeLinecap="round" />
+            </svg>
+          </div>
+          {/* RPM text - positioned at bottom of label */}
+          <span className="dark:text-primary-foreground/90 absolute bottom-[39%] left-1/2 -translate-x-1/2 text-[10px] font-medium text-zinc-900 xl:text-xs">
+            {'33⅓'}
+          </span>
+          {/* Center hole */}
+          <div className="bg-background/90 absolute inset-[47%] rounded-full" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function LoginPage(): React.JSX.Element {
   const { t } = useTranslation()
   const { isAuthenticated, validateOAuthTokens } = useAuth()
@@ -36,6 +89,8 @@ function LoginPage(): React.JSX.Element {
 
   const [isLoading, setIsLoading] = useState(false)
   const [isValidating, setIsValidating] = useState(false)
+  const [publicUsername, setPublicUsername] = useState('')
+  const [isBrowsingLoading, setIsBrowsingLoading] = useState(false)
 
   // Check if user has existing tokens (signed out but can quick-login)
   const existingTokens = getOAuthTokens()
@@ -105,85 +160,158 @@ function LoginPage(): React.JSX.Element {
     }
   }
 
+  /**
+   * Handle public collection browse (placeholder for now)
+   */
+  const handlePublicBrowse = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!publicUsername.trim()) return
+
+    setIsBrowsingLoading(true)
+
+    // Placeholder - show coming soon toast
+    setTimeout(() => {
+      toast.info(t('login.publicBrowse.comingSoon'))
+      setIsBrowsingLoading(false)
+    }, 500)
+  }
+
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[radial-gradient(1200px_circle_at_top,rgba(120,120,120,0.16),transparent_60%)] p-4">
+    <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(1200px_circle_at_top,rgba(120,120,120,0.16),transparent_60%)]">
+      {/* Floating gradient orbs */}
       <div className="bg-primary/15 animate-float-slow pointer-events-none absolute top-12 -left-24 h-64 w-64 rounded-full blur-3xl" />
       <div className="bg-secondary/25 animate-float-slower pointer-events-none absolute top-1/3 right-[-6rem] h-72 w-72 rounded-full blur-3xl" />
       <div className="bg-accent/20 animate-float-slowest pointer-events-none absolute bottom-[-6rem] left-1/2 h-72 w-72 -translate-x-1/2 rounded-full blur-3xl" />
-      {/* Theme and language toggles with fade-in animation */}
+
+      {/* Theme and language toggles */}
       <div className="animate-in fade-in slide-in-from-top-2 absolute top-4 right-4 z-10 flex items-center gap-2 duration-500">
         <LanguageToggle />
         <ModeToggle />
       </div>
 
-      {/* Main login card with stagger animation */}
-      <Card className="bg-card/80 animate-in fade-in zoom-in-95 fill-mode-backwards z-10 w-full max-w-md shadow-2xl backdrop-blur-xl duration-500">
-        <CardHeader className="text-center">
-          {/* App logo/icon with spin animation on mount */}
-          <BrandMark className="animate-in spin-in fill-mode-backwards mx-auto mb-4 delay-150 duration-700" />
-          <CardTitle className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards text-2xl delay-300 duration-500">
-            {t('app.name')}
-          </CardTitle>
-          <CardDescription className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards delay-400 duration-500">
-            {t('app.description')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {hasExistingSession ? (
-            // Welcome back flow - user has existing tokens
-            <div className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards space-y-3 delay-500 duration-500">
-              <p className="text-muted-foreground text-center text-sm">
-                {t('auth.welcomeBack', { username: storedUsername })}
-              </p>
-              <Button
-                onClick={() => void handleContinue()}
-                className="w-full"
-                disabled={isValidating || isLoading}
-              >
-                {isValidating ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t('auth.loggingIn')}
-                  </>
-                ) : (
-                  t('auth.continue')
-                )}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleUseDifferentAccount}
-                className="w-full"
-                disabled={isValidating || isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t('auth.redirecting')}
-                  </>
-                ) : (
-                  t('auth.useDifferentAccount')
-                )}
-              </Button>
-            </div>
-          ) : (
-            // Fresh login - no existing tokens
-            <Button
-              onClick={() => void handleOAuthLogin()}
-              className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards w-full delay-500 duration-500"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t('auth.redirecting')}
-                </>
+      {/* Main layout - split on desktop with max-width for widescreen */}
+      <div className="mx-auto grid min-h-screen max-w-6xl grid-cols-1 lg:grid-cols-2">
+        {/* Visual showcase panel (desktop only) */}
+        <div className="hidden items-center justify-end pr-12 lg:flex xl:pr-16">
+          <VinylShowcase />
+        </div>
+
+        {/* Login section */}
+        <div className="flex items-center justify-center p-4 sm:p-6 lg:justify-start lg:pr-8 lg:pl-12 xl:pl-16">
+          <Card className="lg:bg-card/80 z-10 w-full max-w-md border-0 bg-transparent shadow-none lg:border lg:shadow-2xl lg:backdrop-blur-xl">
+            <CardHeader className="pt-8 pb-6 text-center">
+              {/* App logo with spin animation */}
+              <BrandMark
+                size="lg"
+                className="animate-in spin-in fill-mode-backwards mx-auto mb-6 delay-500 duration-700"
+              />
+              <CardTitle className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards text-3xl delay-600 duration-500">
+                {t('app.name')}
+              </CardTitle>
+              <CardDescription className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards mt-2 text-base delay-700 duration-500">
+                {t('login.subtitle')}
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent className="space-y-8 px-6 pb-8">
+              {/* Login actions */}
+              {hasExistingSession ? (
+                // Welcome back flow - user has existing tokens
+                <div className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards space-y-4 delay-800 duration-500">
+                  <div className="mb-2 text-center">
+                    <p className="text-lg font-medium">
+                      {t('auth.welcomeBack', { username: storedUsername })}
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => void handleContinue()}
+                    className="w-full"
+                    size="lg"
+                    disabled={isValidating || isLoading}
+                  >
+                    {isValidating ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {t('auth.loggingIn')}
+                      </>
+                    ) : (
+                      t('auth.continue')
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={handleUseDifferentAccount}
+                    className="w-full"
+                    disabled={isValidating || isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {t('auth.redirecting')}
+                      </>
+                    ) : (
+                      t('auth.useDifferentAccount')
+                    )}
+                  </Button>
+                </div>
               ) : (
-                t('auth.signInWithDiscogs')
+                // Fresh login - no existing tokens
+                <div className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards space-y-3 delay-800 duration-500">
+                  <Button
+                    onClick={() => void handleOAuthLogin()}
+                    className="w-full"
+                    size="lg"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        {t('auth.redirecting')}
+                      </>
+                    ) : (
+                      t('auth.signInWithDiscogs')
+                    )}
+                  </Button>
+                  <p className="text-muted-foreground text-center text-sm">
+                    {t('login.connectAccount')}
+                  </p>
+                </div>
               )}
-            </Button>
-          )}
-        </CardContent>
-      </Card>
+
+              {/* Public browse section */}
+              <div className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards border-border border-t pt-8 delay-900 duration-500">
+                <p className="text-muted-foreground mb-4 text-center text-sm">
+                  {t('login.publicBrowse.title')}
+                </p>
+                <form
+                  onSubmit={handlePublicBrowse}
+                  className="mx-auto flex max-w-xs gap-2"
+                >
+                  <Input
+                    type="text"
+                    placeholder={t('login.publicBrowse.placeholder')}
+                    value={publicUsername}
+                    onChange={(e) => setPublicUsername(e.target.value)}
+                    className="flex-1"
+                    disabled={isBrowsingLoading}
+                  />
+                  <Button
+                    type="submit"
+                    variant="outline"
+                    disabled={isBrowsingLoading || !publicUsername.trim()}
+                  >
+                    {isBrowsingLoading ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      t('login.publicBrowse.button')
+                    )}
+                  </Button>
+                </form>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   )
 }

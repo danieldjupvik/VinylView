@@ -3,6 +3,16 @@
     "name": "VinylDeck",
     "description": "Browse your Discogs vinyl collection"
   },
+  "login": {
+    "subtitle": "Your vinyl collection, beautifully organized",
+    "connectAccount": "Connect your Discogs account",
+    "publicBrowse": {
+      "title": "Or browse a public collection",
+      "placeholder": "Enter Discogs username",
+      "button": "Browse",
+      "comingSoon": "Coming soon! Public browsing will be available shortly."
+    }
+  },
   "language": {
     "label": "Language",
     "english": "English",

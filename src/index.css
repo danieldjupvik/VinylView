@@ -221,6 +221,25 @@
   }
 }
 
+@keyframes vinyl-spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes groove-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
 @keyframes card-pop {
   0% {
     opacity: 0;
@@ -274,6 +293,12 @@
   .animate-vinyl-spin {
     animation: vinyl-spin 2.6s linear infinite;
   }
+  .animate-vinyl-spin-slow {
+    animation: vinyl-spin-slow 20s linear infinite;
+  }
+  .animate-groove-pulse {
+    animation: groove-pulse 4s ease-in-out infinite;
+  }
   .animate-card-pop {
     animation: card-pop 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
@@ -285,5 +310,16 @@
   }
   .animate-collapsible-up {
     animation: collapsible-up 200ms ease-out;
+  }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .animate-vinyl-spin-slow,
+  .animate-groove-pulse,
+  .animate-float-slow,
+  .animate-float-slower,
+  .animate-float-slowest {
+    animation: none;
   }
 }
