@@ -56,7 +56,7 @@ function VinylShowcase(): React.JSX.Element {
         {/* Spinning vinyl record */}
         <div className="animate-vinyl-spin-slow absolute inset-0">
           {/* Vinyl body with groove rings via box-shadow */}
-          <div className="absolute inset-0 rounded-full bg-gradient-to-br from-zinc-900 to-zinc-800 shadow-[inset_0_0_0_16px_transparent,inset_0_0_0_17px_rgba(63,63,70,0.6),inset_0_0_0_24px_transparent,inset_0_0_0_25px_rgba(82,82,91,0.5),inset_0_0_0_32px_transparent,inset_0_0_0_33px_rgba(63,63,70,0.6),inset_0_0_0_40px_transparent,inset_0_0_0_41px_rgba(82,82,91,0.5),inset_0_0_0_48px_transparent,inset_0_0_0_49px_rgba(63,63,70,0.6),inset_0_0_0_56px_transparent,inset_0_0_0_57px_rgba(82,82,91,0.5),inset_0_0_0_64px_transparent,inset_0_0_0_65px_rgba(63,63,70,0.6),inset_0_0_0_80px_transparent,inset_0_0_0_81px_rgba(82,82,91,0.5),inset_0_0_0_96px_transparent,inset_0_0_0_97px_rgba(63,63,70,0.6)] dark:bg-zinc-800 dark:shadow-[inset_0_0_0_16px_transparent,inset_0_0_0_17px_rgba(113,113,122,0.5),inset_0_0_0_24px_transparent,inset_0_0_0_25px_rgba(161,161,170,0.3),inset_0_0_0_32px_transparent,inset_0_0_0_33px_rgba(113,113,122,0.5),inset_0_0_0_40px_transparent,inset_0_0_0_41px_rgba(161,161,170,0.3),inset_0_0_0_48px_transparent,inset_0_0_0_49px_rgba(113,113,122,0.5),inset_0_0_0_56px_transparent,inset_0_0_0_57px_rgba(161,161,170,0.3),inset_0_0_0_64px_transparent,inset_0_0_0_65px_rgba(113,113,122,0.5),inset_0_0_0_80px_transparent,inset_0_0_0_81px_rgba(161,161,170,0.3),inset_0_0_0_96px_transparent,inset_0_0_0_97px_rgba(113,113,122,0.5),inset_0_0_0_104px_transparent,inset_0_0_0_105px_rgba(161,161,170,0.3)]" />
+          <div className="vinyl-grooves absolute inset-0 rounded-full bg-gradient-to-br from-zinc-900 to-zinc-800 dark:bg-zinc-800" />
 
           {/* Center label */}
           <div className="from-primary/50 to-primary/30 absolute inset-[35%] rounded-full bg-gradient-to-br" />
@@ -231,12 +231,12 @@ function LoginPage(): React.JSX.Element {
                 <div className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards space-y-4 delay-800 duration-500">
                   <div className="mb-4 flex flex-col items-center gap-3">
                     <Avatar className="border-border h-16 w-16 border-2">
-                      {storedProfile?.avatar_url != null && (
+                      {storedProfile?.avatar_url ? (
                         <AvatarImage
                           src={storedProfile.avatar_url}
                           alt={storedUsername ?? ''}
                         />
-                      )}
+                      ) : null}
                       <AvatarFallback className="text-lg font-medium">
                         {initials}
                       </AvatarFallback>
