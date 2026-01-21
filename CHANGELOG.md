@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.3.1-beta.1](https://github.com/danieldjupvik/VinylDeck/compare/vinyldeck-v0.3.0-beta.1...vinyldeck-v0.3.1-beta.1) (2026-01-21)
+
+
+### Features
+
+* improve sidebar buttons ([#48](https://github.com/danieldjupvik/VinylDeck/issues/48)) ([f5244dd](https://github.com/danieldjupvik/VinylDeck/commit/f5244dde16473a9895f78267f46f34f688a42ce0))
+* Redesign login page with public browsing and animations ([#51](https://github.com/danieldjupvik/VinylDeck/issues/51)) ([ccf2fb2](https://github.com/danieldjupvik/VinylDeck/commit/ccf2fb275e43eaa239a4368314083cfa32caab25))
+* update base color and accent ([#50](https://github.com/danieldjupvik/VinylDeck/issues/50)) ([2d71976](https://github.com/danieldjupvik/VinylDeck/commit/2d719766c29f1ff56bb239221a6b24a1a1fa6caa))
+
 ## [0.3.0-beta.1](https://github.com/danieldjupvik/VinylDeck/compare/vinyldeck-v0.2.0-beta.1...vinyldeck-v0.3.0-beta.1) (2026-01-20)
 
 
