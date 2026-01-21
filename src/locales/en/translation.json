@@ -53,7 +53,12 @@
     "oauthMissingParams": "Missing authentication parameters.",
     "oauthSessionExpired": "Your session expired. Please try again.",
     "oauthValidationFailed": "Could not verify your session. Please try again.",
-    "backToLogin": "Back to login"
+    "backToLogin": "Back to login",
+    "switchAccount": {
+      "title": "Switch account?",
+      "description": "This will disconnect your current Discogs account. You'll need to sign in again with a different account.",
+      "confirm": "Switch account"
+    }
   },
   "collection": {
     "title": "My Collection",
