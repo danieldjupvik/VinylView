@@ -231,7 +231,7 @@ function LoginPage(): React.JSX.Element {
                 <div className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards space-y-4 delay-800 duration-500">
                   <div className="mb-4 flex flex-col items-center gap-3">
                     <Avatar className="border-border h-16 w-16 border-2">
-                      {storedProfile?.avatar_url ? (
+                      {storedProfile?.avatar_url?.trim() ? (
                         <AvatarImage
                           src={storedProfile.avatar_url}
                           alt={storedUsername ?? ''}

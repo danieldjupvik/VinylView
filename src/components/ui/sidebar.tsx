@@ -297,10 +297,11 @@ function SidebarTrigger({
         onClick?.(event)
         toggleSidebar()
       }}
+      title="Toggle Sidebar"
+      aria-label="Toggle Sidebar"
       {...props}
     >
       <PanelLeftIcon />
-      <span className="sr-only">Toggle Sidebar</span>
     </Button>
   )
 }
