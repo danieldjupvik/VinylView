@@ -198,7 +198,7 @@ function LoginPage(): React.JSX.Element {
 
         {/* Login section */}
         <div className="flex items-center justify-center p-4 sm:p-6 lg:justify-start lg:pr-8 lg:pl-12 xl:pl-16">
-          <Card className="lg:bg-card/80 z-10 w-full max-w-md border-0 bg-transparent shadow-none lg:border lg:shadow-2xl lg:backdrop-blur-xl">
+          <Card className="lg:bg-card/80 z-10 w-full max-w-md gap-0 border-0 bg-transparent pt-0 pb-0 shadow-none lg:border lg:shadow-2xl lg:backdrop-blur-xl">
             <CardHeader className="pt-8 pb-6 text-center">
               {/* App logo with spin animation */}
               <BrandMark
