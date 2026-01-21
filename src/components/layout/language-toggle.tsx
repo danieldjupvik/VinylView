@@ -65,10 +65,10 @@ export function LanguageToggle({
           variant="ghost"
           size="icon"
           className={cn('', className)}
+          title={t('language.label')}
           aria-label={t('language.label')}
         >
           <Languages className="h-5 w-5" />
-          <span className="sr-only">{t('language.label')}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

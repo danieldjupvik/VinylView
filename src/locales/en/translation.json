@@ -5,7 +5,11 @@
   },
   "login": {
     "subtitle": "Your vinyl collection, beautifully organized",
-    "connectAccount": "Connect your Discogs account",
+    "connectAccount": "Sign in with your Discogs account",
+    "oauthNote": "You'll be redirected to Discogs to authorize access.",
+    "noAccount": "Don't have an account?",
+    "createAccount": "Create one on Discogs",
+    "redirectingHint": "You'll return here after authorizing",
     "publicBrowse": {
       "title": "Or browse a public collection",
       "placeholder": "Enter Discogs username",
@@ -48,12 +52,17 @@
     "welcomeBack": "Welcome back, {{username}}!",
     "continue": "Continue",
     "useDifferentAccount": "Use different account",
-    "oauthError": "Failed to connect to Discogs. Please try again.",
+    "oauthError": "Could not connect to Discogs. Check your internet connection and try again.",
     "oauthDenied": "Authorization was denied.",
     "oauthMissingParams": "Missing authentication parameters.",
-    "oauthSessionExpired": "Your session expired. Please try again.",
+    "oauthSessionExpired": "Your previous session expired. Please sign in again.",
     "oauthValidationFailed": "Could not verify your session. Please try again.",
-    "backToLogin": "Back to login"
+    "backToLogin": "Back to login",
+    "switchAccount": {
+      "title": "Switch account?",
+      "description": "This will disconnect your current Discogs account. You'll need to sign in again with a different account.",
+      "confirm": "Switch account"
+    }
   },
   "collection": {
     "title": "My Collection",

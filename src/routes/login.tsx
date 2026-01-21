@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Loader2 } from 'lucide-react'
+import { AlertCircle, Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -7,6 +7,18 @@ import { toast } from 'sonner'
 import { BrandMark } from '@/components/layout/brand-mark'
 import { LanguageToggle } from '@/components/layout/language-toggle'
 import { ModeToggle } from '@/components/layout/mode-toggle'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from '@/components/ui/alert-dialog'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -16,10 +28,12 @@ import {
   CardTitle
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { useAuth } from '@/hooks/use-auth'
 import { getAndClearRedirectUrl } from '@/lib/redirect-utils'
 import {
   getOAuthTokens,
+  getStoredUserProfile,
   getUsername,
   removeOAuthTokens,
   setOAuthRequestTokens
@@ -31,7 +45,8 @@ export const Route = createFileRoute('/login')({
 })
 
 /**
- * Visual vinyl record showcase component for desktop view
+ * Visual vinyl record showcase component for desktop view.
+ * Uses CSS box-shadow for groove rings to reduce DOM complexity (9 divs → 1 div).
  */
 function VinylShowcase(): React.JSX.Element {
   return (
@@ -40,19 +55,8 @@ function VinylShowcase(): React.JSX.Element {
       <div className="relative h-80 w-80 xl:h-96 xl:w-96">
         {/* Spinning vinyl record */}
         <div className="animate-vinyl-spin-slow absolute inset-0">
-          {/* Outer ring / vinyl body */}
-          <div className="dark:from-foreground/25 dark:to-foreground/10 absolute inset-0 rounded-full bg-gradient-to-br from-zinc-900 to-zinc-800" />
-
-          {/* Groove rings */}
-          <div className="dark:border-foreground/20 absolute inset-4 rounded-full border border-zinc-700" />
-          <div className="dark:border-foreground/15 absolute inset-6 rounded-full border border-zinc-600" />
-          <div className="dark:border-foreground/20 absolute inset-8 rounded-full border border-zinc-700" />
-          <div className="dark:border-foreground/15 absolute inset-10 rounded-full border border-zinc-600" />
-          <div className="dark:border-foreground/20 absolute inset-12 rounded-full border border-zinc-700" />
-          <div className="dark:border-foreground/15 absolute inset-14 rounded-full border border-zinc-600" />
-          <div className="dark:border-foreground/20 absolute inset-16 rounded-full border border-zinc-700" />
-          <div className="dark:border-foreground/15 absolute inset-20 rounded-full border border-zinc-600" />
-          <div className="dark:border-foreground/20 absolute inset-24 rounded-full border border-zinc-700" />
+          {/* Vinyl body with groove rings via box-shadow */}
+          <div className="vinyl-grooves absolute inset-0 rounded-full bg-gradient-to-br from-zinc-900 to-zinc-800 dark:bg-zinc-800" />
 
           {/* Center label */}
           <div className="from-primary/50 to-primary/30 absolute inset-[35%] rounded-full bg-gradient-to-br" />
@@ -89,13 +93,17 @@ function LoginPage(): React.JSX.Element {
 
   const [isLoading, setIsLoading] = useState(false)
   const [isValidating, setIsValidating] = useState(false)
-  const [publicUsername, setPublicUsername] = useState('')
-  const [isBrowsingLoading, setIsBrowsingLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [showSwitchDialog, setShowSwitchDialog] = useState(false)
 
   // Check if user has existing tokens (signed out but can quick-login)
   const existingTokens = getOAuthTokens()
   const storedUsername = getUsername()
+  const storedProfile = getStoredUserProfile()
   const hasExistingSession = existingTokens !== null && storedUsername !== null
+  const initials = storedUsername
+    ? storedUsername.slice(0, 2).toUpperCase()
+    : '?'
 
   const getRequestToken = trpc.oauth.getRequestToken.useMutation()
 
@@ -112,13 +120,16 @@ function LoginPage(): React.JSX.Element {
    */
   const handleContinue = async () => {
     setIsValidating(true)
+    setError(null)
 
     try {
       await validateOAuthTokens()
       // Navigation handled by isAuthenticated effect
     } catch {
       // Tokens were invalid, they've been cleared
-      toast.error(t('auth.oauthSessionExpired'))
+      const errorMessage = t('auth.oauthSessionExpired')
+      setError(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setIsValidating(false)
     }
@@ -128,6 +139,8 @@ function LoginPage(): React.JSX.Element {
    * Use different account - clear tokens and start fresh OAuth flow
    */
   const handleUseDifferentAccount = () => {
+    setShowSwitchDialog(false)
+    setError(null)
     removeOAuthTokens()
     // Force re-render by triggering OAuth flow
     void handleOAuthLogin()
@@ -138,6 +151,7 @@ function LoginPage(): React.JSX.Element {
    */
   const handleOAuthLogin = async () => {
     setIsLoading(true)
+    setError(null)
 
     try {
       // Build the callback URL based on current origin
@@ -155,25 +169,11 @@ function LoginPage(): React.JSX.Element {
       // Redirect to Discogs authorization page
       window.location.href = result.authorizeUrl
     } catch {
-      toast.error(t('auth.oauthError'))
+      const errorMessage = t('auth.oauthError')
+      setError(errorMessage)
+      toast.error(errorMessage)
       setIsLoading(false)
     }
-  }
-
-  /**
-   * Handle public collection browse (placeholder for now)
-   */
-  const handlePublicBrowse = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!publicUsername.trim()) return
-
-    setIsBrowsingLoading(true)
-
-    // Placeholder - show coming soon toast
-    setTimeout(() => {
-      toast.info(t('login.publicBrowse.comingSoon'))
-      setIsBrowsingLoading(false)
-    }, 500)
   }
 
   return (
@@ -198,7 +198,7 @@ function LoginPage(): React.JSX.Element {
 
         {/* Login section */}
         <div className="flex items-center justify-center p-4 sm:p-6 lg:justify-start lg:pr-8 lg:pl-12 xl:pl-16">
-          <Card className="lg:bg-card/80 z-10 w-full max-w-md border-0 bg-transparent shadow-none lg:border lg:shadow-2xl lg:backdrop-blur-xl">
+          <Card className="lg:bg-card/80 z-10 w-full max-w-md gap-0 border-0 bg-transparent pt-0 pb-0 shadow-none lg:border lg:shadow-2xl lg:backdrop-blur-xl">
             <CardHeader className="pt-8 pb-6 text-center">
               {/* App logo with spin animation */}
               <BrandMark
@@ -214,11 +214,33 @@ function LoginPage(): React.JSX.Element {
             </CardHeader>
 
             <CardContent className="space-y-8 px-6 pb-8">
+              {/* Inline error display */}
+              {error !== null && (
+                <div
+                  role="alert"
+                  className="animate-in fade-in slide-in-from-top-1 border-destructive/50 bg-destructive/10 text-destructive flex items-start gap-3 rounded-lg border p-3 text-sm duration-200"
+                >
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+
               {/* Login actions */}
               {hasExistingSession ? (
                 // Welcome back flow - user has existing tokens
                 <div className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards space-y-4 delay-800 duration-500">
-                  <div className="mb-2 text-center">
+                  <div className="mb-4 flex flex-col items-center gap-3">
+                    <Avatar className="border-border h-16 w-16 border-2">
+                      {storedProfile?.avatar_url?.trim() ? (
+                        <AvatarImage
+                          src={storedProfile.avatar_url}
+                          alt={storedUsername ?? ''}
+                        />
+                      ) : null}
+                      <AvatarFallback className="text-lg font-medium">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
                     <p className="text-lg font-medium">
                       {t('auth.welcomeBack', { username: storedUsername })}
                     </p>
@@ -238,25 +260,60 @@ function LoginPage(): React.JSX.Element {
                       t('auth.continue')
                     )}
                   </Button>
-                  <Button
-                    variant="outline"
-                    onClick={handleUseDifferentAccount}
-                    className="w-full"
-                    disabled={isValidating || isLoading}
+                  <AlertDialog
+                    open={showSwitchDialog}
+                    onOpenChange={setShowSwitchDialog}
                   >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {t('auth.redirecting')}
-                      </>
-                    ) : (
-                      t('auth.useDifferentAccount')
-                    )}
-                  </Button>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        disabled={isValidating || isLoading}
+                      >
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            {t('auth.redirecting')}
+                          </>
+                        ) : (
+                          t('auth.useDifferentAccount')
+                        )}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>
+                          {t('auth.switchAccount.title')}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          {t('auth.switchAccount.description')}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>
+                          {t('common.cancel')}
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleUseDifferentAccount}
+                          className="bg-destructive hover:bg-destructive/90 text-white"
+                        >
+                          {t('auth.switchAccount.confirm')}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
               ) : (
                 // Fresh login - no existing tokens
-                <div className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards space-y-3 delay-800 duration-500">
+                <div className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards space-y-4 delay-800 duration-500">
+                  <div className="space-y-1 text-center">
+                    <p className="text-muted-foreground text-sm">
+                      {t('login.connectAccount')}
+                    </p>
+                    <p className="text-muted-foreground/70 text-xs">
+                      {t('login.oauthNote')}
+                    </p>
+                  </div>
                   <Button
                     onClick={() => void handleOAuthLogin()}
                     className="w-full"
@@ -272,8 +329,21 @@ function LoginPage(): React.JSX.Element {
                       t('auth.signInWithDiscogs')
                     )}
                   </Button>
-                  <p className="text-muted-foreground text-center text-sm">
-                    {t('login.connectAccount')}
+                  {isLoading === true && (
+                    <p className="text-muted-foreground animate-pulse text-center text-xs">
+                      {t('login.redirectingHint')}
+                    </p>
+                  )}
+                  <p className="text-muted-foreground text-center text-xs">
+                    {t('login.noAccount')}{' '}
+                    <a
+                      href="https://www.discogs.com/users/create"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline-offset-4 hover:underline"
+                    >
+                      {t('login.createAccount')}
+                    </a>
                   </p>
                 </div>
               )}
@@ -282,31 +352,26 @@ function LoginPage(): React.JSX.Element {
               <div className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards border-border border-t pt-8 delay-900 duration-500">
                 <p className="text-muted-foreground mb-4 text-center text-sm">
                   {t('login.publicBrowse.title')}
+                  <span className="text-muted-foreground/60 ml-2 text-xs">
+                    {t('common.comingSoon')}
+                  </span>
                 </p>
-                <form
-                  onSubmit={handlePublicBrowse}
-                  className="mx-auto flex max-w-xs gap-2"
-                >
+                <div className="mx-auto flex max-w-xs gap-2 opacity-50">
+                  <Label htmlFor="public-browse-username" className="sr-only">
+                    {t('login.publicBrowse.placeholder')}
+                  </Label>
                   <Input
+                    id="public-browse-username"
                     type="text"
                     placeholder={t('login.publicBrowse.placeholder')}
-                    value={publicUsername}
-                    onChange={(e) => setPublicUsername(e.target.value)}
                     className="flex-1"
-                    disabled={isBrowsingLoading}
+                    disabled
+                    aria-disabled="true"
                   />
-                  <Button
-                    type="submit"
-                    variant="outline"
-                    disabled={isBrowsingLoading || !publicUsername.trim()}
-                  >
-                    {isBrowsingLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      t('login.publicBrowse.button')
-                    )}
+                  <Button type="button" variant="outline" disabled>
+                    {t('login.publicBrowse.button')}
                   </Button>
-                </form>
+                </div>
               </div>
             </CardContent>
           </Card>

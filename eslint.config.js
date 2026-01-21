@@ -47,6 +47,19 @@ export default defineConfig([
           alwaysTryTypes: true,
           project: './tsconfig.json'
         }
+      },
+      'jsx-a11y': {
+        // Map shadcn/ui components to native HTML elements for a11y checks.
+        // Update when adding new shadcn components that wrap: button, input, img, label, select, a
+        components: {
+          Button: 'button',
+          Input: 'input',
+          Label: 'label',
+          Checkbox: 'input',
+          Select: 'select',
+          Slider: 'input',
+          AvatarImage: 'img'
+        }
       }
     },
     rules: {

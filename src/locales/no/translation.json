@@ -5,7 +5,11 @@
   },
   "login": {
     "subtitle": "Din vinylsamling, vakkert organisert",
-    "connectAccount": "Koble til Discogs-kontoen din",
+    "connectAccount": "Logg inn med Discogs-kontoen din",
+    "oauthNote": "Du blir omdirigert til Discogs for å gi tilgang.",
+    "noAccount": "Har du ikke en konto?",
+    "createAccount": "Opprett en på Discogs",
+    "redirectingHint": "Du kommer tilbake hit etter autorisering",
     "publicBrowse": {
       "title": "Eller bla gjennom en offentlig samling",
       "placeholder": "Skriv inn Discogs-brukernavn",
@@ -48,12 +52,17 @@
     "welcomeBack": "Velkommen tilbake, {{username}}!",
     "continue": "Fortsett",
     "useDifferentAccount": "Bruk en annen konto",
-    "oauthError": "Kunne ikke koble til Discogs. Prøv igjen.",
+    "oauthError": "Kunne ikke koble til Discogs. Sjekk internettforbindelsen din og prøv igjen.",
     "oauthDenied": "Autorisasjon ble avvist.",
     "oauthMissingParams": "Manglende autentiseringsparametere.",
-    "oauthSessionExpired": "Økten din er utløpt. Prøv igjen.",
+    "oauthSessionExpired": "Din forrige økt utløp. Vennligst logg inn igjen.",
     "oauthValidationFailed": "Kunne ikke bekrefte økten din. Prøv igjen.",
-    "backToLogin": "Tilbake til innlogging"
+    "backToLogin": "Tilbake til innlogging",
+    "switchAccount": {
+      "title": "Bytte konto?",
+      "description": "Dette vil koble fra din nåværende Discogs-konto. Du må logge inn igjen med en annen konto.",
+      "confirm": "Bytt konto"
+    }
   },
   "collection": {
     "title": "Min samling",
