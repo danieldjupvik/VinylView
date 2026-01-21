@@ -190,14 +190,13 @@ export function setSessionActive(active: boolean): void {
 
 /**
  * Sign out - ends session but preserves OAuth tokens for quick re-login.
- * User will see "Welcome back" on next visit.
+ * User will see "Welcome back" with their avatar on next visit.
  */
 export function signOut(): void {
   setSessionActive(false)
-  // Keep OAuth tokens and username for "Welcome back" flow
-  // Only clear session-specific data
+  // Keep OAuth tokens, username, and user profile for "Welcome back" flow
+  // User profile is needed to display avatar on the welcome back screen
   removeStoredIdentity()
-  removeStoredUserProfile()
   removeAvatarSource()
   removeGravatarEmail()
 }

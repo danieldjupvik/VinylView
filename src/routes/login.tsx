@@ -18,6 +18,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -32,6 +33,7 @@ import { useAuth } from '@/hooks/use-auth'
 import { getAndClearRedirectUrl } from '@/lib/redirect-utils'
 import {
   getOAuthTokens,
+  getStoredUserProfile,
   getUsername,
   removeOAuthTokens,
   setOAuthRequestTokens
@@ -107,7 +109,11 @@ function LoginPage(): React.JSX.Element {
   // Check if user has existing tokens (signed out but can quick-login)
   const existingTokens = getOAuthTokens()
   const storedUsername = getUsername()
+  const storedProfile = getStoredUserProfile()
   const hasExistingSession = existingTokens !== null && storedUsername !== null
+  const initials = storedUsername
+    ? storedUsername.slice(0, 2).toUpperCase()
+    : '?'
 
   const getRequestToken = trpc.oauth.getRequestToken.useMutation()
 
@@ -233,7 +239,18 @@ function LoginPage(): React.JSX.Element {
               {hasExistingSession ? (
                 // Welcome back flow - user has existing tokens
                 <div className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards space-y-4 delay-800 duration-500">
-                  <div className="mb-2 text-center">
+                  <div className="mb-4 flex flex-col items-center gap-3">
+                    <Avatar className="border-border h-16 w-16 border-2">
+                      {storedProfile?.avatar_url != null && (
+                        <AvatarImage
+                          src={storedProfile.avatar_url}
+                          alt={storedUsername ?? ''}
+                        />
+                      )}
+                      <AvatarFallback className="text-lg font-medium">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
                     <p className="text-lg font-medium">
                       {t('auth.welcomeBack', { username: storedUsername })}
                     </p>
@@ -298,7 +315,15 @@ function LoginPage(): React.JSX.Element {
                 </div>
               ) : (
                 // Fresh login - no existing tokens
-                <div className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards space-y-3 delay-800 duration-500">
+                <div className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards space-y-4 delay-800 duration-500">
+                  <div className="space-y-1 text-center">
+                    <p className="text-muted-foreground text-sm">
+                      {t('login.connectAccount')}
+                    </p>
+                    <p className="text-muted-foreground/70 text-xs">
+                      {t('login.oauthNote')}
+                    </p>
+                  </div>
                   <Button
                     onClick={() => void handleOAuthLogin()}
                     className="w-full"
@@ -314,8 +339,21 @@ function LoginPage(): React.JSX.Element {
                       t('auth.signInWithDiscogs')
                     )}
                   </Button>
-                  <p className="text-muted-foreground text-center text-sm">
-                    {t('login.connectAccount')}
+                  {isLoading === true && (
+                    <p className="text-muted-foreground animate-pulse text-center text-xs">
+                      {t('login.redirectingHint')}
+                    </p>
+                  )}
+                  <p className="text-muted-foreground text-center text-xs">
+                    {t('login.noAccount')}{' '}
+                    <a
+                      href="https://www.discogs.com/users/create"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary underline-offset-4 hover:underline"
+                    >
+                      {t('login.createAccount')}
+                    </a>
                   </p>
                 </div>
               )}
