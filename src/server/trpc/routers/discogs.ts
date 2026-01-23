@@ -49,7 +49,7 @@ export const discogsRouter = router({
   /**
    * Get the identity of the authenticated user.
    * Used to validate OAuth tokens and get the username.
-   * Uses mutation instead of query to avoid tokens in URL query params.
+   * Uses query (not mutation) but sent as POST via methodOverride for security.
    */
   getIdentity: publicProcedure
     .input(
@@ -58,7 +58,7 @@ export const discogsRouter = router({
         accessTokenSecret: z.string()
       })
     )
-    .mutation(async ({ input }) => {
+    .query(async ({ input }) => {
       const client = createDiscogsClient(
         input.accessToken,
         input.accessTokenSecret
@@ -84,6 +84,7 @@ export const discogsRouter = router({
   /**
    * Get a user's collection releases.
    * Supports pagination and sorting.
+   * Uses query (not mutation) but sent as POST via methodOverride for security.
    */
   getCollection: publicProcedure
     .input(
@@ -109,7 +110,7 @@ export const discogsRouter = router({
         sortOrder: z.enum(['asc', 'desc']).optional()
       })
     )
-    .mutation(async ({ input }) => {
+    .query(async ({ input }) => {
       const client = createDiscogsClient(
         input.accessToken,
         input.accessTokenSecret
@@ -142,6 +143,7 @@ export const discogsRouter = router({
   /**
    * Get a user's profile including avatar_url and email.
    * Email is only visible when authenticated as the requested user.
+   * Uses query (not mutation) but sent as POST via methodOverride for security.
    */
   getUserProfile: publicProcedure
     .input(
@@ -151,7 +153,7 @@ export const discogsRouter = router({
         username: z.string()
       })
     )
-    .mutation(async ({ input }) => {
+    .query(async ({ input }) => {
       const client = createDiscogsClient(
         input.accessToken,
         input.accessTokenSecret
@@ -191,7 +193,7 @@ export const discogsRouter = router({
         username: z.string()
       })
     )
-    .mutation(async ({ input }) => {
+    .query(async ({ input }) => {
       const client = createDiscogsClient(
         input.accessToken,
         input.accessTokenSecret

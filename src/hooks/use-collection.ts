@@ -290,7 +290,7 @@ export function useCollection(
       const perPage = COLLECTION.PER_PAGE
 
       const fetchPage = async (pageNumber: number) => {
-        const result = await trpcUtils.client.discogs.getCollection.mutate({
+        const result = await trpcUtils.client.discogs.getCollection.query({
           accessToken: oauthTokens.accessToken,
           accessTokenSecret: oauthTokens.accessTokenSecret,
           username,
@@ -339,6 +339,9 @@ export function useCollection(
       return { ...firstPage, releases }
     },
     enabled: !!username && !!oauthTokens,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
     staleTime: 5 * 60 * 1000 // 5 minutes
   })
 

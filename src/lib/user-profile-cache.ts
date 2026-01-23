@@ -1,5 +1,13 @@
 // src/lib/user-profile-cache.ts
-// Temporary: Will be replaced with TanStack Query cache in future
+/**
+ * User profile cache for "Welcome back" login flow.
+ *
+ * Stores user profile in localStorage to show avatar/username immediately
+ * on the login page when user returns (before re-authentication).
+ *
+ * Note: TanStack Query also caches profile data, but this localStorage
+ * cache persists across sessions for the "Welcome back" UX.
+ */
 import type { DiscogsUserProfile } from '@/types/discogs'
 
 export function getStoredUserProfile(): DiscogsUserProfile | null {

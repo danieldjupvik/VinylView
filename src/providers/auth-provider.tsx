@@ -61,11 +61,12 @@ export function AuthProvider({
     }): Promise<void> => {
       try {
         // Fetch identity via tRPC client directly with the tokens
-        const identityResult =
-          await trpcUtils.client.discogs.getIdentity.mutate({
+        const identityResult = await trpcUtils.client.discogs.getIdentity.query(
+          {
             accessToken: tokens.accessToken,
             accessTokenSecret: tokens.accessTokenSecret
-          })
+          }
+        )
 
         const { identity } = identityResult
 
@@ -73,7 +74,7 @@ export function AuthProvider({
         let avatarUrl: string | null = null
         try {
           const profileResult =
-            await trpcUtils.client.discogs.getUserProfile.mutate({
+            await trpcUtils.client.discogs.getUserProfile.query({
               accessToken: tokens.accessToken,
               accessTokenSecret: tokens.accessTokenSecret,
               username: identity.username
