@@ -119,6 +119,29 @@ export default defineConfig({
       }
     })
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('/react-dom/') || id.includes('/react/')) {
+              return 'vendor-react'
+            }
+            if (id.includes('@tanstack/react-router')) {
+              return 'vendor-router'
+            }
+            if (id.includes('@tanstack/react-query') || id.includes('@trpc/')) {
+              return 'vendor-trpc'
+            }
+            if (id.includes('@radix-ui/') || id.includes('lucide-react')) {
+              return 'vendor-ui'
+            }
+          }
+          return undefined
+        }
+      }
+    }
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src')
