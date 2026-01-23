@@ -1,3 +1,4 @@
+import { persistQueryClient } from '@tanstack/query-persist-client-core'
 import {
   QueryClient,
   QueryClientProvider,
@@ -6,6 +7,7 @@ import {
 import { TRPCClientError } from '@trpc/client'
 import { useState, type ReactNode } from 'react'
 
+import { queryPersister } from '@/lib/query-persister'
 import { createTRPCClient, trpc } from '@/lib/trpc'
 
 /**
@@ -25,7 +27,7 @@ function getTRPCErrorCode(error: unknown): string | undefined {
 }
 
 function createQueryClient() {
-  return new QueryClient({
+  const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
         staleTime: 1000 * 60 * 5, // 5 minutes
@@ -46,6 +48,15 @@ function createQueryClient() {
       }
     }
   })
+
+  // Enable persistence to IndexedDB
+  void persistQueryClient({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment -- Type mismatch between query-core versions in dependencies
+    queryClient: queryClient as any,
+    persister: queryPersister
+  })
+
+  return queryClient
 }
 
 interface QueryProviderProps {

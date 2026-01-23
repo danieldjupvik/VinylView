@@ -1,21 +1,30 @@
 // src/lib/query-persister.ts
-import { experimental_createQueryPersister } from '@tanstack/query-persist-client-core'
 import { get, set, del } from 'idb-keyval'
+
+import type {
+  PersistedClient,
+  Persister
+} from '@tanstack/query-persist-client-core'
 
 /**
  * Creates an IndexedDB persister for TanStack Query.
- * Uses per-query persistence for memory efficiency.
+ * Stores the entire query cache in IndexedDB for offline access.
  *
  * Benefits:
- * - No 5MB localStorage limit (critical for aggregated collections)
+ * - No 5MB localStorage limit (critical for large collections)
  * - Async API (non-blocking)
- * - 30-day cache lifetime for expensive API calls
+ * - Persists across sessions
  */
-export const queryPersister = experimental_createQueryPersister({
-  storage: {
-    getItem: async (key: string) => await get(key),
-    setItem: async (key: string, value: unknown) => await set(key, value),
-    removeItem: async (key: string) => await del(key)
+const IDB_KEY = 'tanstack-query-cache'
+
+export const queryPersister: Persister = {
+  persistClient: async (client: PersistedClient) => {
+    await set(IDB_KEY, client)
   },
-  maxAge: 1000 * 60 * 60 * 24 * 30 // 30 days
-})
+  restoreClient: async () => {
+    return await get<PersistedClient>(IDB_KEY)
+  },
+  removeClient: async () => {
+    await del(IDB_KEY)
+  }
+}
