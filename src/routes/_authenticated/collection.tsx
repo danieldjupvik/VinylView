@@ -3,6 +3,7 @@ import { AlertCircle, RotateCw } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { CollectionSyncBanner } from '@/components/collection/collection-sync-banner'
 import { CollectionToolbar } from '@/components/collection/collection-toolbar'
 import { PaginationControls } from '@/components/collection/pagination-controls'
 import { VinylGrid } from '@/components/collection/vinyl-grid'
@@ -226,6 +227,9 @@ function CollectionPage() {
 
   return (
     <div className="flex flex-col gap-6 p-6">
+      {/* Collection change detection banner */}
+      <CollectionSyncBanner />
+
       <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
           <h1 className="text-2xl font-bold">{t('collection.title')}</h1>
