@@ -11,7 +11,7 @@ import { VinylTable } from '@/components/collection/vinyl-table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useCollection } from '@/hooks/use-collection'
-import { useViewPreference } from '@/hooks/use-view-preference'
+import { usePreferencesStore } from '@/stores/preferences-store'
 
 export const Route = createFileRoute('/_authenticated/collection')({
   component: CollectionPage
@@ -21,7 +21,12 @@ function CollectionPage() {
   const { t, i18n } = useTranslation()
   const [page, setPage] = useState(1)
   const [now, setNow] = useState(() => Date.now())
-  const { viewMode, toggleView } = useViewPreference()
+  const viewMode = usePreferencesStore((state) => state.viewMode)
+  const setViewMode = usePreferencesStore((state) => state.setViewMode)
+
+  const toggleView = () => {
+    setViewMode(viewMode === 'grid' ? 'table' : 'grid')
+  }
   const [isViewSwitching, setIsViewSwitching] = useState(false)
   const [hasViewToggled, setHasViewToggled] = useState(false)
   const viewSwitchTimeoutRef = useRef<number | null>(null)
