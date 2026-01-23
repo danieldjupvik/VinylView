@@ -13,12 +13,11 @@ import {
   CardTitle
 } from '@/components/ui/card'
 import { useAuth } from '@/hooks/use-auth'
-import { getAndClearRedirectUrl } from '@/lib/redirect-utils'
 import {
   clearOAuthRequestTokens,
-  getOAuthRequestTokens,
-  setOAuthTokens
-} from '@/lib/storage'
+  getOAuthRequestTokens
+} from '@/lib/oauth-session'
+import { getAndClearRedirectUrl } from '@/lib/redirect-utils'
 import { trpc } from '@/lib/trpc'
 
 type OAuthCallbackStatus = 'loading' | 'error' | 'success'
@@ -124,15 +123,13 @@ function OAuthCallbackPage() {
 
         // Validate tokens before storing - if validation fails, tokens are not persisted
         try {
+          // validateOAuthTokens stores tokens in Zustand auth store
           await validateOAuthTokens(tokens)
         } catch {
           setError('validation_failed')
           setStatus('error')
           return
         }
-
-        // Store tokens only after successful validation
-        setOAuthTokens(tokens)
 
         setStatus('success')
 

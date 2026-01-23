@@ -30,15 +30,11 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/hooks/use-auth'
+import { setOAuthRequestTokens } from '@/lib/oauth-session'
 import { getAndClearRedirectUrl } from '@/lib/redirect-utils'
-import {
-  getOAuthTokens,
-  getStoredUserProfile,
-  getUsername,
-  removeOAuthTokens,
-  setOAuthRequestTokens
-} from '@/lib/storage'
 import { trpc } from '@/lib/trpc'
+import { getStoredUserProfile } from '@/lib/user-profile-cache'
+import { useAuthStore } from '@/stores/auth-store'
 
 export const Route = createFileRoute('/login')({
   component: LoginPage
@@ -97,8 +93,9 @@ function LoginPage(): React.JSX.Element {
   const [showSwitchDialog, setShowSwitchDialog] = useState(false)
 
   // Check if user has existing tokens (signed out but can quick-login)
-  const existingTokens = getOAuthTokens()
-  const storedUsername = getUsername()
+  const existingTokens = useAuthStore((state) => state.tokens)
+  const storedUsername = useAuthStore((state) => state.username)
+  const disconnectStore = useAuthStore((state) => state.disconnect)
   const storedProfile = getStoredUserProfile()
   const hasExistingSession = existingTokens !== null && storedUsername !== null
   const initials = storedUsername
@@ -141,7 +138,7 @@ function LoginPage(): React.JSX.Element {
   const handleUseDifferentAccount = () => {
     setShowSwitchDialog(false)
     setError(null)
-    removeOAuthTokens()
+    disconnectStore()
     // Force re-render by triggering OAuth flow
     void handleOAuthLogin()
   }

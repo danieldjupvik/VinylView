@@ -18,8 +18,8 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
-import type { ViewMode } from '@/lib/storage'
 import type { CollectionSortKey, CollectionSortOrder } from '@/types/discogs'
+import type { ViewMode } from '@/types/preferences'
 
 interface CollectionToolbarProps {
   search: string

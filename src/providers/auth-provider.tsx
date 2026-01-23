@@ -8,8 +8,11 @@ import {
 } from 'react'
 
 import { usePreferences } from '@/hooks/use-preferences'
-import { getStoredUserProfile, setStoredUserProfile } from '@/lib/storage'
 import { trpc } from '@/lib/trpc'
+import {
+  getStoredUserProfile,
+  setStoredUserProfile
+} from '@/lib/user-profile-cache'
 import { useAuthStore } from '@/stores/auth-store'
 
 import { AuthContext, type AuthState } from './auth-context'
