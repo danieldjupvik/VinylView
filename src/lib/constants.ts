@@ -1,22 +1,15 @@
 export const APP_VERSION = __APP_VERSION__
 
-export const STORAGE_KEYS = {
-  USERNAME: 'vinyldeck_username',
-  AVATAR_SOURCE: 'vinyldeck_avatar_source',
-  GRAVATAR_EMAIL: 'vinyldeck_gravatar_email',
-  IDENTITY: 'vinyldeck_identity',
-  USER_PROFILE: 'vinyldeck_user_profile',
-  LANGUAGE: 'vinyldeck_language',
-  VIEW_MODE: 'vinyldeck_view_mode',
-  OAUTH_ACCESS_TOKEN: 'vinyldeck_oauth_token',
-  OAUTH_ACCESS_TOKEN_SECRET: 'vinyldeck_oauth_token_secret',
-  SESSION_ACTIVE: 'vinyldeck_session_active'
-} as const
-
-export const SESSION_STORAGE_KEYS = {
-  REDIRECT_URL: 'vinyldeck_redirect_url',
-  OAUTH_REQUEST_TOKEN: 'vinyldeck_oauth_request_token',
-  OAUTH_REQUEST_SECRET: 'vinyldeck_oauth_request_secret'
+/**
+ * Theme configuration.
+ * IMPORTANT: Keep THEME.DEFAULT in sync with index.html inline script.
+ * IMPORTANT: THEME.STORAGE_KEY must match the next-themes storage key.
+ */
+export const THEME = {
+  /** Default theme for new users (must match index.html inline script) */
+  DEFAULT: 'dark',
+  /** localStorage key for theme preference */
+  STORAGE_KEY: 'vinyldeck-theme'
 } as const
 
 /**

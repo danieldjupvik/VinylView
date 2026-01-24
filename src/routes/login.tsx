@@ -30,15 +30,10 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/hooks/use-auth'
+import { setOAuthRequestTokens } from '@/lib/oauth-session'
 import { getAndClearRedirectUrl } from '@/lib/redirect-utils'
-import {
-  getOAuthTokens,
-  getStoredUserProfile,
-  getUsername,
-  removeOAuthTokens,
-  setOAuthRequestTokens
-} from '@/lib/storage'
 import { trpc } from '@/lib/trpc'
+import { useAuthStore } from '@/stores/auth-store'
 
 export const Route = createFileRoute('/login')({
   component: LoginPage
@@ -97,9 +92,10 @@ function LoginPage(): React.JSX.Element {
   const [showSwitchDialog, setShowSwitchDialog] = useState(false)
 
   // Check if user has existing tokens (signed out but can quick-login)
-  const existingTokens = getOAuthTokens()
-  const storedUsername = getUsername()
-  const storedProfile = getStoredUserProfile()
+  const existingTokens = useAuthStore((state) => state.tokens)
+  const storedUsername = useAuthStore((state) => state.username)
+  const cachedProfile = useAuthStore((state) => state.cachedProfile)
+  const disconnectStore = useAuthStore((state) => state.disconnect)
   const hasExistingSession = existingTokens !== null && storedUsername !== null
   const initials = storedUsername
     ? storedUsername.slice(0, 2).toUpperCase()
@@ -141,7 +137,7 @@ function LoginPage(): React.JSX.Element {
   const handleUseDifferentAccount = () => {
     setShowSwitchDialog(false)
     setError(null)
-    removeOAuthTokens()
+    disconnectStore()
     // Force re-render by triggering OAuth flow
     void handleOAuthLogin()
   }
@@ -231,9 +227,9 @@ function LoginPage(): React.JSX.Element {
                 <div className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards space-y-4 delay-800 duration-500">
                   <div className="mb-4 flex flex-col items-center gap-3">
                     <Avatar className="border-border h-16 w-16 border-2">
-                      {storedProfile?.avatar_url?.trim() ? (
+                      {cachedProfile?.avatar_url?.trim() ? (
                         <AvatarImage
-                          src={storedProfile.avatar_url}
+                          src={cachedProfile.avatar_url}
                           alt={storedUsername ?? ''}
                         />
                       ) : null}

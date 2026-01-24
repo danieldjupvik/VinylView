@@ -136,9 +136,19 @@
     "lastUpdated": "Last updated: {{time}}",
     "notUpdated": "Not updated yet",
     "refresh": "Refresh",
+    "refreshing": "Refreshing collection...",
     "nonVinylHidden": "Non-vinyl hidden:",
+    "newItems": "{{count}} new item detected.",
+    "newItems_other": "{{count}} new items detected.",
+    "deletedItems": "{{count}} item removed.",
+    "deletedItems_other": "{{count}} items removed.",
+    "refreshPrompt": "Refresh to see changes.",
     "showing": "Showing {{start}}-{{end}} of {{total}} album",
-    "showing_other": "Showing {{start}}-{{end}} of {{total}} albums"
+    "showing_other": "Showing {{start}}-{{end}} of {{total}} albums",
+    "sync": {
+      "refreshing": "Refreshing...",
+      "refreshNow": "Refresh now"
+    }
   },
   "settings": {
     "title": "Settings",

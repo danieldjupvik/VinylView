@@ -137,8 +137,18 @@
     "notUpdated": "Ikke oppdatert ennå",
     "refresh": "Oppdater",
     "nonVinylHidden": "Ikke-vinyl skjult:",
+    "refreshing": "Oppdaterer samlingen...",
+    "newItems": "{{count}} nytt element oppdaget.",
+    "newItems_other": "{{count}} nye elementer oppdaget.",
+    "deletedItems": "{{count}} element fjernet.",
+    "deletedItems_other": "{{count}} elementer fjernet.",
+    "refreshPrompt": "Oppdater for å se endringer.",
     "showing": "Viser {{start}}-{{end}} av {{total}} album",
-    "showing_other": "Viser {{start}}-{{end}} av {{total}} album"
+    "showing_other": "Viser {{start}}-{{end}} av {{total}} album",
+    "sync": {
+      "refreshing": "Oppdaterer...",
+      "refreshNow": "Oppdater nå"
+    }
   },
   "settings": {
     "title": "Innstillinger",

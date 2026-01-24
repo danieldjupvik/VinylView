@@ -1,4 +1,4 @@
-import { SESSION_STORAGE_KEYS } from '@/lib/constants'
+import { SESSION_KEYS } from '@/lib/storage-keys'
 
 /**
  * Validates a redirect URL to prevent open redirect attacks.
@@ -49,7 +49,7 @@ export function isValidRedirectUrl(url: string): boolean {
  */
 export function storeRedirectUrl(url: string): void {
   if (isValidRedirectUrl(url)) {
-    sessionStorage.setItem(SESSION_STORAGE_KEYS.REDIRECT_URL, url)
+    sessionStorage.setItem(SESSION_KEYS.REDIRECT_URL, url)
   }
 }
 
@@ -60,8 +60,8 @@ export function storeRedirectUrl(url: string): void {
  * @returns The stored redirect URL if valid, or null
  */
 export function getAndClearRedirectUrl(): string | null {
-  const url = sessionStorage.getItem(SESSION_STORAGE_KEYS.REDIRECT_URL)
-  sessionStorage.removeItem(SESSION_STORAGE_KEYS.REDIRECT_URL)
+  const url = sessionStorage.getItem(SESSION_KEYS.REDIRECT_URL)
+  sessionStorage.removeItem(SESSION_KEYS.REDIRECT_URL)
 
   if (url && isValidRedirectUrl(url)) {
     return url

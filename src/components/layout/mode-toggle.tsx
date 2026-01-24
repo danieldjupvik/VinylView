@@ -1,4 +1,5 @@
 import { Monitor, Moon, Sun } from 'lucide-react'
+import { useTheme } from 'next-themes'
 import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/ui/button'
@@ -9,8 +10,6 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
-import { useTheme } from '@/hooks/use-theme'
-import type { Theme } from '@/providers/theme-context'
 
 export function ModeToggle(): React.JSX.Element {
   const { t } = useTranslation()
@@ -31,8 +30,8 @@ export function ModeToggle(): React.JSX.Element {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuRadioGroup
-          value={theme}
-          onValueChange={(v) => setTheme(v as Theme)}
+          value={theme ?? 'system'}
+          onValueChange={setTheme}
         >
           <DropdownMenuRadioItem value="light">
             <Sun className="mr-2 h-4 w-4" />

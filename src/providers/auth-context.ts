@@ -1,6 +1,6 @@
 import { createContext } from 'react'
 
-import type { OAuthTokens } from '@/lib/storage'
+import type { OAuthTokens } from '@/types/discogs'
 
 export interface AuthState {
   isAuthenticated: boolean

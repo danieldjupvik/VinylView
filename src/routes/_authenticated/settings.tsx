@@ -9,6 +9,7 @@ import {
   Shield,
   Sun
 } from 'lucide-react'
+import { useTheme } from 'next-themes'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
@@ -42,7 +43,6 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { useAuth } from '@/hooks/use-auth'
 import { usePreferences } from '@/hooks/use-preferences'
-import { useTheme } from '@/hooks/use-theme'
 import { APP_VERSION } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 export const Route = createFileRoute('/_authenticated/settings')({

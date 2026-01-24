@@ -28,12 +28,16 @@ function getBaseUrl() {
 /**
  * Creates a tRPC client for use outside of React components.
  * This is useful for calling tRPC procedures in non-React contexts.
+ *
+ * Uses methodOverride: 'POST' to send all queries as POST requests,
+ * keeping OAuth tokens in request body instead of URL parameters.
  */
 export function createTRPCClient(): ReturnType<typeof trpc.createClient> {
   return trpc.createClient({
     links: [
       httpBatchLink({
-        url: `${getBaseUrl()}/api/trpc`
+        url: `${getBaseUrl()}/api/trpc`,
+        methodOverride: 'POST' // Send all queries as POST for security
       })
     ]
   })

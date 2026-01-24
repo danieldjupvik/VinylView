@@ -8,19 +8,8 @@ import {
 } from 'react'
 
 import { usePreferences } from '@/hooks/use-preferences'
-import {
-  disconnectDiscogs,
-  getOAuthTokens,
-  getStoredUserProfile,
-  isSessionActive,
-  setSessionActive,
-  setStoredIdentity,
-  setStoredUserProfile,
-  setUsername,
-  signOut as signOutStorage,
-  type OAuthTokens
-} from '@/lib/storage'
 import { trpc } from '@/lib/trpc'
+import { useAuthStore } from '@/stores/auth-store'
 
 import { AuthContext, type AuthState } from './auth-context'
 
@@ -33,6 +22,15 @@ export function AuthProvider({
 }: AuthProviderProps): React.JSX.Element {
   const { gravatarEmail, setGravatarEmail } = usePreferences()
   const latestGravatarEmailRef = useRef(gravatarEmail)
+
+  // Subscribe to Zustand auth store
+  const authTokens = useAuthStore((state) => state.tokens)
+  const sessionActive = useAuthStore((state) => state.sessionActive)
+  const setAuth = useAuthStore((state) => state.setAuth)
+  const setCachedProfile = useAuthStore((state) => state.setCachedProfile)
+  const signOutStore = useAuthStore((state) => state.signOut)
+  const disconnectStore = useAuthStore((state) => state.disconnect)
+
   const [state, setState] = useState<AuthState>({
     isAuthenticated: false,
     isLoading: true,
@@ -54,26 +52,26 @@ export function AuthProvider({
    * This is called on mount (if session active) and after OAuth callback.
    */
   const validateSession = useCallback(
-    async (tokens: OAuthTokens): Promise<void> => {
+    async (tokens: {
+      accessToken: string
+      accessTokenSecret: string
+    }): Promise<void> => {
       try {
         // Fetch identity via tRPC client directly with the tokens
-        const identityResult =
-          await trpcUtils.client.discogs.getIdentity.mutate({
+        const identityResult = await trpcUtils.client.discogs.getIdentity.query(
+          {
             accessToken: tokens.accessToken,
             accessTokenSecret: tokens.accessTokenSecret
-          })
+          }
+        )
 
         const { identity } = identityResult
-
-        // Store identity and username
-        setStoredIdentity(identity)
-        setUsername(identity.username)
 
         // Fetch user profile for avatar_url and email
         let avatarUrl: string | null = null
         try {
           const profileResult =
-            await trpcUtils.client.discogs.getUserProfile.mutate({
+            await trpcUtils.client.discogs.getUserProfile.query({
               accessToken: tokens.accessToken,
               accessTokenSecret: tokens.accessTokenSecret,
               username: identity.username
@@ -81,14 +79,11 @@ export function AuthProvider({
 
           const { profile } = profileResult
 
-          // Store profile in localStorage
-          setStoredUserProfile({
+          // Cache profile in Zustand store for "Welcome back" flow
+          setCachedProfile({
             id: profile.id,
             username: profile.username,
-            resource_url: identity.resource_url,
             avatar_url: profile.avatar_url,
-            num_collection: profile.num_collection,
-            num_wantlist: profile.num_wantlist,
             ...(profile.email && { email: profile.email })
           })
 
@@ -100,17 +95,18 @@ export function AuthProvider({
             setGravatarEmail(profile.email)
           }
         } catch {
-          // Profile fetch failed, try to use cached profile
-          const cachedProfile = getStoredUserProfile()
-          avatarUrl = cachedProfile?.avatar_url ?? null
-          if (!latestGravatarEmailRef.current && cachedProfile?.email) {
-            latestGravatarEmailRef.current = cachedProfile.email
-            setGravatarEmail(cachedProfile.email)
+          // Profile fetch failed, try to use cached profile from store
+          // Use getState() to avoid dependency loop (setCachedProfile updates cachedProfile)
+          const fallbackProfile = useAuthStore.getState().cachedProfile
+          avatarUrl = fallbackProfile?.avatar_url ?? null
+          if (!latestGravatarEmailRef.current && fallbackProfile?.email) {
+            latestGravatarEmailRef.current = fallbackProfile.email
+            setGravatarEmail(fallbackProfile.email)
           }
         }
 
-        // Mark session as active and set authenticated state
-        setSessionActive(true)
+        // Update Zustand store and component state
+        setAuth(tokens, identity.username, identity.id)
         setState({
           isAuthenticated: true,
           isLoading: false,
@@ -121,7 +117,7 @@ export function AuthProvider({
         })
       } catch (error) {
         // Tokens are invalid or expired - fully disconnect
-        disconnectDiscogs()
+        disconnectStore()
         setState({
           isAuthenticated: false,
           isLoading: false,
@@ -130,23 +126,23 @@ export function AuthProvider({
           avatarUrl: null,
           oauthTokens: null
         })
-        // Rethrow so callers can handle the failure (e.g., show error UI, prevent redirect)
         throw error
       }
     },
     [
       trpcUtils.client.discogs.getIdentity,
       trpcUtils.client.discogs.getUserProfile,
-      setGravatarEmail
+      setGravatarEmail,
+      setAuth,
+      setCachedProfile,
+      disconnectStore
     ]
   )
 
   // Validate session on mount (only if session was active)
   useEffect(() => {
     const initializeAuth = async () => {
-      const tokens = getOAuthTokens()
-
-      if (!tokens) {
+      if (!authTokens) {
         // No OAuth tokens, user is not authenticated
         setState({
           isAuthenticated: false,
@@ -160,7 +156,7 @@ export function AuthProvider({
       }
 
       // Only auto-login if session was active (user didn't sign out)
-      if (!isSessionActive()) {
+      if (!sessionActive) {
         // Tokens exist but user signed out - show "Welcome back" flow
         setState({
           isAuthenticated: false,
@@ -174,26 +170,26 @@ export function AuthProvider({
       }
 
       // Session was active, validate tokens
-      // Catch errors silently on mount - state is already set to unauthenticated by validateSession
       try {
-        await validateSession(tokens)
+        await validateSession(authTokens)
       } catch {
-        // Error already handled by validateSession (disconnects and sets state)
+        // Error already handled by validateSession
       }
     }
 
     void initializeAuth()
-  }, [validateSession])
+  }, [authTokens, sessionActive, validateSession])
 
   /**
    * Validates OAuth tokens and establishes an authenticated session.
    * Can accept tokens directly (for OAuth callback) or read from storage.
-   *
-   * @param tokens - Optional tokens to validate. If not provided, reads from storage.
    */
   const validateOAuthTokens = useCallback(
-    async (tokens?: OAuthTokens): Promise<void> => {
-      const tokensToValidate = tokens ?? getOAuthTokens()
+    async (tokens?: {
+      accessToken: string
+      accessTokenSecret: string
+    }): Promise<void> => {
+      const tokensToValidate = tokens ?? authTokens
 
       if (!tokensToValidate) {
         throw new Error('No OAuth tokens found')
@@ -202,7 +198,7 @@ export function AuthProvider({
       setState((prev) => ({ ...prev, isLoading: true }))
       await validateSession(tokensToValidate)
     },
-    [validateSession]
+    [authTokens, validateSession]
   )
 
   /**
@@ -210,7 +206,7 @@ export function AuthProvider({
    * User will see "Welcome back" flow on next login.
    */
   const signOut = useCallback((): void => {
-    signOutStorage()
+    signOutStore()
 
     setState({
       isAuthenticated: false,
@@ -220,16 +216,18 @@ export function AuthProvider({
       avatarUrl: null,
       oauthTokens: null
     })
-  }, [])
+  }, [signOutStore])
 
   /**
    * Disconnect - fully removes Discogs authorization.
    * Clears all tokens and caches. User must re-authorize.
+   * Note: User profile and avatar preferences are cleared in the auth store's disconnect action.
    */
   const disconnect = useCallback((): void => {
-    disconnectDiscogs()
+    // Store's disconnect() handles profile cache and avatar preference cleanup
+    disconnectStore()
 
-    // Clear sensitive caches on disconnect
+    // Clear browser caches for sensitive data
     if ('caches' in window) {
       const cacheNames = [
         'discogs-api-cache',
@@ -251,7 +249,7 @@ export function AuthProvider({
       avatarUrl: null,
       oauthTokens: null
     })
-  }, [])
+  }, [disconnectStore])
 
   const value = useMemo(
     () => ({ ...state, validateOAuthTokens, signOut, disconnect }),

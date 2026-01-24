@@ -49,7 +49,7 @@ export const discogsRouter = router({
   /**
    * Get the identity of the authenticated user.
    * Used to validate OAuth tokens and get the username.
-   * Uses mutation instead of query to avoid tokens in URL query params.
+   * Uses query (not mutation) but sent as POST via methodOverride for security.
    */
   getIdentity: publicProcedure
     .input(
@@ -58,7 +58,7 @@ export const discogsRouter = router({
         accessTokenSecret: z.string()
       })
     )
-    .mutation(async ({ input }) => {
+    .query(async ({ input }) => {
       const client = createDiscogsClient(
         input.accessToken,
         input.accessTokenSecret
@@ -84,6 +84,7 @@ export const discogsRouter = router({
   /**
    * Get a user's collection releases.
    * Supports pagination and sorting.
+   * Uses query (not mutation) but sent as POST via methodOverride for security.
    */
   getCollection: publicProcedure
     .input(
@@ -109,7 +110,7 @@ export const discogsRouter = router({
         sortOrder: z.enum(['asc', 'desc']).optional()
       })
     )
-    .mutation(async ({ input }) => {
+    .query(async ({ input }) => {
       const client = createDiscogsClient(
         input.accessToken,
         input.accessTokenSecret
@@ -142,6 +143,7 @@ export const discogsRouter = router({
   /**
    * Get a user's profile including avatar_url and email.
    * Email is only visible when authenticated as the requested user.
+   * Uses query (not mutation) but sent as POST via methodOverride for security.
    */
   getUserProfile: publicProcedure
     .input(
@@ -151,7 +153,7 @@ export const discogsRouter = router({
         username: z.string()
       })
     )
-    .mutation(async ({ input }) => {
+    .query(async ({ input }) => {
       const client = createDiscogsClient(
         input.accessToken,
         input.accessTokenSecret
@@ -175,6 +177,44 @@ export const discogsRouter = router({
         }
       } catch (error) {
         handleDiscogsError(error, 'Failed to get user profile')
+      }
+    }),
+
+  /**
+   * Get collection metadata for change detection.
+   * Returns only the total count without fetching full collection data.
+   * Fast endpoint (1 API call) for detecting new/deleted items.
+   */
+  getCollectionMetadata: publicProcedure
+    .input(
+      z.object({
+        accessToken: z.string(),
+        accessTokenSecret: z.string(),
+        username: z.string()
+      })
+    )
+    .query(async ({ input }) => {
+      const client = createDiscogsClient(
+        input.accessToken,
+        input.accessTokenSecret
+      )
+
+      try {
+        // Fetch only first page with per_page=1 (minimal data transfer)
+        const { data, rateLimit } = await client
+          .user()
+          .collection()
+          .getReleases(input.username, 0, {
+            page: 1,
+            per_page: 1
+          })
+
+        return {
+          totalCount: data.pagination.items,
+          rateLimit
+        }
+      } catch (error) {
+        handleDiscogsError(error, 'Failed to get collection metadata')
       }
     })
 })

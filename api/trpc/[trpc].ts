@@ -49,7 +49,8 @@ export default async function handler(
     endpoint: '/api/trpc',
     req: webRequest,
     router: appRouter,
-    createContext: () => ({})
+    createContext: () => ({}),
+    allowMethodOverride: true // Allow POST for queries (secure OAuth tokens)
   })
 
   // Send the response

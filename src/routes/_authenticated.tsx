@@ -7,6 +7,7 @@ import {
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { CollectionSyncBanner } from '@/components/collection/collection-sync-banner'
 import { AppSidebar } from '@/components/layout/app-sidebar'
 import { BrandMark } from '@/components/layout/brand-mark'
 import { LanguageToggle } from '@/components/layout/language-toggle'
@@ -81,6 +82,8 @@ function AuthenticatedLayout() {
               <ModeToggle />
             </div>
           </header>
+          {/* Global collection sync banner - shows on all authenticated pages */}
+          <CollectionSyncBanner />
           <div className="flex-1">
             <Outlet />
           </div>

@@ -1,4 +1,10 @@
-import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import {
+  createFileRoute,
+  Link,
+  useLocation,
+  useNavigate,
+  useRouterState
+} from '@tanstack/react-router'
 import { Loader2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -13,12 +19,11 @@ import {
   CardTitle
 } from '@/components/ui/card'
 import { useAuth } from '@/hooks/use-auth'
-import { getAndClearRedirectUrl } from '@/lib/redirect-utils'
 import {
   clearOAuthRequestTokens,
-  getOAuthRequestTokens,
-  setOAuthTokens
-} from '@/lib/storage'
+  getOAuthRequestTokens
+} from '@/lib/oauth-session'
+import { getAndClearRedirectUrl } from '@/lib/redirect-utils'
 import { trpc } from '@/lib/trpc'
 
 type OAuthCallbackStatus = 'loading' | 'error' | 'success'
@@ -52,23 +57,42 @@ export const Route = createFileRoute('/oauth-callback')({
 function OAuthCallbackPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const location = useLocation()
+  const isHydrated = useRouterState({
+    select: (state) => state.status === 'idle'
+  })
   const { oauth_token, oauth_verifier, denied } = Route.useSearch()
   const { validateOAuthTokens } = useAuth()
 
   const [status, setStatus] = useState<OAuthCallbackStatus>('loading')
   const [error, setError] = useState<OAuthError | null>(null)
 
-  // Prevent double execution in React StrictMode
-  const hasStartedRef = useRef(false)
+  // Track which params we've processed to prevent double execution in StrictMode
+  // while still allowing re-execution when params change (e.g., router hydration)
+  const processedParamsRef = useRef<string | null>(null)
 
   const getAccessToken = trpc.oauth.getAccessToken.useMutation()
 
+  const hasSearch = location.searchStr.length > 0
+  const noParams = !oauth_token && !oauth_verifier && !denied
+  const awaitingParams = noParams && !hasSearch && !isHydrated
+  const paramsMissing = noParams && !hasSearch && isHydrated
+
   useEffect(() => {
-    // Guard against double execution (React StrictMode runs effects twice)
-    if (hasStartedRef.current) {
+    // Create a key from current params to detect changes
+    const paramsKey = `${oauth_token ?? ''}|${oauth_verifier ?? ''}|${denied ?? ''}`
+
+    // Skip if we've already processed these exact params (prevents StrictMode double-run)
+    if (processedParamsRef.current === paramsKey) {
       return
     }
-    hasStartedRef.current = true
+
+    // If no params are available, wait for router hydration or show error after hydration.
+    if (awaitingParams || paramsMissing) {
+      return
+    }
+
+    processedParamsRef.current = paramsKey
 
     const exchangeTokens = async () => {
       // Check if user denied authorization
@@ -124,15 +148,13 @@ function OAuthCallbackPage() {
 
         // Validate tokens before storing - if validation fails, tokens are not persisted
         try {
+          // validateOAuthTokens stores tokens in Zustand auth store
           await validateOAuthTokens(tokens)
         } catch {
           setError('validation_failed')
           setStatus('error')
           return
         }
-
-        // Store tokens only after successful validation
-        setOAuthTokens(tokens)
 
         setStatus('success')
 
@@ -147,11 +169,19 @@ function OAuthCallbackPage() {
     }
 
     void exchangeTokens()
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Only run once on mount
-  }, [])
+  }, [
+    denied,
+    getAccessToken,
+    navigate,
+    oauth_token,
+    oauth_verifier,
+    awaitingParams,
+    paramsMissing,
+    validateOAuthTokens
+  ])
 
-  const getErrorMessage = (): string => {
-    switch (error) {
+  const getErrorMessage = (currentError: OAuthError | null): string => {
+    switch (currentError) {
       case 'denied':
         return t('auth.oauthDenied')
       case 'missing_params':
@@ -167,6 +197,9 @@ function OAuthCallbackPage() {
     }
   }
 
+  const effectiveStatus = paramsMissing ? 'error' : status
+  const effectiveError = paramsMissing ? 'missing_params' : error
+
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[radial-gradient(1200px_circle_at_top,rgba(120,120,120,0.16),transparent_60%)] p-4">
       <div className="bg-primary/15 animate-float-slow pointer-events-none absolute top-12 -left-24 h-64 w-64 rounded-full blur-3xl" />
@@ -178,16 +211,16 @@ function OAuthCallbackPage() {
           <BrandMark className="mx-auto mb-4" />
           <CardTitle className="text-2xl">{t('app.name')}</CardTitle>
           <CardDescription>
-            {status === 'loading' && t('auth.completingLogin')}
-            {status === 'error' && getErrorMessage()}
-            {status === 'success' && t('auth.loginSuccess')}
+            {effectiveStatus === 'loading' && t('auth.completingLogin')}
+            {effectiveStatus === 'error' && getErrorMessage(effectiveError)}
+            {effectiveStatus === 'success' && t('auth.loginSuccess')}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-4">
-          {status === 'loading' && (
+          {effectiveStatus === 'loading' && (
             <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
           )}
-          {status === 'error' && (
+          {effectiveStatus === 'error' && (
             <Button asChild variant="outline">
               <Link to="/login">{t('auth.backToLogin')}</Link>
             </Button>

@@ -36,6 +36,22 @@ export interface DiscogsOAuthAccessToken {
 }
 
 /**
+ * App-level OAuth token storage (stored in localStorage via Zustand)
+ */
+export interface OAuthTokens {
+  accessToken: string
+  accessTokenSecret: string
+}
+
+/**
+ * OAuth request tokens (temporary, stored in sessionStorage during OAuth flow)
+ */
+export interface OAuthRequestTokens {
+  requestToken: string
+  requestTokenSecret: string
+}
+
+/**
  * ==============================================================================
  * User Identity
  * ==============================================================================

@@ -28,7 +28,8 @@ app.all('/api/trpc/*', async (c) => {
     endpoint: '/api/trpc',
     req: c.req.raw,
     router: appRouter,
-    createContext: () => ({})
+    createContext: () => ({}),
+    allowMethodOverride: true // Allow POST for queries (secure OAuth tokens)
   })
   return response
 })

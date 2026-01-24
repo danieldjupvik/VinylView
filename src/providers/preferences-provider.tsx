@@ -1,3 +1,4 @@
+// src/providers/preferences-provider.tsx
 import {
   useCallback,
   useEffect,
@@ -7,12 +8,7 @@ import {
 } from 'react'
 
 import { buildGravatarUrl, normalizeGravatarEmail } from '@/lib/gravatar'
-import {
-  getAvatarSource,
-  getGravatarEmail,
-  setAvatarSource as storeAvatarSource,
-  setGravatarEmail as storeGravatarEmail
-} from '@/lib/storage'
+import { usePreferencesStore } from '@/stores/preferences-store'
 
 import { PreferencesContext, type AvatarSource } from './preferences-context'
 
@@ -20,20 +16,26 @@ interface PreferencesProviderProps {
   children: ReactNode
 }
 
-const DEFAULT_AVATAR_SOURCE: AvatarSource = 'discogs'
-
+/**
+ * Preferences provider using Zustand store.
+ * Provides React Context wrapper for Zustand store + Gravatar URL loading logic.
+ */
 export function PreferencesProvider({
   children
 }: PreferencesProviderProps): React.JSX.Element {
-  const [avatarSource, setAvatarSourceState] = useState<AvatarSource>(() => {
-    const stored = getAvatarSource()
-    return stored === 'gravatar' ? 'gravatar' : DEFAULT_AVATAR_SOURCE
-  })
-  const [gravatarEmail, setGravatarEmailState] = useState(
-    () => getGravatarEmail() ?? ''
+  // Subscribe to Zustand store
+  const avatarSource = usePreferencesStore((state) => state.avatarSource)
+  const gravatarEmail = usePreferencesStore((state) => state.gravatarEmail)
+  const setAvatarSourceStore = usePreferencesStore(
+    (state) => state.setAvatarSource
   )
+  const setGravatarEmailStore = usePreferencesStore(
+    (state) => state.setGravatarEmail
+  )
+
   const [gravatarUrl, setGravatarUrl] = useState<string | null>(null)
 
+  // Load Gravatar URL when email changes
   useEffect(() => {
     const url = buildGravatarUrl(gravatarEmail, 128)
     if (!url) {
@@ -59,30 +61,37 @@ export function PreferencesProvider({
     }
   }, [gravatarEmail])
 
-  const setAvatarSource = useCallback((source: AvatarSource): void => {
-    storeAvatarSource(source)
-    setAvatarSourceState(source)
-  }, [])
+  const setAvatarSource = useCallback(
+    (source: AvatarSource): void => {
+      setAvatarSourceStore(source)
+    },
+    [setAvatarSourceStore]
+  )
 
-  const setGravatarEmail = useCallback((email: string): void => {
-    const normalized = normalizeGravatarEmail(email)
-    storeGravatarEmail(normalized)
-    setGravatarEmailState(normalized)
-    setGravatarUrl(null)
-  }, [])
+  const setGravatarEmail = useCallback(
+    (email: string): void => {
+      const normalized = normalizeGravatarEmail(email)
+      setGravatarEmailStore(normalized)
+      setGravatarUrl(null)
+    },
+    [setGravatarEmailStore]
+  )
+
+  // Derive effective gravatarUrl - null if email is empty (prevents stale URL after reset)
+  const effectiveGravatarUrl = gravatarEmail ? gravatarUrl : null
 
   const value = useMemo(
     () => ({
       avatarSource,
       gravatarEmail,
-      gravatarUrl,
+      gravatarUrl: effectiveGravatarUrl,
       setAvatarSource,
       setGravatarEmail
     }),
     [
       avatarSource,
       gravatarEmail,
-      gravatarUrl,
+      effectiveGravatarUrl,
       setAvatarSource,
       setGravatarEmail
     ]

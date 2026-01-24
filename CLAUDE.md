@@ -193,7 +193,9 @@ Squash merge is the only strategy that gives you full control over the changelog
 - **shadcn/ui** (new-york style) for UI components
 - **Bun** as the package manager
 - **TanStack Router** for file-based routing
-- **TanStack Query** for server state management
+- **TanStack Query** for server state management with IndexedDB persistence
+- **Zustand** for client state (auth, preferences) with localStorage persistence
+- **next-themes** for theme management (FOUC prevention)
 - **tRPC** for type-safe API calls via Vercel Serverless Functions
 - **i18next** for internationalization
 - **country-flag-icons** for lightweight flag icons
@@ -206,13 +208,14 @@ Squash merge is the only strategy that gives you full control over the changelog
 - `src/api/` - Client-side API helpers and rate limiter utilities
 - `src/components/ui/` - shadcn/ui components (added via `bunx shadcn add <component>`)
 - `src/components/layout/` - Layout components (sidebar, brand mark, toggles)
-- `src/components/collection/` - Collection view components
+- `src/components/collection/` - Collection view components (including sync banner)
 - `src/components/auth/` - Authentication components
-- `src/hooks/` - Custom React hooks (auth, collection, preferences, theme)
-- `src/lib/` - Utility functions, constants, storage, tRPC client, gravatar helpers
+- `src/hooks/` - Custom React hooks (auth, collection, preferences, collection sync)
+- `src/lib/` - Utility functions, constants, storage keys, tRPC client, query persister
 - `src/locales/` - i18n translation files
 - `src/providers/` - React context providers (auth, theme, preferences, query/tRPC, i18n)
 - `src/routes/` - TanStack Router file-based routes
+- `src/stores/` - Zustand stores (auth-store, preferences-store)
 - `src/types/` - TypeScript type definitions
 
 ## Path Aliases
@@ -422,7 +425,9 @@ Client (React) → tRPC Client → Vercel Serverless Function → Discogs API
 **Client-side (`src/lib/`):**
 
 - `trpc.ts` - tRPC React client setup with httpBatchLink
-- `storage.ts` - OAuth tokens and user data persistence in localStorage/sessionStorage
+- `query-persister.ts` - IndexedDB persistence for TanStack Query cache
+- `storage-keys.ts` - Centralized storage key constants
+- `cross-tab-sync.ts` - Cross-tab auth synchronization
 
 **Vercel handler (`api/trpc/[trpc].ts`):**
 
@@ -436,8 +441,9 @@ Client (React) → tRPC Client → Vercel Serverless Function → Discogs API
 - `discogs.getIdentity` - Get authenticated user's identity
 - `discogs.getUserProfile` - Get user profile (avatar, email, collection stats)
 - `discogs.getCollection` - Get user's collection releases with pagination
+- `discogs.getCollectionMetadata` - Fast metadata check for collection change detection
 
-Constants in `src/lib/constants.ts` define app version, storage keys, and rate limit config.
+Constants in `src/lib/constants.ts` define app version and rate limit config. Storage keys are in `src/lib/storage-keys.ts`.
 
 ## Vercel Serverless Functions
 
@@ -473,10 +479,11 @@ The local `tsc -b` command uses `tsconfig.server.json` with `moduleResolution: "
 
 ## Authentication
 
-Auth is managed via React Context in `src/providers/`:
+Auth state is managed via Zustand store with React Context wrapper:
 
-- `auth-context.ts` - AuthContext definition with OAuth state
-- `auth-provider.tsx` - AuthProvider with OAuth validation and session management
+- `src/stores/auth-store.ts` - Zustand store for OAuth tokens, session state, username, userId
+- `src/providers/auth-context.ts` - AuthContext definition with OAuth state
+- `src/providers/auth-provider.tsx` - AuthProvider consuming Zustand store + OAuth validation
 - Use the `useAuth()` hook from `src/hooks/use-auth.ts`
 
 **OAuth 1.0a Flow:**
@@ -486,7 +493,7 @@ Auth is managed via React Context in `src/providers/`:
 3. Client stores request token secret in sessionStorage, redirects to Discogs
 4. User authorizes app on Discogs, redirected back with `oauth_verifier`
 5. Client calls `oauth.getAccessToken` with request token + verifier → gets access token
-6. Access token stored in localStorage for persistent authentication
+6. Access token stored in Zustand auth store (persisted to localStorage)
 
 **Session Management (Two-tier system):**
 
@@ -499,6 +506,7 @@ Auth is managed via React Context in `src/providers/`:
 - **Disconnect** (`disconnect()`) - Full deauthorization. Clears all tokens and caches. Use when switching Discogs accounts or revoking access.
 - On mount, if session was active, validates tokens via `discogs.getIdentity`
 - Cached profile only used after successful token validation
+- **Cross-tab sync**: Logout in one tab automatically logs out all tabs (via `setupCrossTabSync()` in `main.tsx`)
 
 **Login Page States:**
 
@@ -550,7 +558,7 @@ The sidebar uses shadcn's sidebar component with collapsible functionality.
 ## Collection View Toggle
 
 - Collection supports grid and table views with a toolbar toggle.
-- View mode preference is stored in localStorage (`STORAGE_KEYS.VIEW_MODE`).
+- View mode preference is stored via Zustand preferences store (`usePreferencesStore`).
 - Table view is designed for responsive use; columns collapse on smaller screens.
 
 ## View Transitions
@@ -569,3 +577,215 @@ The sidebar uses shadcn's sidebar component with collapsible functionality.
   - API responses: NetworkFirst strategy, 1-hour cache
   - Cover images: CacheFirst strategy, 30-day cache
 - Service worker auto-updates on new deployment
+
+## State Management (Zustand)
+
+Client state is managed via Zustand stores with automatic localStorage persistence:
+
+**Stores (`src/stores/`):**
+
+- `auth-store.ts` - OAuth tokens, session state, username, userId, cachedProfile
+- `preferences-store.ts` - View mode, avatar source, Gravatar email
+
+**Key pattern:**
+
+```typescript
+import { useAuthStore } from '@/stores/auth-store'
+import { usePreferencesStore } from '@/stores/preferences-store'
+
+// Read state
+const tokens = useAuthStore((state) => state.tokens)
+const viewMode = usePreferencesStore((state) => state.viewMode)
+
+// Actions
+const signOut = useAuthStore((state) => state.signOut)
+const setViewMode = usePreferencesStore((state) => state.setViewMode)
+```
+
+**Benefits over React Context:**
+
+- Simpler code (~283 lines of Context → ~80 lines of stores)
+- Built-in localStorage persistence via `persist` middleware
+- No provider nesting required for direct store access
+- Automatic cross-tab sync for auth state
+
+**IMPORTANT: Always use Zustand for client state persistence.** Do not use raw `localStorage.setItem/getItem` directly. The only exceptions are third-party libraries that manage their own storage:
+
+- `next-themes` - Manages theme preference internally
+- `i18next` - Manages language preference internally
+
+For any new client state that needs persistence, add it to an existing Zustand store or create a new one.
+
+## Storage Architecture
+
+Storage has been consolidated from 11 fragmented keys to 4 main keys:
+
+**localStorage keys (`src/lib/storage-keys.ts`):**
+
+| Key                  | Managed By  | Contents                                                     |
+| -------------------- | ----------- | ------------------------------------------------------------ |
+| `vinyldeck-auth`     | Zustand     | OAuth tokens, sessionActive, username, userId, cachedProfile |
+| `vinyldeck-prefs`    | Zustand     | viewMode, avatarSource, gravatarEmail                        |
+| `vinyldeck-theme`    | next-themes | Theme preference (light/dark/system)                         |
+| `vinyldeck-language` | i18next     | Language preference (en/nb)                                  |
+
+**sessionStorage keys:**
+
+| Key                       | Purpose                       |
+| ------------------------- | ----------------------------- |
+| `vinyldeck-oauth-request` | Temporary OAuth request token |
+| `vinyldeck-redirect`      | Post-login redirect URL       |
+
+**IndexedDB:**
+
+- TanStack Query cache persisted via `idb-keyval` library
+- No 5MB localStorage limit (critical for large collections)
+- 30-day cache lifetime for expensive API calls
+
+## Query Persistence (IndexedDB)
+
+TanStack Query cache is persisted to IndexedDB for instant page loads:
+
+**Setup (`src/lib/query-persister.ts`):**
+
+- Uses `@tanstack/query-persist-client-core` with `idb-keyval`
+- All queries automatically persist to IndexedDB
+- 30-day max age for cached data
+- `placeholderData: keepPreviousData` shows old data during refetch
+
+**Benefits:**
+
+- Instant page loads from cache (no loading spinners)
+- Survives browser restarts
+- Scales to large collections (bypasses localStorage 5MB limit)
+- Background refetch with old data shown
+
+## Theme Management (next-themes)
+
+Theme is managed via `next-themes` library for FOUC prevention:
+
+**Implementation:**
+
+- `src/providers/theme-provider.tsx` - Wraps app with NextThemesProvider
+- `index.html` - Inline script applies theme before React loads
+- `src/components/layout/mode-toggle.tsx` - Uses `useTheme()` from next-themes
+
+**Features:**
+
+- No FOUC (flash of unstyled content) on page load
+- No flickering on theme toggle (`disableTransitionOnChange`)
+- System theme detection (`enableSystem`)
+- Persists to `vinyldeck-theme` localStorage key
+
+## Collection Sync (Change Detection)
+
+Detects changes in user's Discogs collection without refetching full data:
+
+**How it works:**
+
+1. User adds vinyl on Discogs website
+2. User opens VinylDeck → cached collection loads instantly
+3. Background metadata check (1 fast API call) detects count change
+4. Banner shows: "5 new items detected - Refresh to see changes"
+5. User clicks refresh → full collection refetches in background
+6. Old data shown during refresh (no loading spinners)
+
+**Implementation:**
+
+- `src/hooks/use-collection-sync.ts` - Change detection hook
+- `src/components/collection/collection-sync-banner.tsx` - UI banner
+- `discogs.getCollectionMetadata` - Fast tRPC procedure (fetches count only)
+
+**Usage:**
+
+```typescript
+const { hasChanges, newItemsCount, deletedItemsCount, refreshCollection } =
+  useCollectionSync()
+```
+
+## Future: Collection Aggregation
+
+The current caching architecture is designed to support future collection enrichment with data from multiple Discogs API endpoints.
+
+**The Problem: Discogs Rate Limits**
+
+Discogs imposes strict API rate limits of 60 requests/minute. To avoid hitting limits, we use a conservative 48 requests/minute.
+
+**Aggregation Plan:**
+
+For each album in a collection, fetch 3 additional endpoints by release ID:
+
+| Endpoint          | Data Retrieved                              |
+| ----------------- | ------------------------------------------- |
+| Marketplace stats | Number for sale, lowest price               |
+| Price suggestions | Price by condition (requires seller status) |
+| Community data    | Have/want counts, ratings                   |
+
+**Performance Impact:**
+
+- 3 API calls per album = ~16 albums/minute at 48 req/min
+- **500 album collection = ~30 minutes to fully load**
+
+**Why This Architecture:**
+
+The robust IndexedDB caching and metadata-based change detection were implemented specifically for this:
+
+1. **Initial load is expensive** - 30 minutes for large collections
+2. **Subsequent loads are instant** - Served from IndexedDB cache
+3. **Smart invalidation** - Only refetch when items added/removed (detected via `getCollectionMetadata`)
+4. **Background updates** - User sees cached data immediately, refresh happens in background
+5. **30-day cache lifetime** - Avoids re-waiting on aggregation for returning users
+
+**Implementation Approach (Future):**
+
+```typescript
+// Backend only change - frontend adapts automatically
+getCollection: protectedProcedure.query(async ({ ctx }) => {
+  const collection = await discogsClient.getCollection(username)
+
+  // Rate-limited enrichment (3 calls per item)
+  const enriched = await rateLimitedMap(
+    collection.releases,
+    async (release) => {
+      const [marketplace, prices, community] = await Promise.all([
+        discogsClient.getMarketplaceStats(release.id),
+        discogsClient.getPriceSuggestions(release.id),
+        discogsClient.getCommunityData(release.id)
+      ])
+      return { ...release, marketplace, prices, community }
+    },
+    { requestsPerMinute: 48 }
+  )
+
+  return { ...collection, releases: enriched }
+})
+```
+
+**Key Design Decisions:**
+
+- Zero frontend changes needed when aggregation is added
+- TanStack Query + IndexedDB handles larger payloads automatically
+- Metadata check still works (count-based, not content-based)
+- `placeholderData: keepPreviousData` shows old data during 30-min refresh
+
+## Security
+
+**Content Security Policy (CSP):**
+
+CSP headers are configured in `vercel.json` to prevent XSS attacks:
+
+- `script-src 'self'` - Only same-origin scripts (blocks injected scripts)
+- `style-src 'self' 'unsafe-inline'` - Allows Tailwind inline styles
+- `img-src` - Whitelists Discogs and Gravatar image domains
+- `connect-src` - Whitelists API endpoints and Vercel services
+- `frame-ancestors 'none'` - Prevents clickjacking
+
+**FOUC prevention script:**
+
+The theme initialization script (`public/theme-init.js`) is loaded as an external file rather than inline to avoid CSP hash maintenance issues. External scripts are covered by `script-src 'self'` automatically.
+
+**Cross-tab auth sync:**
+
+- Logout in one tab automatically logs out all tabs
+- Prevents stale authenticated sessions
+- Implemented via `storage` event listener in `src/lib/cross-tab-sync.ts`
