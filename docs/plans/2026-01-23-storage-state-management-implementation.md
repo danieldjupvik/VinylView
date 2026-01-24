@@ -104,28 +104,43 @@ git commit -m "feat: add consolidated storage key constants"
 
 ```typescript
 // src/lib/query-persister.ts
-import { experimental_createPersister } from '@tanstack/query-persist-client-core'
 import { get, set, del } from 'idb-keyval'
+
+import type {
+  PersistedClient,
+  Persister
+} from '@tanstack/query-persist-client-core'
 
 /**
  * Creates an IndexedDB persister for TanStack Query.
- * Uses per-query persistence for memory efficiency.
+ * Stores the entire query cache in IndexedDB for offline access.
+ *
+ * Uses the stable Persister interface with persistQueryClient, not the
+ * experimental per-query createPersister API. This approach:
+ * - Persists the full QueryClient cache to a single IndexedDB entry
+ * - Works with persistQueryClient() for automatic save/restore
+ * - Is production-ready and well-documented
  *
  * Benefits:
- * - No 5MB localStorage limit (critical for aggregated collections)
+ * - No 5MB localStorage limit (critical for large collections)
  * - Async API (non-blocking)
- * - 30-day cache lifetime for expensive API calls
+ * - Persists across sessions
+ *
+ * @see https://tanstack.com/query/v5/docs/framework/react/plugins/persistQueryClient
  */
-export const queryPersister = experimental_createPersister({
-  storage: {
-    getItem: async (key) => await get(key),
-    setItem: async (key, value) => await set(key, value),
-    removeItem: async (key) => await del(key)
+const IDB_KEY = 'tanstack-query-cache'
+
+export const queryPersister: Persister = {
+  persistClient: async (client: PersistedClient) => {
+    await set(IDB_KEY, client)
   },
-  maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
-  serialize: (data) => data,
-  deserialize: (data) => data
-})
+  restoreClient: async () => {
+    return await get<PersistedClient>(IDB_KEY)
+  },
+  removeClient: async () => {
+    await del(IDB_KEY)
+  }
+}
 ```
 
 **Step 2: Verify TypeScript compilation**
@@ -149,41 +164,59 @@ git commit -m "feat: add IndexedDB query persister for TanStack Query"
 
 **Files:**
 
-- Modify: `src/lib/trpc.ts:1-41`
+- Modify: `src/providers/query-provider.tsx`
 
-**Step 1: Add imports and QueryClient**
+**Step 1: Add persistence imports**
 
-Find the existing file and add these imports at the top:
+Add the persistence imports at the top of the file:
 
 ```typescript
-import { createTRPCReact, httpBatchLink } from '@trpc/react-query'
-import { QueryClient } from '@tanstack/react-query'
-import { keepPreviousData } from '@tanstack/react-query'
+import {
+  persistQueryClient,
+  type PersistQueryClientOptions
+} from '@tanstack/query-persist-client-core'
+import {
+  QueryClient,
+  QueryClientProvider,
+  keepPreviousData
+} from '@tanstack/react-query'
 
-import { queryPersister } from './query-persister.js'
-import type { AppRouter } from '@/server/trpc/index.ts'
+import { queryPersister } from '@/lib/query-persister'
 ```
 
 **Step 2: Create QueryClient with persistence**
 
-Add this after the imports, before the `getBaseUrl()` function:
+Create the QueryClient and enable persistence using the stable `persistQueryClient` API:
 
 ```typescript
-/**
- * TanStack Query client with IndexedDB persistence.
- * All queries automatically persist to IndexedDB and show previous data during refetch.
- */
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      gcTime: 1000 * 60 * 60 * 24, // 24 hours
-      persister: queryPersister, // All queries persist to IndexedDB
-      placeholderData: keepPreviousData // Show old data during refetch
+function createQueryClient() {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 1000 * 60 * 5, // 5 minutes
+        gcTime: 1000 * 60 * 60 * 24, // 24 hours
+        placeholderData: keepPreviousData // Show old data during refetch
+      }
     }
-  }
-})
+  })
+
+  // Enable persistence to IndexedDB using the stable persistQueryClient API
+  // Note: The experimental per-query createPersister API is different and not used here.
+  // persistQueryClient restores cache on init and subscribes to changes for auto-save.
+  // @see https://tanstack.com/query/v5/docs/framework/react/plugins/persistQueryClient
+  void persistQueryClient({
+    queryClient:
+      queryClient as unknown as PersistQueryClientOptions['queryClient'],
+    persister: queryPersister
+  })
+
+  return queryClient
+}
 ```
+
+**Important:** The `persister` option in `defaultOptions.queries` is for the experimental
+`createPersister` API (per-query persistence). The stable approach uses `persistQueryClient()`
+which persists the entire cache and handles restore/subscribe automatically.
 
 **Step 3: Verify TypeScript compilation**
 

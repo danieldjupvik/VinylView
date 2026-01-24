@@ -237,53 +237,97 @@ bun add @tanstack/query-persist-client-core idb-keyval
 
 ```typescript
 // src/lib/query-persister.ts
-import { experimental_createPersister } from '@tanstack/query-persist-client-core'
 import { get, set, del } from 'idb-keyval'
+
+import type {
+  PersistedClient,
+  Persister
+} from '@tanstack/query-persist-client-core'
 
 /**
  * Creates an IndexedDB persister for TanStack Query.
- * Uses per-query persistence for memory efficiency.
+ * Stores the entire query cache in IndexedDB for offline access.
+ *
+ * Uses the stable Persister interface with persistQueryClient, not the
+ * experimental per-query createPersister API. This approach:
+ * - Persists the full QueryClient cache to a single IndexedDB entry
+ * - Works with persistQueryClient() for automatic save/restore
+ * - Is production-ready and well-documented
+ *
+ * @see https://tanstack.com/query/v5/docs/framework/react/plugins/persistQueryClient
  */
-export const queryPersister = experimental_createPersister({
-  storage: {
-    getItem: async (key) => await get(key),
-    setItem: async (key, value) => await set(key, value),
-    removeItem: async (key) => await del(key)
+const IDB_KEY = 'tanstack-query-cache'
+
+export const queryPersister: Persister = {
+  persistClient: async (client: PersistedClient) => {
+    await set(IDB_KEY, client)
   },
-  maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
-  serialize: (data) => data,
-  deserialize: (data) => data
-})
+  restoreClient: async () => {
+    return await get<PersistedClient>(IDB_KEY)
+  },
+  removeClient: async () => {
+    await del(IDB_KEY)
+  }
+}
 ```
 
 ### Update QueryClient
 
 ```typescript
-// src/lib/trpc.ts
-import { createTRPCReact } from '@trpc/react-query'
-import { QueryClient } from '@tanstack/react-query'
-import { keepPreviousData } from '@tanstack/react-query'
-import { queryPersister } from './query-persister'
-import type { AppRouter } from '../server/trpc'
+// src/providers/query-provider.tsx
+import {
+  persistQueryClient,
+  type PersistQueryClientOptions
+} from '@tanstack/query-persist-client-core'
+import {
+  QueryClient,
+  QueryClientProvider,
+  keepPreviousData
+} from '@tanstack/react-query'
 
-export const trpc = createTRPCReact<AppRouter>()
+import { queryPersister } from '@/lib/query-persister'
 
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      gcTime: 1000 * 60 * 60 * 24, // 24 hours
-      persister: queryPersister, // All queries persist to IndexedDB
-      placeholderData: keepPreviousData // Show old data during refetch
+function createQueryClient() {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 1000 * 60 * 5, // 5 minutes
+        gcTime: 1000 * 60 * 60 * 24, // 24 hours
+        placeholderData: keepPreviousData // Show old data during refetch
+      }
     }
-  }
-})
+  })
+
+  // Enable persistence to IndexedDB using the stable persistQueryClient API
+  // persistQueryClient restores cache on init and subscribes to changes for auto-save.
+  void persistQueryClient({
+    queryClient:
+      queryClient as unknown as PersistQueryClientOptions['queryClient'],
+    persister: queryPersister
+  })
+
+  return queryClient
+}
 ```
+
+**Note on API choices:** TanStack Query v5 offers two persistence approaches:
+
+1. **`persistQueryClient`** (stable) - Persists the entire QueryClient cache. Used here.
+2. **`experimental_createPersister`** (experimental) - Per-query persistence that wraps queryFn.
+
+We use the stable `persistQueryClient` API because:
+
+- It's production-ready and well-documented
+- Simpler to reason about (one cache, one storage entry)
+- Direct control over persistence lifecycle
+
+The experimental per-query API (`createPersister` in `defaultOptions.queries.persister`)
+has different semantics and caveats (e.g., `setQueryData()` updates aren't auto-persisted).
 
 ### Why IndexedDB?
 
 - **No 5MB limit** (critical for large collections with aggregation)
-- **Per-query persistence** (memory efficient)
+- **Full cache persistence** (entire QueryClient state saved)
 - **Async API** (non-blocking)
 - **Future-proof** for 500+ item collections with 2-3 API calls per item
 
