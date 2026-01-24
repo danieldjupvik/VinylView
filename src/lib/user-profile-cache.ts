@@ -8,11 +8,12 @@
  * Note: TanStack Query also caches profile data, but this localStorage
  * cache persists across sessions for the "Welcome back" UX.
  */
+import { STORAGE_KEYS } from '@/lib/storage-keys'
 import type { DiscogsUserProfile } from '@/types/discogs'
 
 export function getStoredUserProfile(): DiscogsUserProfile | null {
   try {
-    const stored = localStorage.getItem('vinyldeck_user_profile')
+    const stored = localStorage.getItem(STORAGE_KEYS.USER_PROFILE)
     return stored ? (JSON.parse(stored) as DiscogsUserProfile) : null
   } catch {
     return null
@@ -33,7 +34,7 @@ export function getStoredUserProfile(): DiscogsUserProfile | null {
  */
 export function setStoredUserProfile(profile: DiscogsUserProfile): void {
   try {
-    localStorage.setItem('vinyldeck_user_profile', JSON.stringify(profile))
+    localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(profile))
   } catch {
     // Ignore storage errors
   }
@@ -41,7 +42,7 @@ export function setStoredUserProfile(profile: DiscogsUserProfile): void {
 
 export function clearStoredUserProfile(): void {
   try {
-    localStorage.removeItem('vinyldeck_user_profile')
+    localStorage.removeItem(STORAGE_KEYS.USER_PROFILE)
   } catch {
     // Ignore storage errors
   }

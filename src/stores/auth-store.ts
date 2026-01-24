@@ -2,6 +2,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+import { STORAGE_KEYS } from '@/lib/storage-keys'
 import { clearStoredUserProfile } from '@/lib/user-profile-cache'
 import { usePreferencesStore } from '@/stores/preferences-store'
 
@@ -70,6 +71,6 @@ export const useAuthStore = create<AuthStore>()(
         })
       }
     }),
-    { name: 'vinyldeck-auth' }
+    { name: STORAGE_KEYS.AUTH }
   )
 )

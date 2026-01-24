@@ -1,5 +1,9 @@
 // src/lib/cross-tab-sync.ts
+import { STORAGE_KEYS } from '@/lib/storage-keys'
 import { useAuthStore } from '@/stores/auth-store'
+
+// Guard against multiple registrations (e.g., during HMR)
+let isSetup = false
 
 /**
  * Sets up cross-tab synchronization for auth state.
@@ -12,13 +16,19 @@ import { useAuthStore } from '@/stores/auth-store'
  * Security: Prevents logged-out tabs from remaining authenticated.
  *
  * Call this once during app initialization.
+ *
+ * @returns Cleanup function to remove the event listener
  */
-export function setupCrossTabSync(): void {
-  if (typeof window === 'undefined') return
+export function setupCrossTabSync(): () => void {
+  if (typeof window === 'undefined') return () => {}
 
-  window.addEventListener('storage', (event) => {
+  // Prevent duplicate listeners during HMR
+  if (isSetup) return () => {}
+  isSetup = true
+
+  const handleStorage = (event: StorageEvent): void => {
     // Storage events fire when localStorage changes in OTHER tabs (not same tab)
-    if (event.key === 'vinyldeck-auth') {
+    if (event.key === STORAGE_KEYS.AUTH) {
       if (event.newValue === null) {
         // Auth was fully cleared (disconnect)
         useAuthStore.getState().disconnect()
@@ -60,5 +70,12 @@ export function setupCrossTabSync(): void {
         }
       }
     }
-  })
+  }
+
+  window.addEventListener('storage', handleStorage)
+
+  return () => {
+    window.removeEventListener('storage', handleStorage)
+    isSetup = false
+  }
 }

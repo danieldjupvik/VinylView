@@ -2,8 +2,9 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-type ViewMode = 'grid' | 'table'
-type AvatarSource = 'discogs' | 'gravatar'
+import { STORAGE_KEYS } from '@/lib/storage-keys'
+import type { AvatarSource } from '@/providers/preferences-context'
+import type { ViewMode } from '@/types/preferences'
 
 interface PreferencesStore {
   // State
@@ -40,6 +41,6 @@ export const usePreferencesStore = create<PreferencesStore>()(
       resetAvatarSettings: () =>
         set({ avatarSource: 'discogs', gravatarEmail: '' })
     }),
-    { name: 'vinyldeck-prefs' }
+    { name: STORAGE_KEYS.PREFERENCES }
   )
 )

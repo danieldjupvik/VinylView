@@ -14,17 +14,34 @@ import type {
  * - No 5MB localStorage limit (critical for large collections)
  * - Async API (non-blocking)
  * - Persists across sessions
+ *
+ * Error handling: Operations are wrapped in try-catch to prevent
+ * cascading failures when IndexedDB is unavailable (private browsing,
+ * quota exceeded, or corrupted storage).
  */
 const IDB_KEY = 'tanstack-query-cache'
 
 export const queryPersister: Persister = {
   persistClient: async (client: PersistedClient) => {
-    await set(IDB_KEY, client)
+    try {
+      await set(IDB_KEY, client)
+    } catch {
+      // Ignore persistence errors - app continues with in-memory cache
+    }
   },
   restoreClient: async () => {
-    return await get<PersistedClient>(IDB_KEY)
+    try {
+      return await get<PersistedClient>(IDB_KEY)
+    } catch {
+      // Return undefined if restore fails - starts fresh
+      return undefined
+    }
   },
   removeClient: async () => {
-    await del(IDB_KEY)
+    try {
+      await del(IDB_KEY)
+    } catch {
+      // Ignore removal errors
+    }
   }
 }
