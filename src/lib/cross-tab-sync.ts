@@ -48,20 +48,14 @@ export function setupCrossTabSync(): () => void {
           if (newState.state) {
             const { tokens, sessionActive } = newState.state
 
-            // Sync state directly to avoid duplicate side effects
-            // (disconnect() was already called by the originating tab)
-            if (!sessionActive || !tokens) {
-              if (!tokens) {
-                // Just sync state - cleanup already happened in originating tab
-                useAuthStore.setState({
-                  tokens: null,
-                  sessionActive: false,
-                  username: null,
-                  userId: null
-                })
-              } else {
-                store.signOut()
-              }
+            if (!tokens) {
+              // Tokens cleared = disconnect in other tab
+              // Call disconnect() to run side effects (reset avatar preferences, etc.)
+              // Side effects are idempotent so safe to run in each tab
+              store.disconnect()
+            } else if (!sessionActive) {
+              // Session ended but tokens kept = sign out
+              store.signOut()
             }
           }
         } catch (error) {
