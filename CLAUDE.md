@@ -584,7 +584,7 @@ Client state is managed via Zustand stores with automatic localStorage persisten
 
 **Stores (`src/stores/`):**
 
-- `auth-store.ts` - OAuth tokens, session state, username, userId
+- `auth-store.ts` - OAuth tokens, session state, username, userId, cachedProfile
 - `preferences-store.ts` - View mode, avatar source, Gravatar email
 
 **Key pattern:**
@@ -609,17 +609,25 @@ const setViewMode = usePreferencesStore((state) => state.setViewMode)
 - No provider nesting required for direct store access
 - Automatic cross-tab sync for auth state
 
+**IMPORTANT: Always use Zustand for client state persistence.** Do not use raw `localStorage.setItem/getItem` directly. The only exceptions are third-party libraries that manage their own storage:
+
+- `next-themes` - Manages theme preference internally
+- `i18next` - Manages language preference internally
+
+For any new client state that needs persistence, add it to an existing Zustand store or create a new one.
+
 ## Storage Architecture
 
-Storage has been consolidated from 11 fragmented keys to 3 main keys:
+Storage has been consolidated from 11 fragmented keys to 4 main keys:
 
 **localStorage keys (`src/lib/storage-keys.ts`):**
 
-| Key               | Tool        | Contents                                      |
-| ----------------- | ----------- | --------------------------------------------- |
-| `vinyldeck-auth`  | Zustand     | OAuth tokens, sessionActive, username, userId |
-| `vinyldeck-prefs` | Zustand     | viewMode, avatarSource, gravatarEmail         |
-| `vinyldeck-theme` | next-themes | Theme preference (light/dark/system)          |
+| Key                  | Managed By  | Contents                                                     |
+| -------------------- | ----------- | ------------------------------------------------------------ |
+| `vinyldeck-auth`     | Zustand     | OAuth tokens, sessionActive, username, userId, cachedProfile |
+| `vinyldeck-prefs`    | Zustand     | viewMode, avatarSource, gravatarEmail                        |
+| `vinyldeck-theme`    | next-themes | Theme preference (light/dark/system)                         |
+| `vinyldeck-language` | i18next     | Language preference (en/nb)                                  |
 
 **sessionStorage keys:**
 

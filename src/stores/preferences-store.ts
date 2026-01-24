@@ -21,7 +21,7 @@ interface PreferencesStore {
 
 /**
  * Zustand store for user preferences.
- * Automatically persists to localStorage under 'vinyldeck-prefs' key.
+ * Automatically persists to localStorage (via Zustand) under 'vinyldeck-prefs' key.
  *
  * Consolidates:
  * - vinyldeck_view_mode

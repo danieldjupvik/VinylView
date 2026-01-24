@@ -9,10 +9,6 @@ import {
 
 import { usePreferences } from '@/hooks/use-preferences'
 import { trpc } from '@/lib/trpc'
-import {
-  getStoredUserProfile,
-  setStoredUserProfile
-} from '@/lib/user-profile-cache'
 import { useAuthStore } from '@/stores/auth-store'
 
 import { AuthContext, type AuthState } from './auth-context'
@@ -31,6 +27,7 @@ export function AuthProvider({
   const authTokens = useAuthStore((state) => state.tokens)
   const sessionActive = useAuthStore((state) => state.sessionActive)
   const setAuth = useAuthStore((state) => state.setAuth)
+  const setCachedProfile = useAuthStore((state) => state.setCachedProfile)
   const signOutStore = useAuthStore((state) => state.signOut)
   const disconnectStore = useAuthStore((state) => state.disconnect)
 
@@ -82,14 +79,11 @@ export function AuthProvider({
 
           const { profile } = profileResult
 
-          // Store profile in localStorage (will be moved to TanStack Query cache later)
-          setStoredUserProfile({
+          // Cache profile in Zustand store for "Welcome back" flow
+          setCachedProfile({
             id: profile.id,
             username: profile.username,
-            resource_url: identity.resource_url,
             avatar_url: profile.avatar_url,
-            num_collection: profile.num_collection,
-            num_wantlist: profile.num_wantlist,
             ...(profile.email && { email: profile.email })
           })
 
@@ -101,12 +95,13 @@ export function AuthProvider({
             setGravatarEmail(profile.email)
           }
         } catch {
-          // Profile fetch failed, try to use cached profile
-          const cachedProfile = getStoredUserProfile()
-          avatarUrl = cachedProfile?.avatar_url ?? null
-          if (!latestGravatarEmailRef.current && cachedProfile?.email) {
-            latestGravatarEmailRef.current = cachedProfile.email
-            setGravatarEmail(cachedProfile.email)
+          // Profile fetch failed, try to use cached profile from store
+          // Use getState() to avoid dependency loop (setCachedProfile updates cachedProfile)
+          const fallbackProfile = useAuthStore.getState().cachedProfile
+          avatarUrl = fallbackProfile?.avatar_url ?? null
+          if (!latestGravatarEmailRef.current && fallbackProfile?.email) {
+            latestGravatarEmailRef.current = fallbackProfile.email
+            setGravatarEmail(fallbackProfile.email)
           }
         }
 
@@ -139,6 +134,7 @@ export function AuthProvider({
       trpcUtils.client.discogs.getUserProfile,
       setGravatarEmail,
       setAuth,
+      setCachedProfile,
       disconnectStore
     ]
   )

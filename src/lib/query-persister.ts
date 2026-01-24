@@ -1,6 +1,8 @@
 // src/lib/query-persister.ts
 import { get, set, del } from 'idb-keyval'
 
+import { IDB_KEYS } from './storage-keys'
+
 import type {
   PersistedClient,
   Persister
@@ -19,19 +21,18 @@ import type {
  * cascading failures when IndexedDB is unavailable (private browsing,
  * quota exceeded, or corrupted storage).
  */
-const IDB_KEY = 'tanstack-query-cache'
 
 export const queryPersister: Persister = {
   persistClient: async (client: PersistedClient) => {
     try {
-      await set(IDB_KEY, client)
+      await set(IDB_KEYS.QUERY_CACHE, client)
     } catch {
       // Ignore persistence errors - app continues with in-memory cache
     }
   },
   restoreClient: async () => {
     try {
-      return await get<PersistedClient>(IDB_KEY)
+      return await get<PersistedClient>(IDB_KEYS.QUERY_CACHE)
     } catch {
       // Return undefined if restore fails - starts fresh
       return undefined
@@ -39,7 +40,7 @@ export const queryPersister: Persister = {
   },
   removeClient: async () => {
     try {
-      await del(IDB_KEY)
+      await del(IDB_KEYS.QUERY_CACHE)
     } catch {
       // Ignore removal errors
     }
