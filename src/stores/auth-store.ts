@@ -2,6 +2,9 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+import { clearStoredUserProfile } from '@/lib/user-profile-cache'
+import { usePreferencesStore } from '@/stores/preferences-store'
+
 interface AuthTokens {
   accessToken: string
   accessTokenSecret: string
@@ -51,14 +54,21 @@ export const useAuthStore = create<AuthStore>()(
       // Sign out: clear session, keep tokens for "welcome back"
       signOut: () => set({ sessionActive: false }),
 
-      // Disconnect: clear everything
-      disconnect: () =>
+      // Disconnect: clear everything including user-specific caches
+      disconnect: () => {
+        // Clear cached user profile
+        clearStoredUserProfile()
+
+        // Reset avatar preferences to prevent cross-account data leakage
+        usePreferencesStore.getState().resetAvatarSettings()
+
         set({
           tokens: null,
           sessionActive: false,
           username: null,
           userId: null
         })
+      }
     }),
     { name: 'vinyldeck-auth' }
   )

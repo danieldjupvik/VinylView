@@ -1,6 +1,17 @@
 export const APP_VERSION = __APP_VERSION__
 
 /**
+ * Theme configuration.
+ * IMPORTANT: Keep DEFAULT_THEME in sync with index.html inline script.
+ */
+export const THEME = {
+  /** Default theme for new users (must match index.html inline script) */
+  DEFAULT: 'dark',
+  /** localStorage key for theme preference */
+  STORAGE_KEY: 'vinyldeck-theme'
+} as const
+
+/**
  * Discogs API Rate Limiting Configuration
  *
  * Official Discogs rate limits (as of API documentation):

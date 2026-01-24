@@ -10,7 +10,6 @@ import {
 import { usePreferences } from '@/hooks/use-preferences'
 import { trpc } from '@/lib/trpc'
 import {
-  clearStoredUserProfile,
   getStoredUserProfile,
   setStoredUserProfile
 } from '@/lib/user-profile-cache'
@@ -226,14 +225,13 @@ export function AuthProvider({
   /**
    * Disconnect - fully removes Discogs authorization.
    * Clears all tokens and caches. User must re-authorize.
+   * Note: User profile and avatar preferences are cleared in the auth store's disconnect action.
    */
   const disconnect = useCallback((): void => {
+    // Store's disconnect() handles profile cache and avatar preference cleanup
     disconnectStore()
 
-    // Clear cached user profile to prevent stale data on re-login
-    clearStoredUserProfile()
-
-    // Clear sensitive caches on disconnect
+    // Clear browser caches for sensitive data
     if ('caches' in window) {
       const cacheNames = [
         'discogs-api-cache',

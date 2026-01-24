@@ -5,15 +5,19 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VinylDeck</title>
-    <!-- FOUC Prevention: Apply theme before React loads -->
+    <!--
+      FOUC Prevention: Apply theme before React loads.
+      IMPORTANT: Keep default ('dark') in sync with THEME.DEFAULT in src/lib/constants.ts
+    -->
     <script>
       try {
-        const theme = localStorage.getItem('vinyldeck-theme') || 'system'
-        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
-          .matches
-          ? 'dark'
-          : 'light'
-        const effectiveTheme = theme === 'system' ? systemTheme : theme
+        const theme = localStorage.getItem('vinyldeck-theme') || 'dark'
+        const effectiveTheme =
+          theme === 'system'
+            ? window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light'
+            : theme
         document.documentElement.classList.add(effectiveTheme)
       } catch (e) {
         // Ignore storage errors in private browsing

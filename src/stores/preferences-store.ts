@@ -15,6 +15,7 @@ interface PreferencesStore {
   setViewMode: (mode: ViewMode) => void
   setAvatarSource: (source: AvatarSource) => void
   setGravatarEmail: (email: string) => void
+  resetAvatarSettings: () => void
 }
 
 /**
@@ -35,7 +36,9 @@ export const usePreferencesStore = create<PreferencesStore>()(
 
       setViewMode: (mode) => set({ viewMode: mode }),
       setAvatarSource: (source) => set({ avatarSource: source }),
-      setGravatarEmail: (email) => set({ gravatarEmail: email })
+      setGravatarEmail: (email) => set({ gravatarEmail: email }),
+      resetAvatarSettings: () =>
+        set({ avatarSource: 'discogs', gravatarEmail: '' })
     }),
     { name: 'vinyldeck-prefs' }
   )

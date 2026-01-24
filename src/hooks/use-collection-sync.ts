@@ -86,8 +86,12 @@ export function useCollectionSync(): {
     newItemsCount,
     deletedItemsCount,
     refreshCollection: () => {
-      // Invalidate all collection queries to trigger refetch
-      void queryClient.invalidateQueries({ queryKey: ['collection', username] })
+      // Invalidate and refetch all collection queries, including inactive ones
+      // (e.g., when user clicks refresh from Settings page)
+      void queryClient.invalidateQueries({
+        queryKey: ['collection', username],
+        refetchType: 'all'
+      })
     }
   }
 }

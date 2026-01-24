@@ -77,18 +77,21 @@ export function PreferencesProvider({
     [setGravatarEmailStore]
   )
 
+  // Derive effective gravatarUrl - null if email is empty (prevents stale URL after reset)
+  const effectiveGravatarUrl = gravatarEmail ? gravatarUrl : null
+
   const value = useMemo(
     () => ({
       avatarSource,
       gravatarEmail,
-      gravatarUrl,
+      gravatarUrl: effectiveGravatarUrl,
       setAvatarSource,
       setGravatarEmail
     }),
     [
       avatarSource,
       gravatarEmail,
-      gravatarUrl,
+      effectiveGravatarUrl,
       setAvatarSource,
       setGravatarEmail
     ]
