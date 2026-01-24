@@ -39,7 +39,7 @@ const readStoredLanguage = () => {
   }
 }
 
-// eslint-disable-next-line import-x/no-named-as-default-member
+// eslint-disable-next-line import-x/no-named-as-default-member -- i18next default export is the configured instance used for chaining
 void i18next.use(initReactI18next).init({
   resources: {
     en: {

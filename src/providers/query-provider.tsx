@@ -1,4 +1,7 @@
-import { persistQueryClient } from '@tanstack/query-persist-client-core'
+import {
+  persistQueryClient,
+  type PersistQueryClientOptions
+} from '@tanstack/query-persist-client-core'
 import {
   QueryClient,
   QueryClientProvider,
@@ -50,9 +53,12 @@ function createQueryClient() {
   })
 
   // Enable persistence to IndexedDB
+  // Bridge duplicated query-core types from dependency tree.
+  const queryClientForPersist =
+    queryClient as unknown as PersistQueryClientOptions['queryClient']
+
   void persistQueryClient({
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment -- Type mismatch between query-core versions in dependencies
-    queryClient: queryClient as any,
+    queryClient: queryClientForPersist,
     persister: queryPersister
   })
 

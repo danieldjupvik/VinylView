@@ -144,8 +144,14 @@ function OAuthCallbackPage() {
     }
 
     void exchangeTokens()
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Only run once on mount
-  }, [])
+  }, [
+    denied,
+    getAccessToken,
+    navigate,
+    oauth_token,
+    oauth_verifier,
+    validateOAuthTokens
+  ])
 
   const getErrorMessage = (): string => {
     switch (error) {
