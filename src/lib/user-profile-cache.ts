@@ -11,10 +11,21 @@
 import { STORAGE_KEYS } from '@/lib/storage-keys'
 import type { DiscogsUserProfile } from '@/types/discogs'
 
+/**
+ * Validates that parsed JSON has required DiscogsUserProfile fields.
+ */
+function isValidUserProfile(data: unknown): data is DiscogsUserProfile {
+  if (typeof data !== 'object' || data === null) return false
+  const obj = data as Record<string, unknown>
+  return typeof obj['id'] === 'number' && typeof obj['username'] === 'string'
+}
+
 export function getStoredUserProfile(): DiscogsUserProfile | null {
   try {
     const stored = localStorage.getItem(STORAGE_KEYS.USER_PROFILE)
-    return stored ? (JSON.parse(stored) as DiscogsUserProfile) : null
+    if (!stored) return null
+    const parsed: unknown = JSON.parse(stored)
+    return isValidUserProfile(parsed) ? parsed : null
   } catch {
     return null
   }
