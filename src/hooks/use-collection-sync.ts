@@ -82,15 +82,11 @@ export function useCollectionSync(): {
 
   // Calculate changes
   const liveCount = meta?.totalCount ?? 0
-  const hasCachedDataResolved = hasCachedData
-  const cachedCountResolved = cachedCount
 
-  const hasChanges = hasCachedDataResolved && liveCount !== cachedCountResolved
-  const newItemsCount = hasCachedDataResolved
-    ? Math.max(0, liveCount - cachedCountResolved)
-    : 0
-  const deletedItemsCount = hasCachedDataResolved
-    ? Math.max(0, cachedCountResolved - liveCount)
+  const hasChanges = hasCachedData && liveCount !== cachedCount
+  const newItemsCount = hasCachedData ? Math.max(0, liveCount - cachedCount) : 0
+  const deletedItemsCount = hasCachedData
+    ? Math.max(0, cachedCount - liveCount)
     : 0
 
   return {

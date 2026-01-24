@@ -1,21 +1,6 @@
-import { QueryClient, keepPreviousData } from '@tanstack/react-query'
 import { createTRPCReact, httpBatchLink } from '@trpc/react-query'
 
 import type { AppRouter } from '@/server/trpc/index.ts'
-
-/**
- * TanStack Query client with IndexedDB persistence.
- * All queries automatically persist to IndexedDB and show previous data during refetch.
- */
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      gcTime: 1000 * 60 * 60 * 24, // 24 hours
-      placeholderData: keepPreviousData // Show old data during refetch
-    }
-  }
-})
 
 /**
  * tRPC React client instance.
