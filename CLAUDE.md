@@ -780,16 +780,9 @@ CSP headers are configured in `vercel.json` to prevent XSS attacks:
 - `connect-src` - Whitelists API endpoints and Vercel services
 - `frame-ancestors 'none'` - Prevents clickjacking
 
-**Inline script hash:**
+**FOUC prevention script:**
 
-The CSP includes a SHA-256 hash for the FOUC prevention script in `index.html`. If you modify that inline script, you must regenerate the hash:
-
-```bash
-# Extract script content and generate new hash
-echo -n '<script content without tags>' | openssl dgst -sha256 -binary | openssl base64
-```
-
-Then update the `sha256-...` value in `vercel.json`. The build will work locally without this, but production will block the script.
+The theme initialization script (`public/theme-init.js`) is loaded as an external file rather than inline to avoid CSP hash maintenance issues. External scripts are covered by `script-src 'self'` automatically.
 
 **Cross-tab auth sync:**
 
