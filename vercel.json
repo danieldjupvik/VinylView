@@ -8,7 +8,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'sha256-X0l4JOSE/LFx4g+BQYhqS73JiuhMICora/Sf/Sow3Z4=' https://vercel.live https://*.vercel.app; style-src 'self' 'unsafe-inline'; img-src 'self' https://i.discogs.com https://img.discogs.com https://www.gravatar.com https://secure.gravatar.com data: blob:; connect-src 'self' https://api.discogs.com https://*.vercel-insights.com https://vercel.live wss://*.pusher.com; font-src 'self' https://vercel.live https://www.slant.co data:; frame-src https://vercel.live; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+          "value": "default-src 'self'; script-src 'self' 'sha256-X0l4JOSE/LFx4g+BQYhqS73JiuhMICora/Sf/Sow3Z4=' https://vercel.live https://*.vercel.app; style-src 'self' 'unsafe-inline'; img-src 'self' https://i.discogs.com https://img.discogs.com https://www.gravatar.com https://secure.gravatar.com data: blob:; connect-src 'self' https://api.discogs.com https://i.discogs.com https://img.discogs.com https://www.gravatar.com https://secure.gravatar.com https://*.vercel-insights.com https://vercel.live wss://*.pusher.com; font-src 'self' https://vercel.live https://www.slant.co data:; frame-src https://vercel.live; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
         },
         {
           "key": "X-Content-Type-Options",
