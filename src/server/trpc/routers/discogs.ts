@@ -1,44 +1,13 @@
-import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
 import { createDiscogsClient } from '../../discogs-client.js'
+import { handleDiscogsError } from '../error-utils.js'
 import { publicProcedure, router } from '../init.js'
 
 import type {
   DiscogsCollectionRelease,
   DiscogsPagination
 } from '../../../types/discogs.js'
-
-/**
- * Type guard for errors from @lionralfs/discogs-client.
- * DiscogsError is not exported from the package, so we check for the statusCode property.
- */
-function isDiscogsError(
-  error: unknown
-): error is Error & { statusCode: number } {
-  return (
-    error instanceof Error &&
-    'statusCode' in error &&
-    typeof (error as Error & { statusCode: unknown }).statusCode === 'number'
-  )
-}
-
-/**
- * Handles Discogs API errors and converts them to tRPC errors.
- * Checks for 401 errors (invalid/expired tokens) and returns appropriate error codes.
- */
-function handleDiscogsError(error: unknown, fallbackMessage: string): never {
-  if (isDiscogsError(error) && error.statusCode === 401) {
-    throw new TRPCError({
-      code: 'UNAUTHORIZED',
-      message: 'Invalid or expired OAuth tokens'
-    })
-  }
-  throw new TRPCError({
-    code: 'INTERNAL_SERVER_ERROR',
-    message: error instanceof Error ? error.message : fallbackMessage
-  })
-}
 
 /**
  * Discogs API router for proxying authenticated requests.
@@ -77,7 +46,7 @@ export const discogsRouter = router({
           rateLimit
         }
       } catch (error) {
-        handleDiscogsError(error, 'Failed to get identity')
+        handleDiscogsError(error, 'get identity')
       }
     }),
 
@@ -136,7 +105,7 @@ export const discogsRouter = router({
           rateLimit
         }
       } catch (error) {
-        handleDiscogsError(error, 'Failed to get collection')
+        handleDiscogsError(error, 'get collection')
       }
     }),
 
@@ -176,7 +145,7 @@ export const discogsRouter = router({
           rateLimit
         }
       } catch (error) {
-        handleDiscogsError(error, 'Failed to get user profile')
+        handleDiscogsError(error, 'get user profile')
       }
     }),
 
@@ -214,7 +183,7 @@ export const discogsRouter = router({
           rateLimit
         }
       } catch (error) {
-        handleDiscogsError(error, 'Failed to get collection metadata')
+        handleDiscogsError(error, 'get collection metadata')
       }
     })
 })

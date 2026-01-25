@@ -2,6 +2,7 @@ import { DiscogsOAuth } from '@lionralfs/discogs-client'
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 
+import { handleDiscogsError } from '../error-utils.js'
 import { publicProcedure, router } from '../init.js'
 
 declare const process: {
@@ -116,16 +117,7 @@ export const oauthRouter = router({
           authorizeUrl: response.authorizeUrl
         }
       } catch (error) {
-        if (error instanceof TRPCError) {
-          throw error
-        }
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message:
-            error instanceof Error
-              ? error.message
-              : 'Failed to get request token'
-        })
+        handleDiscogsError(error, 'get request token')
       }
     }),
 
@@ -163,16 +155,7 @@ export const oauthRouter = router({
           accessTokenSecret: response.accessTokenSecret
         }
       } catch (error) {
-        if (error instanceof TRPCError) {
-          throw error
-        }
-        throw new TRPCError({
-          code: 'BAD_REQUEST',
-          message:
-            error instanceof Error
-              ? error.message
-              : 'Failed to get access token'
-        })
+        handleDiscogsError(error, 'get access token')
       }
     })
 })
