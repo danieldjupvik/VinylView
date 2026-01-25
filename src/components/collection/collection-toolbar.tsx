@@ -91,7 +91,7 @@ export function CollectionToolbar({
           placeholder={t('collection.search')}
           aria-label={t('collection.search')}
           value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
+          onChange={(e) => { onSearchChange(e.target.value); }}
           className="pl-9"
         />
       </div>

@@ -257,7 +257,7 @@ export function VinylCard({
             alt={`${artistName} - ${info.title}`}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"
             loading="lazy"
-            onError={() => setImageErrored(true)}
+            onError={() => { setImageErrored(true); }}
           />
         ) : (
           <div className="bg-muted flex h-full w-full items-center justify-center">

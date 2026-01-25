@@ -79,7 +79,7 @@ function CollectionPage() {
       setNow(Date.now())
     }, 30_000)
 
-    return () => window.clearInterval(interval)
+    return () => { window.clearInterval(interval); }
   }, [])
 
   useEffect(() => {

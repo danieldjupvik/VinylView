@@ -25,7 +25,7 @@ export default defineConfig([
       jsxA11y.flatConfigs.strict,
       reactPlugin.configs.flat.recommended,
       reactPlugin.configs.flat['jsx-runtime'],
-      tseslint.configs.recommendedTypeChecked,
+      tseslint.configs.strictTypeChecked,
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
       i18next.configs['flat/recommended']

@@ -76,7 +76,7 @@ function VinylTableRow({
             alt={`${artistName} - ${info.title}`}
             className="bg-muted/40 h-10 w-10 rounded-sm object-contain"
             loading="lazy"
-            onError={() => setImageError(true)}
+            onError={() => { setImageError(true); }}
           />
         ) : (
           <div className="bg-muted flex h-10 w-10 items-center justify-center rounded-sm">

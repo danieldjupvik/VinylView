@@ -325,11 +325,9 @@ function LoginPage(): React.JSX.Element {
                       t('auth.signInWithDiscogs')
                     )}
                   </Button>
-                  {isLoading === true && (
-                    <p className="text-muted-foreground animate-pulse text-center text-xs">
+                  {isLoading ? <p className="text-muted-foreground animate-pulse text-center text-xs">
                       {t('login.redirectingHint')}
-                    </p>
-                  )}
+                    </p> : null}
                   <p className="text-muted-foreground text-center text-xs">
                     {t('login.noAccount')}{' '}
                     <a

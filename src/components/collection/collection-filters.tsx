@@ -100,7 +100,7 @@ function FilterGroup({
                   id={id}
                   checked={isChecked}
                   onCheckedChange={() =>
-                    onChange(toggleValue(selected, option.value))
+                    { onChange(toggleValue(selected, option.value)); }
                   }
                 />
                 <span className="line-clamp-1 flex-1">

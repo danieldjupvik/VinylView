@@ -166,7 +166,7 @@ function SettingsPage() {
               <div className="grid gap-3 sm:grid-cols-2">
                 <button
                   type="button"
-                  onClick={() => setAvatarSource('discogs')}
+                  onClick={() => { setAvatarSource('discogs'); }}
                   className={cn(
                     'hover:bg-accent/50 flex w-full items-center gap-3 rounded-md border p-3 text-left transition-all duration-200 hover:scale-[1.02] hover:shadow-md',
                     avatarSource === 'discogs'
@@ -197,7 +197,7 @@ function SettingsPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setAvatarSource('gravatar')}
+                  onClick={() => { setAvatarSource('gravatar'); }}
                   className={cn(
                     'hover:bg-accent/50 flex w-full items-center gap-3 rounded-md border p-3 text-left transition-all duration-200 hover:scale-[1.02] hover:shadow-md',
                     avatarSource === 'gravatar'
@@ -341,21 +341,21 @@ function SettingsPage() {
               <div className="grid gap-3 sm:grid-cols-3">
                 <SelectionCard
                   selected={theme === 'light'}
-                  onClick={() => setTheme('light')}
+                  onClick={() => { setTheme('light'); }}
                   icon={<Sun className="text-foreground/70 size-5" />}
                   title={t('settings.appearance.theme.light')}
                   hint={t('settings.appearance.theme.lightHint')}
                 />
                 <SelectionCard
                   selected={theme === 'dark'}
-                  onClick={() => setTheme('dark')}
+                  onClick={() => { setTheme('dark'); }}
                   icon={<Moon className="text-foreground/70 size-5" />}
                   title={t('settings.appearance.theme.dark')}
                   hint={t('settings.appearance.theme.darkHint')}
                 />
                 <SelectionCard
                   selected={theme === 'system'}
-                  onClick={() => setTheme('system')}
+                  onClick={() => { setTheme('system'); }}
                   icon={<Monitor className="text-foreground/70 size-5" />}
                   title={t('settings.appearance.theme.system')}
                   hint={t('settings.appearance.theme.systemHint')}

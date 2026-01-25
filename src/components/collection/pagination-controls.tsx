@@ -30,7 +30,7 @@ export function PaginationControls({
       <Button
         variant="outline"
         size="sm"
-        onClick={() => onPageChange(page - 1)}
+        onClick={() => { onPageChange(page - 1); }}
         disabled={page <= 1 || isLoading}
         className="transition-all duration-200 hover:scale-105 disabled:hover:scale-100"
       >
@@ -43,7 +43,7 @@ export function PaginationControls({
       <Button
         variant="outline"
         size="sm"
-        onClick={() => onPageChange(page + 1)}
+        onClick={() => { onPageChange(page + 1); }}
         disabled={page >= totalPages || isLoading}
         className="transition-all duration-200 hover:scale-105 disabled:hover:scale-100"
       >
