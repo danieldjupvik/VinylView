@@ -1,5 +1,3 @@
-import { Disc3 } from 'lucide-react'
-
 import { cn } from '@/lib/utils'
 
 type BrandMarkSize = 'sm' | 'md' | 'lg'
@@ -8,39 +6,28 @@ interface BrandMarkProps {
   size?: BrandMarkSize
   spinning?: boolean
   className?: string
-  iconClassName?: string
 }
 
-const sizeClasses: Record<BrandMarkSize, { container: string; icon: string }> =
-  {
-    sm: { container: 'size-9', icon: 'size-4' },
-    md: { container: 'size-12', icon: 'size-6' },
-    lg: { container: 'size-20', icon: 'size-10' }
-  }
+const sizeClasses: Record<BrandMarkSize, string> = {
+  sm: 'w-12',
+  md: 'w-20',
+  lg: 'w-32'
+}
 
 export function BrandMark({
   size = 'md',
   spinning = false,
-  className,
-  iconClassName
+  className
 }: BrandMarkProps): React.JSX.Element {
-  const classes = sizeClasses[size]
-
   return (
-    <div
+    <img
+      src="/logo.png"
+      alt="VinylDeck"
       className={cn(
-        'bg-secondary text-secondary-foreground ring-border/70 flex aspect-square items-center justify-center rounded-full shadow-sm ring-1',
-        classes.container,
+        sizeClasses[size],
+        spinning && 'animate-vinyl-spin',
         className
       )}
-    >
-      <Disc3
-        className={cn(
-          classes.icon,
-          spinning && 'animate-vinyl-spin',
-          iconClassName
-        )}
-      />
-    </div>
+    />
   )
 }
