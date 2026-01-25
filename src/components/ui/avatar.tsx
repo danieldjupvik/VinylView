@@ -61,6 +61,7 @@ const AvatarBadge = React.forwardRef<
   return (
     <span
       ref={ref}
+      role="status"
       data-slot="avatar-badge"
       className={cn(
         'border-background absolute right-0 bottom-0 size-3 rounded-full border-2',

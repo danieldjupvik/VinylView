@@ -1,4 +1,5 @@
 import { useIsRestoring, useQueryClient } from '@tanstack/react-query'
+import { TRPCClientError } from '@trpc/client'
 import {
   useCallback,
   useEffect,
@@ -21,6 +22,23 @@ import { trpc } from '@/lib/trpc'
 import { useAuthStore } from '@/stores/auth-store'
 
 import { AuthContext, type AuthState } from './auth-context'
+
+/**
+ * Checks if a tRPC error indicates invalid OAuth tokens.
+ * Returns true for UNAUTHORIZED (401) and FORBIDDEN (403) errors.
+ * Returns false for transient errors (5xx, network issues) that should not trigger logout.
+ */
+function isAuthError(error: unknown): boolean {
+  if (!(error instanceof TRPCClientError)) {
+    return false
+  }
+  const data: unknown = error.data
+  if (typeof data === 'object' && data !== null && 'code' in data) {
+    const code = (data as { code: unknown }).code
+    return code === 'UNAUTHORIZED' || code === 'FORBIDDEN'
+  }
+  return false
+}
 
 interface AuthProviderProps {
   children: ReactNode
@@ -47,7 +65,7 @@ export function AuthProvider({
   const isRestoring = useIsRestoring()
 
   // User profile from TanStack Query
-  const { fetchProfile } = useUserProfile()
+  const { fetchProfile, clearProfile } = useUserProfile()
 
   // Query client for cache management
   const queryClient = useQueryClient()
@@ -93,11 +111,11 @@ export function AuthProvider({
           authTokens.accessTokenSecret)
     ) {
       // Tokens changed without disconnect - clear stale profile and require re-validation
-      queryClient.removeQueries({ queryKey: USER_PROFILE_QUERY_KEY })
+      clearProfile()
       hasInitializedRef.current = false
     }
     prevTokensRef.current = authTokens
-  }, [authTokens, queryClient])
+  }, [authTokens, clearProfile])
 
   /**
    * Validates OAuth tokens by fetching identity from the server.
@@ -136,16 +154,87 @@ export function AuthProvider({
 
       setState((prev) => ({ ...prev, isLoading: true }))
 
+      // Step 1: Validate tokens
+      let identity: { username: string; id: number }
       try {
-        const identity = await validateTokens(tokensToValidate)
+        identity = await validateTokens(tokensToValidate)
+      } catch (error) {
+        // Only disconnect on auth errors (401/403) - tokens are definitively invalid
+        if (isAuthError(error)) {
+          disconnectStore()
 
-        // Check if profile is cached - if not, fetch it
-        const cachedProfile = queryClient.getQueryData<UserProfile>(
-          USER_PROFILE_QUERY_KEY
-        )
-        if (!cachedProfile) {
-          // Profile missing - fetch it now to avoid broken state
-          // Pass tokens directly to avoid store timing issues
+          // Clear TanStack Query in-memory cache
+          queryClient.clear()
+
+          // Clear IndexedDB via the persister
+          void queryPersister.removeClient()
+
+          // Clear browser caches for sensitive data
+          if ('caches' in window) {
+            const cacheNames = [
+              'discogs-api-cache',
+              'discogs-images-cache',
+              'gravatar-images-cache'
+            ]
+            cacheNames.forEach((name) => {
+              caches.delete(name).catch(() => {
+                // Ignore errors if cache doesn't exist
+              })
+            })
+          }
+
+          setState({
+            isAuthenticated: false,
+            isLoading: false,
+            isOnline,
+            hasStoredTokens: false,
+            oauthTokens: null
+          })
+        } else {
+          // Transient error (network, 5xx) - keep tokens, try to use cached state
+          console.warn(
+            'Token validation failed due to transient error, will retry later:',
+            error
+          )
+
+          // If we have a cached profile, trust it and authenticate (like offline mode)
+          const cachedProfile = queryClient.getQueryData<UserProfile>(
+            USER_PROFILE_QUERY_KEY
+          )
+          if (cachedProfile) {
+            // Store tokens if new ones were provided
+            if (tokens) {
+              setTokens(tokensToValidate)
+            }
+
+            setSessionActive(true)
+            setState((prev) => ({
+              ...prev,
+              isAuthenticated: true,
+              isLoading: false,
+              oauthTokens: tokensToValidate
+            }))
+            // Don't throw - we successfully recovered using cached state
+            return
+          }
+
+          // No cached profile - can't authenticate, but keep tokens for retry
+          setState((prev) => ({
+            ...prev,
+            isLoading: false,
+            hasStoredTokens: true
+          }))
+        }
+        throw error
+      }
+
+      // Step 2: Fetch profile if not cached - failure here is non-fatal
+      // (tokens are valid, profile can be fetched later)
+      const cachedProfile = queryClient.getQueryData<UserProfile>(
+        USER_PROFILE_QUERY_KEY
+      )
+      if (!cachedProfile) {
+        try {
           const userProfile = await fetchProfile(
             identity.username,
             tokensToValidate
@@ -156,53 +245,33 @@ export function AuthProvider({
             latestGravatarEmailRef.current = userProfile.email
             setGravatarEmail(userProfile.email)
           }
+        } catch (profileError) {
+          // Profile fetch failed but tokens are valid - set minimal profile from identity
+          // This allows collection loading to work (requires username)
+          console.warn(
+            'Profile fetch failed during token validation, using identity data:',
+            profileError
+          )
+          const minimalProfile: UserProfile = {
+            id: identity.id,
+            username: identity.username
+          }
+          queryClient.setQueryData(USER_PROFILE_QUERY_KEY, minimalProfile)
         }
-
-        // Store tokens if new ones were provided
-        if (tokens) {
-          setTokens(tokens)
-        }
-
-        setSessionActive(true)
-        setState((prev) => ({
-          ...prev,
-          isAuthenticated: true,
-          isLoading: false,
-          oauthTokens: tokensToValidate
-        }))
-      } catch (error) {
-        // Tokens are invalid or expired - fully disconnect and clear all caches
-        disconnectStore()
-
-        // Clear TanStack Query in-memory cache
-        queryClient.clear()
-
-        // Clear IndexedDB via the persister
-        void queryPersister.removeClient()
-
-        // Clear browser caches for sensitive data
-        if ('caches' in window) {
-          const cacheNames = [
-            'discogs-api-cache',
-            'discogs-images-cache',
-            'gravatar-images-cache'
-          ]
-          cacheNames.forEach((name) => {
-            caches.delete(name).catch(() => {
-              // Ignore errors if cache doesn't exist
-            })
-          })
-        }
-
-        setState({
-          isAuthenticated: false,
-          isLoading: false,
-          isOnline,
-          hasStoredTokens: false,
-          oauthTokens: null
-        })
-        throw error
       }
+
+      // Store tokens if new ones were provided
+      if (tokens) {
+        setTokens(tokens)
+      }
+
+      setSessionActive(true)
+      setState((prev) => ({
+        ...prev,
+        isAuthenticated: true,
+        isLoading: false,
+        oauthTokens: tokensToValidate
+      }))
     },
     [
       authTokens,
@@ -260,11 +329,84 @@ export function AuthProvider({
       }
 
       // ONLINE PATH: validate tokens and fetch profile
-      try {
-        // Validate tokens and get identity
-        const identity = await validateTokens(tokensToUse)
 
-        // Fetch and cache profile (pass tokens directly to avoid store timing issues)
+      // Step 1: Validate tokens
+      let identity: { username: string; id: number }
+      try {
+        identity = await validateTokens(tokensToUse)
+      } catch (error) {
+        // Only disconnect on auth errors (401/403) - tokens are definitively invalid
+        if (isAuthError(error)) {
+          disconnectStore()
+
+          // Clear TanStack Query in-memory cache
+          queryClient.clear()
+
+          // Clear IndexedDB via the persister
+          void queryPersister.removeClient()
+
+          // Clear browser caches for sensitive data
+          if ('caches' in window) {
+            const cacheNames = [
+              'discogs-api-cache',
+              'discogs-images-cache',
+              'gravatar-images-cache'
+            ]
+            cacheNames.forEach((name) => {
+              caches.delete(name).catch(() => {
+                // Ignore errors if cache doesn't exist
+              })
+            })
+          }
+
+          setState({
+            isAuthenticated: false,
+            isLoading: false,
+            isOnline,
+            hasStoredTokens: false,
+            oauthTokens: null
+          })
+        } else {
+          // Transient error (network, 5xx) - keep tokens, try to use cached state
+          console.warn(
+            'Token validation failed due to transient error, will retry later:',
+            error
+          )
+
+          // If we have a cached profile, trust it and authenticate (like offline mode)
+          const cachedProfile = queryClient.getQueryData<UserProfile>(
+            USER_PROFILE_QUERY_KEY
+          )
+          if (cachedProfile) {
+            // Store tokens if new ones were provided
+            if (tokens) {
+              setTokens(tokensToUse)
+            }
+
+            setSessionActive(true)
+            setState((prev) => ({
+              ...prev,
+              isAuthenticated: true,
+              isLoading: false,
+              oauthTokens: tokensToUse
+            }))
+            // Don't throw - we successfully recovered using cached state
+            return
+          }
+
+          // No cached profile - can't authenticate, but keep tokens for retry
+          setState((prev) => ({
+            ...prev,
+            isLoading: false,
+            hasStoredTokens: true
+          }))
+        }
+        throw error
+      }
+
+      // Step 2: Fetch profile - failure here is non-fatal
+      // (tokens are valid, profile can be fetched later)
+      try {
         const userProfile = await fetchProfile(identity.username, tokensToUse)
 
         // Update gravatar email from profile if not already set
@@ -272,52 +414,32 @@ export function AuthProvider({
           latestGravatarEmailRef.current = userProfile.email
           setGravatarEmail(userProfile.email)
         }
-
-        // Store tokens if new ones were provided
-        if (tokens) {
-          setTokens(tokens)
+      } catch (profileError) {
+        // Profile fetch failed but tokens are valid - set minimal profile from identity
+        // This allows collection loading to work (requires username)
+        console.warn(
+          'Profile fetch failed during session establishment, using identity data:',
+          profileError
+        )
+        const minimalProfile: UserProfile = {
+          id: identity.id,
+          username: identity.username
         }
-
-        setSessionActive(true)
-        setState((prev) => ({
-          ...prev,
-          isAuthenticated: true,
-          isLoading: false,
-          oauthTokens: tokensToUse
-        }))
-      } catch (error) {
-        // Tokens are invalid or expired - fully disconnect and clear all caches
-        disconnectStore()
-
-        // Clear TanStack Query in-memory cache
-        queryClient.clear()
-
-        // Clear IndexedDB via the persister
-        void queryPersister.removeClient()
-
-        // Clear browser caches for sensitive data
-        if ('caches' in window) {
-          const cacheNames = [
-            'discogs-api-cache',
-            'discogs-images-cache',
-            'gravatar-images-cache'
-          ]
-          cacheNames.forEach((name) => {
-            caches.delete(name).catch(() => {
-              // Ignore errors if cache doesn't exist
-            })
-          })
-        }
-
-        setState({
-          isAuthenticated: false,
-          isLoading: false,
-          isOnline,
-          hasStoredTokens: false,
-          oauthTokens: null
-        })
-        throw error
+        queryClient.setQueryData(USER_PROFILE_QUERY_KEY, minimalProfile)
       }
+
+      // Store tokens if new ones were provided
+      if (tokens) {
+        setTokens(tokens)
+      }
+
+      setSessionActive(true)
+      setState((prev) => ({
+        ...prev,
+        isAuthenticated: true,
+        isLoading: false,
+        oauthTokens: tokensToUse
+      }))
     },
     [
       authTokens,
