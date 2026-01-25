@@ -30,10 +30,10 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/hooks/use-auth'
+import { useUserProfile } from '@/hooks/use-user-profile'
 import { setOAuthRequestTokens } from '@/lib/oauth-session'
 import { getAndClearRedirectUrl } from '@/lib/redirect-utils'
 import { trpc } from '@/lib/trpc'
-import { useAuthStore } from '@/stores/auth-store'
 
 export const Route = createFileRoute('/login')({
   component: LoginPage
@@ -83,7 +83,14 @@ function VinylShowcase(): React.JSX.Element {
 
 function LoginPage(): React.JSX.Element {
   const { t } = useTranslation()
-  const { isAuthenticated, validateOAuthTokens } = useAuth()
+  const {
+    isAuthenticated,
+    hasStoredTokens,
+    isOnline,
+    establishSession,
+    disconnect
+  } = useAuth()
+  const { profile } = useUserProfile()
   const navigate = useNavigate()
 
   const [isLoading, setIsLoading] = useState(false)
@@ -91,15 +98,18 @@ function LoginPage(): React.JSX.Element {
   const [error, setError] = useState<string | null>(null)
   const [showSwitchDialog, setShowSwitchDialog] = useState(false)
 
-  // Check if user has existing tokens (signed out but can quick-login)
-  const existingTokens = useAuthStore((state) => state.tokens)
-  const storedUsername = useAuthStore((state) => state.username)
-  const cachedProfile = useAuthStore((state) => state.cachedProfile)
-  const disconnectStore = useAuthStore((state) => state.disconnect)
-  const hasExistingSession = existingTokens !== null && storedUsername !== null
-  const initials = storedUsername
-    ? storedUsername.slice(0, 2).toUpperCase()
-    : '?'
+  // Get cached profile data for "Welcome back" flow
+  const username = profile?.username
+  const cachedAvatarUrl = profile?.avatar_url
+
+  // Show "Welcome back" if tokens exist (even without cached profile when online)
+  // When online without cached profile, establishSession will fetch it
+  const hasExistingSession = hasStoredTokens
+
+  // Can only continue offline if we have cached profile data
+  const cannotContinue = !isOnline && profile === undefined
+
+  const initials = username ? username.slice(0, 2).toUpperCase() : '?'
 
   const getRequestToken = trpc.oauth.getRequestToken.useMutation()
 
@@ -119,11 +129,15 @@ function LoginPage(): React.JSX.Element {
     setError(null)
 
     try {
-      await validateOAuthTokens()
+      await establishSession()
       // Navigation handled by isAuthenticated effect
-    } catch {
-      // Tokens were invalid, they've been cleared
-      const errorMessage = t('auth.oauthSessionExpired')
+    } catch (err) {
+      // Handle specific offline error
+      const errorMessage =
+        err instanceof Error &&
+        err.message === 'Cannot continue offline without cached profile'
+          ? t('auth.offlineNoCachedData')
+          : t('auth.oauthSessionExpired')
       setError(errorMessage)
       toast.error(errorMessage)
     } finally {
@@ -137,7 +151,7 @@ function LoginPage(): React.JSX.Element {
   const handleUseDifferentAccount = () => {
     setShowSwitchDialog(false)
     setError(null)
-    disconnectStore()
+    disconnect()
     // Force re-render by triggering OAuth flow
     void handleOAuthLogin()
   }
@@ -227,10 +241,10 @@ function LoginPage(): React.JSX.Element {
                 <div className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards space-y-4 delay-800 duration-500">
                   <div className="mb-4 flex flex-col items-center gap-3">
                     <Avatar className="border-border h-16 w-16 border-2">
-                      {cachedProfile?.avatar_url?.trim() ? (
+                      {cachedAvatarUrl?.trim() ? (
                         <AvatarImage
-                          src={cachedProfile.avatar_url}
-                          alt={storedUsername}
+                          src={cachedAvatarUrl}
+                          alt={username ?? t('user.fallback')}
                         />
                       ) : null}
                       <AvatarFallback className="text-lg font-medium">
@@ -238,14 +252,16 @@ function LoginPage(): React.JSX.Element {
                       </AvatarFallback>
                     </Avatar>
                     <p className="text-lg font-medium">
-                      {t('auth.welcomeBack', { username: storedUsername })}
+                      {username
+                        ? t('auth.welcomeBack', { username })
+                        : t('auth.welcomeBackGeneric')}
                     </p>
                   </div>
                   <Button
                     onClick={() => void handleContinue()}
                     className="w-full"
                     size="lg"
-                    disabled={isValidating || isLoading}
+                    disabled={isValidating || isLoading || cannotContinue}
                   >
                     {isValidating ? (
                       <>
@@ -256,6 +272,11 @@ function LoginPage(): React.JSX.Element {
                       t('auth.continue')
                     )}
                   </Button>
+                  {cannotContinue ? (
+                    <p className="text-muted-foreground text-center text-xs">
+                      {t('auth.offlineCannotContinue')}
+                    </p>
+                  ) : null}
                   <AlertDialog
                     open={showSwitchDialog}
                     onOpenChange={setShowSwitchDialog}

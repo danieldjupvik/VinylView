@@ -54,4 +54,22 @@ const AvatarFallback = React.forwardRef<
 })
 AvatarFallback.displayName = AvatarPrimitive.Fallback.displayName
 
-export { Avatar, AvatarImage, AvatarFallback }
+const AvatarBadge = React.forwardRef<
+  HTMLSpanElement,
+  React.HTMLAttributes<HTMLSpanElement>
+>(({ className, ...props }, ref) => {
+  return (
+    <span
+      ref={ref}
+      data-slot="avatar-badge"
+      className={cn(
+        'border-background absolute right-0 bottom-0 size-3 rounded-full border-2',
+        className
+      )}
+      {...props}
+    />
+  )
+})
+AvatarBadge.displayName = 'AvatarBadge'
+
+export { Avatar, AvatarImage, AvatarFallback, AvatarBadge }

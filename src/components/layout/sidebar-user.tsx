@@ -8,7 +8,12 @@ import { LogOut, Settings } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import {
+  Avatar,
+  AvatarBadge,
+  AvatarFallback,
+  AvatarImage
+} from '@/components/ui/avatar'
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -16,19 +21,26 @@ import {
   useSidebar
 } from '@/components/ui/sidebar'
 import { useAuth } from '@/hooks/use-auth'
+import { useOnlineStatus } from '@/hooks/use-online-status'
 import { usePreferences } from '@/hooks/use-preferences'
+import { useUserProfile } from '@/hooks/use-user-profile'
 import { storeRedirectUrl } from '@/lib/redirect-utils'
 
 import type { MouseEvent } from 'react'
 
 export function SidebarUser(): React.JSX.Element {
   const { t } = useTranslation()
-  const { username, signOut, avatarUrl } = useAuth()
+  const { signOut } = useAuth()
+  const { profile } = useUserProfile()
+  const isOnline = useOnlineStatus()
   const { avatarSource, gravatarUrl } = usePreferences()
   const navigate = useNavigate()
   const location = useRouterState({ select: (s) => s.location })
   const routeLocation = useLocation()
   const { isMobile, setOpenMobile } = useSidebar()
+
+  const username = profile?.username
+  const avatarUrl = profile?.avatar_url
 
   const isActive = (path: string) =>
     routeLocation.pathname === path ||
@@ -72,7 +84,7 @@ export function SidebarUser(): React.JSX.Element {
     ? username
         .split(/[\s_-]/)
         .filter(Boolean)
-        .map((part) => part.charAt(0))
+        .map((part: string) => part.charAt(0))
         .join('')
         .toUpperCase()
         .slice(0, 2)
@@ -122,6 +134,13 @@ export function SidebarUser(): React.JSX.Element {
               />
             ) : null}
             <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
+            <AvatarBadge
+              className={
+                isOnline
+                  ? 'bg-green-500 dark:bg-green-600'
+                  : 'bg-muted-foreground/50'
+              }
+            />
           </Avatar>
           <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
             <span className="truncate font-medium">{username}</span>

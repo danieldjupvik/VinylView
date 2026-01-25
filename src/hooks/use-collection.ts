@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { isVinylRecord } from '@/api/discogs'
 import { rateLimiter } from '@/api/rate-limiter'
 import { useAuth } from '@/hooks/use-auth'
+import { useUserProfile } from '@/hooks/use-user-profile'
 import { COLLECTION } from '@/lib/constants'
 import { trpc } from '@/lib/trpc'
 import {
@@ -166,7 +167,9 @@ interface UseCollectionReturn {
 export function useCollection(
   options: UseCollectionOptions = {}
 ): UseCollectionReturn {
-  const { username, oauthTokens } = useAuth()
+  const { oauthTokens } = useAuth()
+  const { profile } = useUserProfile()
+  const username = profile?.username
   const trpcUtils = trpc.useUtils()
   const urlFilters = useMemo(() => readFiltersFromUrl(), [])
   const [search, setSearch] = useState('')

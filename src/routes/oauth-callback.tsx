@@ -62,7 +62,7 @@ function OAuthCallbackPage() {
     select: (state) => state.status === 'idle'
   })
   const { oauth_token, oauth_verifier, denied } = Route.useSearch()
-  const { validateOAuthTokens } = useAuth()
+  const { establishSession } = useAuth()
 
   const [status, setStatus] = useState<OAuthCallbackStatus>('loading')
   const [error, setError] = useState<OAuthError | null>(null)
@@ -146,10 +146,10 @@ function OAuthCallbackPage() {
           accessTokenSecret: result.accessTokenSecret
         }
 
-        // Validate tokens before storing - if validation fails, tokens are not persisted
+        // Validate tokens and fetch profile - if validation fails, tokens are not persisted
         try {
-          // validateOAuthTokens stores tokens in Zustand auth store
-          await validateOAuthTokens(tokens)
+          // establishSession validates tokens and fetches profile
+          await establishSession(tokens)
         } catch {
           setError('validation_failed')
           setStatus('error')
@@ -177,7 +177,7 @@ function OAuthCallbackPage() {
     oauth_verifier,
     awaitingParams,
     paramsMissing,
-    validateOAuthTokens
+    establishSession
   ])
 
   const getErrorMessage = (currentError: OAuthError | null): string => {

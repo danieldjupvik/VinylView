@@ -43,6 +43,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { useAuth } from '@/hooks/use-auth'
 import { usePreferences } from '@/hooks/use-preferences'
+import { useUserProfile } from '@/hooks/use-user-profile'
 import { APP_VERSION } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 export const Route = createFileRoute('/_authenticated/settings')({
@@ -112,7 +113,10 @@ function LanguageFlag({ lang }: { lang: 'en' | 'no' }) {
 
 function SettingsPage() {
   const { t, i18n } = useTranslation()
-  const { username, avatarUrl, disconnect } = useAuth()
+  const { disconnect } = useAuth()
+  const { profile } = useUserProfile()
+  const username = profile?.username
+  const avatarUrl = profile?.avatar_url
   const { avatarSource, gravatarUrl, setAvatarSource } = usePreferences()
   const { theme, setTheme } = useTheme()
   const navigate = useNavigate()
@@ -128,7 +132,7 @@ function SettingsPage() {
   const initials = username
     ? username
         .split(/[\s_-]/)
-        .map((part) => part[0])
+        .map((part: string) => part[0])
         .join('')
         .toUpperCase()
         .slice(0, 2)

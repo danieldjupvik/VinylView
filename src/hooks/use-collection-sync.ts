@@ -2,6 +2,7 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useSyncExternalStore } from 'react'
 
+import { useUserProfile } from '@/hooks/use-user-profile'
 import { trpc } from '@/lib/trpc'
 import { useAuthStore } from '@/stores/auth-store'
 import type { DiscogsCollectionResponse } from '@/types/discogs'
@@ -23,7 +24,8 @@ export function useCollectionSync(): {
 } {
   const queryClient = useQueryClient()
   const tokens = useAuthStore((state) => state.tokens)
-  const username = useAuthStore((state) => state.username)
+  const { profile } = useUserProfile()
+  const username = profile?.username
 
   // Fast metadata check (auto-refetches on window focus)
   const { data: meta } = trpc.discogs.getCollectionMetadata.useQuery(

@@ -56,6 +56,9 @@
     "oauthDenied": "Autorisasjon ble avvist.",
     "oauthMissingParams": "Manglende autentiseringsparametere.",
     "oauthSessionExpired": "Din forrige økt utløp. Vennligst logg inn igjen.",
+    "offlineNoCachedData": "Kan ikke fortsette uten internett. Koble til for å fortsette.",
+    "offlineCannotContinue": "Du er frakoblet. Koble til internett for å fortsette.",
+    "welcomeBackGeneric": "Velkommen tilbake",
     "oauthValidationFailed": "Kunne ikke bekrefte økten din. Prøv igjen.",
     "backToLogin": "Tilbake til innlogging",
     "switchAccount": {
