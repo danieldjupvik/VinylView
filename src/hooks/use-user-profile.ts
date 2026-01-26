@@ -39,8 +39,15 @@ export function useUserProfile(): {
   const [isFetching, setIsFetching] = useState(false)
   const [error, setError] = useState<Error | null>(null)
 
-  // Subscribe to profile cache updates (including IndexedDB restoration)
-  // enabled: false prevents automatic fetching - we fetch manually via fetchProfile()
+  // Subscribe to profile cache updates (including IndexedDB restoration).
+  // Pattern: enabled: false + passthrough queryFn
+  //
+  // Why this pattern?
+  // - enabled: false prevents automatic fetching (we control when via fetchProfile())
+  // - queryFn is required by TanStack Query even when disabled, so we use a passthrough
+  //   that returns existing cache data. This is never actually called since enabled: false.
+  // - useQuery subscription triggers re-renders when cache updates (via setQueryData or
+  //   IndexedDB hydration), giving us reactive profile state without automatic fetches.
   const { data: profileData } = useQuery<UserProfile | null>({
     queryKey: USER_PROFILE_QUERY_KEY,
     queryFn: () =>
