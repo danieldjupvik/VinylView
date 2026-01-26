@@ -5,6 +5,8 @@ import { useState, type ReactNode } from 'react'
 
 import { queryPersister } from '@/lib/query-persister'
 import { createTRPCClient, trpc } from '@/lib/trpc'
+import { useHydrationState } from '@/providers/hydration-context'
+import { HydrationProvider } from '@/providers/hydration-provider'
 
 /**
  * Extract the error code from a tRPC error.
@@ -53,20 +55,41 @@ interface QueryProviderProps {
 /** Persistence options for IndexedDB cache restoration */
 const persistOptions = { persister: queryPersister }
 
-export function QueryProvider({
+function QueryProviderInner({
   children
 }: QueryProviderProps): React.JSX.Element {
   const [queryClient] = useState(createQueryClient)
   const [trpcClient] = useState(createTRPCClient)
+  const { setHasHydrated } = useHydrationState()
+
+  /**
+   * Marks hydration as complete for both success and failure so
+   * expensive queries can still run when persistence is unavailable.
+   */
+  const markHydrated = () => {
+    setHasHydrated(true)
+  }
 
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <PersistQueryClientProvider
         client={queryClient}
         persistOptions={persistOptions}
+        onSuccess={markHydrated}
+        onError={markHydrated}
       >
         {children}
       </PersistQueryClientProvider>
     </trpc.Provider>
+  )
+}
+
+export function QueryProvider({
+  children
+}: QueryProviderProps): React.JSX.Element {
+  return (
+    <HydrationProvider>
+      <QueryProviderInner>{children}</QueryProviderInner>
+    </HydrationProvider>
   )
 }

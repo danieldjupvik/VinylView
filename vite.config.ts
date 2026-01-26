@@ -64,6 +64,7 @@ export default defineConfig({
         // SPA: serve index.html for all navigation requests (enables offline refresh)
         navigateFallback: 'index.html',
         navigateFallbackDenylist: [/^\/api\//],
+        // IMPORTANT: Keep cache names in sync with src/lib/constants.ts CACHE_NAMES
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/api\.discogs\.com\/.*/i,

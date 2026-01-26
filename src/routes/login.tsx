@@ -31,6 +31,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/hooks/use-auth'
 import { useUserProfile } from '@/hooks/use-user-profile'
+import { OfflineNoCacheError } from '@/lib/errors'
 import { setOAuthRequestTokens } from '@/lib/oauth-session'
 import { getAndClearRedirectUrl } from '@/lib/redirect-utils'
 import { trpc } from '@/lib/trpc'
@@ -132,10 +133,9 @@ function LoginPage(): React.JSX.Element {
       await establishSession()
       // Navigation handled by isAuthenticated effect
     } catch (err) {
-      // Handle specific offline error
+      // Handle specific offline error with type-safe check
       const errorMessage =
-        err instanceof Error &&
-        err.message === 'Cannot continue offline without cached profile'
+        err instanceof OfflineNoCacheError
           ? t('auth.offlineNoCachedData')
           : t('auth.oauthSessionExpired')
       setError(errorMessage)

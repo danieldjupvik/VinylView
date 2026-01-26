@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { isVinylRecord } from '@/api/discogs'
 import { rateLimiter } from '@/api/rate-limiter'
 import { useAuth } from '@/hooks/use-auth'
+import { useHydrationGuard } from '@/hooks/use-hydration-guard'
 import { useUserProfile } from '@/hooks/use-user-profile'
 import { COLLECTION } from '@/lib/constants'
 import { trpc } from '@/lib/trpc'
@@ -207,6 +208,7 @@ export function useCollection(
     selectedCountries.length > 0 ||
     yearRangeSelection !== null
   const shouldFetchAllPages = isClientSort || hasSearch || hasActiveFilters
+  const isQueryEnabled = useHydrationGuard(!!username && !!oauthTokens)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -346,11 +348,11 @@ export function useCollection(
 
       return { ...firstPage, releases }
     },
-    enabled: !!username && !!oauthTokens,
+    enabled: isQueryEnabled,
     refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000 // 5 minutes
+    staleTime: Number.POSITIVE_INFINITY // Only refetch on explicit user action
   })
 
   const [hasCachedDataAtMount] = useState(() => data !== undefined)
