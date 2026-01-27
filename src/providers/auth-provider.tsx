@@ -28,6 +28,21 @@ interface AuthProviderProps {
   children: ReactNode
 }
 
+/**
+ * Provides authentication state and methods to the app.
+ * Handles OAuth token validation, session management, and cross-tab sync.
+ *
+ * @param props - Component props
+ * @param props.children - The app component tree
+ * @returns Provider wrapper with auth context
+ *
+ * @example
+ * ```tsx
+ * <AuthProvider>
+ *   <App />
+ * </AuthProvider>
+ * ```
+ */
 export function AuthProvider({
   children
 }: AuthProviderProps): React.JSX.Element {
@@ -137,7 +152,7 @@ export function AuthProvider({
       // Clear TanStack Query in-memory cache
       queryClient.clear()
 
-      // Clear IndexedDB via the persister
+      // Clear IndexedDB via the persister (errors handled internally)
       void queryPersister.removeClient()
 
       // Clear browser caches for sensitive data
