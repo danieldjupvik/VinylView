@@ -41,7 +41,7 @@ export function useCollectionSync(): {
         enabled: Boolean(tokens && username),
         refetchOnWindowFocus: true,
         refetchInterval: 60 * 1000,
-        staleTime: 10 * 1000 // 10 seconds - responsive tab-switch detection (metadata check is cheap)
+        staleTime: 30 * 1000 // 30 sec debounce for tab-switch detection
       }
     )
 

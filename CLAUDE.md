@@ -289,6 +289,22 @@ Cache names defined in `src/lib/constants.ts` (`CACHE_NAMES`) for coordination b
 - IndexedDB persisted cache
 - Browser Cache API caches
 
+### Query Caching Strategy
+
+Default `staleTime: Infinity` in `query-provider.tsx`. Override per-query based on endpoint cost:
+
+| Endpoint Type            | staleTime               | Refresh Trigger        | Example       |
+| ------------------------ | ----------------------- | ---------------------- | ------------- |
+| **Heavy** (aggregation)  | `Infinity` (default)    | Manual refresh button  | Collection    |
+| **Auth-driven**          | `Infinity` (default)    | Login/logout events    | Profile       |
+| **Light** (simple fetch) | `5 * 60 * 1000` (5 min) | Auto on stale + mount  | Wantlist      |
+| **Polling**              | `30 * 1000` (30 sec)    | Window focus, interval | Metadata sync |
+
+When adding new endpoints:
+
+- Heavy/expensive → inherit default (no override needed)
+- Light/cheap → add `staleTime: 1000 * 60 * 5` or similar
+
 ### Hydration Guard
 
 `HydrationProvider` tracks when IndexedDB restoration completes. Use `useHydrationGuard` to prevent expensive queries from firing before cached data is restored.
@@ -371,7 +387,7 @@ const { data } = useQuery({
 **IndexedDB:**
 
 - TanStack Query cache (collection, user profile)
-- 30-day cache lifetime
+- Persists indefinitely (manual refresh philosophy)
 
 ## Collection Features
 

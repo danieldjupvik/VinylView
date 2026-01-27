@@ -351,8 +351,7 @@ export function useCollection(
     enabled: isQueryEnabled,
     refetchOnMount: false,
     refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
-    staleTime: Number.POSITIVE_INFINITY // Only refetch on explicit user action
+    refetchOnWindowFocus: false
   })
 
   const [hasCachedDataAtMount] = useState(() => data !== undefined)

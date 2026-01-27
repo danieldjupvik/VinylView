@@ -8,15 +8,20 @@ import { createTRPCClient, trpc } from '@/lib/trpc'
 import { useHydrationState } from '@/providers/hydration-context'
 import { HydrationProvider } from '@/providers/hydration-provider'
 
+/**
+ * Query client defaults for offline-first PWA.
+ *
+ * staleTime: Infinity by default for expensive endpoints (collection, profile).
+ * Light endpoints (wantlist, etc.) should override with shorter staleTime.
+ */
 function createQueryClient() {
   return new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 1000 * 60 * 5, // 5 minutes
-        gcTime: 1000 * 60 * 60 * 24, // 24 hours
-        placeholderData: keepPreviousData, // Show old data during refetch
+        staleTime: Infinity, // Override for light endpoints that need auto-refresh
+        gcTime: 1000 * 60 * 60 * 24, // 24 hours in memory
+        placeholderData: keepPreviousData,
         retry: (failureCount, error) => {
-          // Don't retry on errors where retrying won't help
           if (isNonRetryableError(error)) {
             return false
           }

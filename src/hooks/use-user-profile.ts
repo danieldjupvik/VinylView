@@ -52,8 +52,7 @@ export function useUserProfile(): {
     queryKey: USER_PROFILE_QUERY_KEY,
     queryFn: () =>
       queryClient.getQueryData<UserProfile>(USER_PROFILE_QUERY_KEY) ?? null,
-    enabled: false,
-    staleTime: Infinity
+    enabled: false
   })
 
   /**
