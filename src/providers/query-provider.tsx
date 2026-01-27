@@ -1,28 +1,12 @@
 import { QueryClient, keepPreviousData } from '@tanstack/react-query'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
-import { TRPCClientError } from '@trpc/client'
 import { useState, type ReactNode } from 'react'
 
+import { isNonRetryableError } from '@/lib/errors'
 import { queryPersister } from '@/lib/query-persister'
 import { createTRPCClient, trpc } from '@/lib/trpc'
 import { useHydrationState } from '@/providers/hydration-context'
 import { HydrationProvider } from '@/providers/hydration-provider'
-
-/**
- * Extract the error code from a tRPC error.
- * Returns undefined if the error doesn't have a recognizable code.
- */
-function getTRPCErrorCode(error: unknown): string | undefined {
-  if (!(error instanceof TRPCClientError)) {
-    return undefined
-  }
-  const data: unknown = error.data
-  if (typeof data === 'object' && data !== null && 'code' in data) {
-    const code = (data as { code: unknown }).code
-    return typeof code === 'string' ? code : undefined
-  }
-  return undefined
-}
 
 function createQueryClient() {
   return new QueryClient({
@@ -32,13 +16,8 @@ function createQueryClient() {
         gcTime: 1000 * 60 * 60 * 24, // 24 hours
         placeholderData: keepPreviousData, // Show old data during refetch
         retry: (failureCount, error) => {
-          // Don't retry on certain tRPC error codes
-          const code = getTRPCErrorCode(error)
-          if (
-            code === 'UNAUTHORIZED' ||
-            code === 'NOT_FOUND' ||
-            code === 'TOO_MANY_REQUESTS'
-          ) {
+          // Don't retry on errors where retrying won't help
+          if (isNonRetryableError(error)) {
             return false
           }
           return failureCount < 2

@@ -1,5 +1,4 @@
 import { useIsRestoring, useQueryClient } from '@tanstack/react-query'
-import { TRPCClientError } from '@trpc/client'
 import {
   useCallback,
   useEffect,
@@ -18,29 +17,12 @@ import {
   useUserProfile
 } from '@/hooks/use-user-profile'
 import { CACHE_NAMES } from '@/lib/constants'
-import { OfflineNoCacheError } from '@/lib/errors'
+import { isAuthError, OfflineNoCacheError } from '@/lib/errors'
 import { queryPersister } from '@/lib/query-persister'
 import { trpc } from '@/lib/trpc'
 import { useAuthStore } from '@/stores/auth-store'
 
 import { AuthContext, type AuthState } from './auth-context'
-
-/**
- * Checks if a tRPC error indicates invalid OAuth tokens.
- * Returns true for UNAUTHORIZED (401) and FORBIDDEN (403) errors.
- * Returns false for transient errors (5xx, network issues) that should not trigger logout.
- */
-function isAuthError(error: unknown): boolean {
-  if (!(error instanceof TRPCClientError)) {
-    return false
-  }
-  const data: unknown = error.data
-  if (typeof data === 'object' && data !== null && 'code' in data) {
-    const code = (data as { code: unknown }).code
-    return code === 'UNAUTHORIZED' || code === 'FORBIDDEN'
-  }
-  return false
-}
 
 interface AuthProviderProps {
   children: ReactNode
