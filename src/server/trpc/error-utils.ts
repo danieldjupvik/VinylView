@@ -90,6 +90,7 @@ export function getTRPCCode(
 /**
  * Handles Discogs API errors and converts them to tRPC errors.
  * Provides detailed error messages including HTTP status codes for debugging.
+ * Preserves the original error as `cause` for server-side debugging.
  *
  * Use this in catch blocks when calling the Discogs client:
  * ```ts
@@ -122,7 +123,8 @@ export function handleDiscogsError(error: unknown, context: string): never {
 
     throw new TRPCError({
       code: getTRPCCode(statusCode),
-      message
+      message,
+      cause: error
     })
   }
 
@@ -130,7 +132,8 @@ export function handleDiscogsError(error: unknown, context: string): never {
   if (isNetworkError(error)) {
     throw new TRPCError({
       code: 'INTERNAL_SERVER_ERROR',
-      message: `Network error while trying to ${context}: ${error.message}`
+      message: `Network error while trying to ${context}: ${error.message}`,
+      cause: error
     })
   }
 
@@ -140,6 +143,7 @@ export function handleDiscogsError(error: unknown, context: string): never {
 
   throw new TRPCError({
     code: 'INTERNAL_SERVER_ERROR',
-    message: `Failed to ${context}: ${errorMessage}`
+    message: `Failed to ${context}: ${errorMessage}`,
+    cause: error instanceof Error ? error : undefined
   })
 }
