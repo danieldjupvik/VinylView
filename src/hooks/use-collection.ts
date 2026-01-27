@@ -281,10 +281,10 @@ export function useCollection(
     dataUpdatedAt,
     refetch
   } = useQuery({
+    // eslint-disable-next-line @tanstack/query/exhaustive-deps -- tokens excluded from key to avoid storing credentials in IndexedDB; token changes trigger re-auth and cache clearing anyway
     queryKey: [
       'collection',
       username,
-      oauthTokens,
       shouldFetchAllPages,
       shouldFetchAllPages ? null : page,
       serverSort,

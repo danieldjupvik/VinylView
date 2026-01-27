@@ -53,7 +53,27 @@ interface QueryProviderProps {
 }
 
 /** Persistence options for IndexedDB cache restoration */
-const persistOptions = { persister: queryPersister }
+const persistOptions = {
+  persister: queryPersister,
+  dehydrateOptions: {
+    shouldDehydrateQuery: (query: {
+      queryKey: readonly unknown[]
+      state: { data: unknown; status: string }
+    }) => {
+      // Don't persist queries with no data (empty shells after cache clear)
+      if (query.state.status !== 'success' || query.state.data === undefined) {
+        return false
+      }
+
+      // Exclude getCollectionMetadata - lightweight poll that runs fresh anyway
+      const key = query.queryKey[0]
+      if (Array.isArray(key) && key[1] === 'getCollectionMetadata') {
+        return false
+      }
+      return true
+    }
+  }
+}
 
 function QueryProviderInner({
   children
