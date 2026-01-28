@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { useCollectionSync } from '@/hooks/use-collection-sync'
-import { useAuthStore } from '@/stores/auth-store'
+import { useUserProfile } from '@/hooks/use-user-profile'
 
 /**
  * Global persistent banner that notifies user of collection changes.
@@ -25,7 +25,8 @@ export function CollectionSyncBanner(): React.JSX.Element | null {
   const { t } = useTranslation()
   const { hasChanges, newItemsCount, deletedItemsCount, refreshCollection } =
     useCollectionSync()
-  const username = useAuthStore((state) => state.username)
+  const { profile } = useUserProfile()
+  const username = profile?.username
 
   // Check if collection is currently refetching
   // Use the custom query key from use-collection hook, not tRPC's query key

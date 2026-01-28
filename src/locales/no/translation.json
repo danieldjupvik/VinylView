@@ -6,10 +6,8 @@
   "login": {
     "subtitle": "Din vinylsamling, vakkert organisert",
     "connectAccount": "Logg inn med Discogs-kontoen din",
-    "oauthNote": "Du blir omdirigert til Discogs for å gi tilgang.",
     "noAccount": "Har du ikke en konto?",
     "createAccount": "Opprett en på Discogs",
-    "redirectingHint": "Du kommer tilbake hit etter autorisering",
     "publicBrowse": {
       "title": "Eller bla gjennom en offentlig samling",
       "placeholder": "Skriv inn Discogs-brukernavn",
@@ -56,6 +54,9 @@
     "oauthDenied": "Autorisasjon ble avvist.",
     "oauthMissingParams": "Manglende autentiseringsparametere.",
     "oauthSessionExpired": "Din forrige økt utløp. Vennligst logg inn igjen.",
+    "offlineNoCachedData": "Kan ikke fortsette uten internett. Koble til for å fortsette.",
+    "offlineCannotContinue": "Du er frakoblet. Koble til internett for å fortsette.",
+    "welcomeBackGeneric": "Velkommen tilbake",
     "oauthValidationFailed": "Kunne ikke bekrefte økten din. Prøv igjen.",
     "backToLogin": "Tilbake til innlogging",
     "switchAccount": {
@@ -216,12 +217,23 @@
   },
   "errors": {
     "generic": "Noe gikk galt",
+    "oopsTitle": "Oops! Traff en feil tone",
+    "unexpectedErrorDescription": "Noe uventet skjedde.\nLa oss få deg tilbake på sporet.",
+    "collectionLoadFailed": "Vi kunne ikke laste samlingen din.\nSjekk tilkoblingen og prøv igjen.",
     "network": "Nettverksfeil. Prøv igjen.",
     "rateLimit": "For mange forespørsler. Vent litt.",
     "unauthorized": "Økten er utløpt. Logg inn på nytt.",
-    "notFound": "Siden ble ikke funnet"
+    "notFoundTitle": "Borte i platehyllene",
+    "notFoundDescription": "Denne siden har visst forsvunnet.\nLa oss ta deg tilbake til samlingen.",
+    "notFound": "Siden ble ikke funnet",
+    "tryAgain": "Prøv igjen",
+    "backHome": "Tilbake til samlingen"
   },
   "user": {
-    "fallback": "Bruker"
+    "fallback": "Bruker",
+    "status": {
+      "online": "Tilkoblet",
+      "offline": "Frakoblet"
+    }
   }
 }

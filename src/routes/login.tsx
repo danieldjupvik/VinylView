@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import { BrandMark } from '@/components/layout/brand-mark'
+import { GradientBackground } from '@/components/layout/gradient-background'
 import { LanguageToggle } from '@/components/layout/language-toggle'
 import { ModeToggle } from '@/components/layout/mode-toggle'
 import {
@@ -18,7 +19,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import {
+  Avatar,
+  AvatarBadge,
+  AvatarFallback,
+  AvatarImage
+} from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -30,10 +36,11 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuth } from '@/hooks/use-auth'
+import { useUserProfile } from '@/hooks/use-user-profile'
+import { isAuthError, OfflineNoCacheError } from '@/lib/errors'
 import { setOAuthRequestTokens } from '@/lib/oauth-session'
 import { getAndClearRedirectUrl } from '@/lib/redirect-utils'
 import { trpc } from '@/lib/trpc'
-import { useAuthStore } from '@/stores/auth-store'
 
 export const Route = createFileRoute('/login')({
   component: LoginPage
@@ -83,7 +90,14 @@ function VinylShowcase(): React.JSX.Element {
 
 function LoginPage(): React.JSX.Element {
   const { t } = useTranslation()
-  const { isAuthenticated, validateOAuthTokens } = useAuth()
+  const {
+    isAuthenticated,
+    hasStoredTokens,
+    isOnline,
+    establishSession,
+    disconnect
+  } = useAuth()
+  const { profile } = useUserProfile()
   const navigate = useNavigate()
 
   const [isLoading, setIsLoading] = useState(false)
@@ -91,15 +105,18 @@ function LoginPage(): React.JSX.Element {
   const [error, setError] = useState<string | null>(null)
   const [showSwitchDialog, setShowSwitchDialog] = useState(false)
 
-  // Check if user has existing tokens (signed out but can quick-login)
-  const existingTokens = useAuthStore((state) => state.tokens)
-  const storedUsername = useAuthStore((state) => state.username)
-  const cachedProfile = useAuthStore((state) => state.cachedProfile)
-  const disconnectStore = useAuthStore((state) => state.disconnect)
-  const hasExistingSession = existingTokens !== null && storedUsername !== null
-  const initials = storedUsername
-    ? storedUsername.slice(0, 2).toUpperCase()
-    : '?'
+  // Get cached profile data for "Welcome back" flow
+  const username = profile?.username
+  const cachedAvatarUrl = profile?.avatar_url
+
+  // Show "Welcome back" if tokens exist (even without cached profile when online)
+  // When online without cached profile, establishSession will fetch it
+  const hasExistingSession = hasStoredTokens
+
+  // Can only continue offline if we have cached profile data
+  const cannotContinue = !isOnline && profile === undefined
+
+  const initials = username ? username.slice(0, 2).toUpperCase() : '?'
 
   const getRequestToken = trpc.oauth.getRequestToken.useMutation()
 
@@ -119,11 +136,21 @@ function LoginPage(): React.JSX.Element {
     setError(null)
 
     try {
-      await validateOAuthTokens()
+      await establishSession()
       // Navigation handled by isAuthenticated effect
-    } catch {
-      // Tokens were invalid, they've been cleared
-      const errorMessage = t('auth.oauthSessionExpired')
+    } catch (err) {
+      // Determine appropriate error message:
+      // - Offline without cache: show offline message
+      // - Auth errors (401/403): session expired, tokens invalid
+      // - Transient errors (5xx, network): validation failed, try again
+      let errorMessage: string
+      if (err instanceof OfflineNoCacheError) {
+        errorMessage = t('auth.offlineNoCachedData')
+      } else if (isAuthError(err)) {
+        errorMessage = t('auth.oauthSessionExpired')
+      } else {
+        errorMessage = t('auth.oauthValidationFailed')
+      }
       setError(errorMessage)
       toast.error(errorMessage)
     } finally {
@@ -137,7 +164,7 @@ function LoginPage(): React.JSX.Element {
   const handleUseDifferentAccount = () => {
     setShowSwitchDialog(false)
     setError(null)
-    disconnectStore()
+    disconnect()
     // Force re-render by triggering OAuth flow
     void handleOAuthLogin()
   }
@@ -173,12 +200,7 @@ function LoginPage(): React.JSX.Element {
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[radial-gradient(1200px_circle_at_top,rgba(120,120,120,0.16),transparent_60%)]">
-      {/* Floating gradient orbs */}
-      <div className="bg-primary/15 animate-float-slow pointer-events-none absolute top-12 -left-24 h-64 w-64 rounded-full blur-3xl" />
-      <div className="bg-secondary/25 animate-float-slower pointer-events-none absolute top-1/3 right-[-6rem] h-72 w-72 rounded-full blur-3xl" />
-      <div className="bg-accent/20 animate-float-slowest pointer-events-none absolute bottom-[-6rem] left-1/2 h-72 w-72 -translate-x-1/2 rounded-full blur-3xl" />
-
+    <GradientBackground>
       {/* Theme and language toggles */}
       <div className="animate-in fade-in slide-in-from-top-2 absolute top-4 right-4 z-10 flex items-center gap-2 duration-500">
         <LanguageToggle />
@@ -226,26 +248,45 @@ function LoginPage(): React.JSX.Element {
                 // Welcome back flow - user has existing tokens
                 <div className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards space-y-4 delay-800 duration-500">
                   <div className="mb-4 flex flex-col items-center gap-3">
-                    <Avatar className="border-border h-16 w-16 border-2">
-                      {cachedProfile?.avatar_url?.trim() ? (
+                    <Avatar className="ring-border size-12 overflow-visible ring-2">
+                      {cachedAvatarUrl?.trim() ? (
                         <AvatarImage
-                          src={cachedProfile.avatar_url}
-                          alt={storedUsername}
+                          src={cachedAvatarUrl}
+                          alt={username ?? t('user.fallback')}
                         />
                       ) : null}
                       <AvatarFallback className="text-lg font-medium">
                         {initials}
                       </AvatarFallback>
+                      <AvatarBadge
+                        className={
+                          isOnline
+                            ? 'bg-green-500 dark:bg-green-600'
+                            : 'bg-red-600'
+                        }
+                        aria-label={t(
+                          isOnline
+                            ? 'user.status.online'
+                            : 'user.status.offline'
+                        )}
+                      />
                     </Avatar>
                     <p className="text-lg font-medium">
-                      {t('auth.welcomeBack', { username: storedUsername })}
+                      {username
+                        ? t('auth.welcomeBack', { username })
+                        : t('auth.welcomeBackGeneric')}
                     </p>
                   </div>
+                  {cannotContinue ? (
+                    <p className="text-muted-foreground text-center text-xs">
+                      {t('auth.offlineCannotContinue')}
+                    </p>
+                  ) : null}
                   <Button
                     onClick={() => void handleContinue()}
                     className="w-full"
                     size="lg"
-                    disabled={isValidating || isLoading}
+                    disabled={isValidating || isLoading || cannotContinue}
                   >
                     {isValidating ? (
                       <>
@@ -302,14 +343,9 @@ function LoginPage(): React.JSX.Element {
               ) : (
                 // Fresh login - no existing tokens
                 <div className="animate-in fade-in slide-in-from-bottom-2 fill-mode-backwards space-y-4 delay-800 duration-500">
-                  <div className="space-y-1 text-center">
-                    <p className="text-muted-foreground text-sm">
-                      {t('login.connectAccount')}
-                    </p>
-                    <p className="text-muted-foreground/70 text-xs">
-                      {t('login.oauthNote')}
-                    </p>
-                  </div>
+                  <p className="text-muted-foreground text-center text-sm">
+                    {t('login.connectAccount')}
+                  </p>
                   <Button
                     onClick={() => void handleOAuthLogin()}
                     className="w-full"
@@ -325,11 +361,6 @@ function LoginPage(): React.JSX.Element {
                       t('auth.signInWithDiscogs')
                     )}
                   </Button>
-                  {isLoading ? (
-                    <p className="text-muted-foreground animate-pulse text-center text-xs">
-                      {t('login.redirectingHint')}
-                    </p>
-                  ) : null}
                   <p className="text-muted-foreground text-center text-xs">
                     {t('login.noAccount')}{' '}
                     <a
@@ -373,6 +404,6 @@ function LoginPage(): React.JSX.Element {
           </Card>
         </div>
       </div>
-    </div>
+    </GradientBackground>
   )
 }

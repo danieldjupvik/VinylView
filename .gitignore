@@ -24,3 +24,6 @@ coverage
 *.sln
 *.sw?
 .vercel
+
+# Claude Code hooks
+.claude/hooks/**/tsconfig-cache.json

@@ -43,6 +43,9 @@ reviews:
   poem: false
   enable_prompt_for_ai_agents: true
   path_filters:
+    - '!docs/**'
+    - '!CLAUDE.md'
+    - '!GEMINI.md'
     - '!dist/**'
     - '!build/**'
     - '!coverage/**'
@@ -55,6 +58,11 @@ reviews:
     - '!**/*.{png,jpg,jpeg,gif,svg,ico,webp}'
     - '!**/*.xml'
   path_instructions:
+    - path: 'src/components/ui/**'
+      instructions: >-
+        These are shadcn/ui components - third-party code added via CLI.
+        Do NOT suggest adding TSDoc or docstrings to these files.
+        Only review for breaking changes or security issues if modified.
     - path: 'src/**/*.{ts,tsx}'
       instructions: >-
         Review TypeScript and React code for conformity with best practices.
@@ -245,6 +253,8 @@ code_generation:
   docstrings:
     language: en-US
     path_instructions:
+      - path: 'src/components/ui/**'
+        instructions: 'Do not generate docstrings. These are shadcn/ui components.'
       - path: 'src/**/*.ts'
         instructions: 'Use TSDoc format with @param, @returns, and @example tags where helpful. Keep descriptions concise.'
       - path: 'src/**/*.tsx'

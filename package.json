@@ -10,6 +10,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "preview:offline": "bun run build && concurrently -n api,preview -c blue,green \"bun run dev:api\" \"vite preview\"",
     "prepare": "husky"
   },
   "dependencies": {
@@ -31,6 +32,7 @@
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/query-persist-client-core": "^5.91.19",
     "@tanstack/react-query": "^5.90.18",
+    "@tanstack/react-query-persist-client": "^5.90.22",
     "@tanstack/react-router": "^1.150.0",
     "@trpc/client": "^11.8.1",
     "@trpc/react-query": "^11.8.1",

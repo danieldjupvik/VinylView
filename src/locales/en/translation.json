@@ -6,10 +6,8 @@
   "login": {
     "subtitle": "Your vinyl collection, beautifully organized",
     "connectAccount": "Sign in with your Discogs account",
-    "oauthNote": "You'll be redirected to Discogs to authorize access.",
     "noAccount": "Don't have an account?",
     "createAccount": "Create one on Discogs",
-    "redirectingHint": "You'll return here after authorizing",
     "publicBrowse": {
       "title": "Or browse a public collection",
       "placeholder": "Enter Discogs username",
@@ -56,6 +54,9 @@
     "oauthDenied": "Authorization was denied.",
     "oauthMissingParams": "Missing authentication parameters.",
     "oauthSessionExpired": "Your previous session expired. Please sign in again.",
+    "offlineNoCachedData": "Cannot continue offline. Please connect to the internet.",
+    "offlineCannotContinue": "You're offline. Connect to the internet to continue.",
+    "welcomeBackGeneric": "Welcome back",
     "oauthValidationFailed": "Could not verify your session. Please try again.",
     "backToLogin": "Back to login",
     "switchAccount": {
@@ -216,12 +217,23 @@
   },
   "errors": {
     "generic": "Something went wrong",
+    "oopsTitle": "Oops! Hit a wrong note",
+    "unexpectedErrorDescription": "Something unexpected happened.\nLet's get you back on track.",
+    "collectionLoadFailed": "We couldn't load your collection.\nCheck your connection and try again.",
     "network": "Network error. Please try again.",
     "rateLimit": "Rate limit exceeded. Please wait a moment.",
     "unauthorized": "Session expired. Please log in again.",
-    "notFound": "Page not found"
+    "notFoundTitle": "Lost in the stacks",
+    "notFoundDescription": "This page seems to have wandered off.\nLet's get you back to your collection.",
+    "notFound": "Page not found",
+    "tryAgain": "Try again",
+    "backHome": "Back to collection"
   },
   "user": {
-    "fallback": "User"
+    "fallback": "User",
+    "status": {
+      "online": "Online",
+      "offline": "Offline"
+    }
   }
 }

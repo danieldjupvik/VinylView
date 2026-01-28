@@ -44,3 +44,17 @@ export const RATE_LIMIT = {
 export const COLLECTION = {
   PER_PAGE: 100
 } as const
+
+/**
+ * Browser Cache API cache names.
+ * Used by service worker (vite.config.ts) and auth-provider for cache management.
+ * Keep in sync with runtimeCaching configuration in vite.config.ts.
+ */
+export const CACHE_NAMES = {
+  /** Discogs API response cache */
+  DISCOGS_API: 'discogs-api-cache',
+  /** Discogs cover images cache */
+  DISCOGS_IMAGES: 'discogs-images-cache',
+  /** Gravatar images cache */
+  GRAVATAR_IMAGES: 'gravatar-images-cache'
+} as const

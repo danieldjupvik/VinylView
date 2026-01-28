@@ -43,6 +43,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { useAuth } from '@/hooks/use-auth'
 import { usePreferences } from '@/hooks/use-preferences'
+import { useUserProfile } from '@/hooks/use-user-profile'
 import { APP_VERSION } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 export const Route = createFileRoute('/_authenticated/settings')({
@@ -112,7 +113,10 @@ function LanguageFlag({ lang }: { lang: 'en' | 'no' }) {
 
 function SettingsPage() {
   const { t, i18n } = useTranslation()
-  const { username, avatarUrl, disconnect } = useAuth()
+  const { disconnect } = useAuth()
+  const { profile } = useUserProfile()
+  const username = profile?.username
+  const avatarUrl = profile?.avatar_url
   const { avatarSource, gravatarUrl, setAvatarSource } = usePreferences()
   const { theme, setTheme } = useTheme()
   const navigate = useNavigate()
@@ -175,15 +179,11 @@ function SettingsPage() {
                       : 'border-border'
                   )}
                 >
-                  <Avatar className="size-10 rounded-md">
+                  <Avatar className="ring-border size-10 ring-2">
                     {avatarUrl ? (
-                      <AvatarImage
-                        src={avatarUrl}
-                        alt={username ?? 'User'}
-                        className="rounded-md object-cover"
-                      />
+                      <AvatarImage src={avatarUrl} alt={username ?? 'User'} />
                     ) : null}
-                    <AvatarFallback className="rounded-md text-xs">
+                    <AvatarFallback className="text-lg font-medium">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
@@ -208,15 +208,11 @@ function SettingsPage() {
                       : 'border-border'
                   )}
                 >
-                  <Avatar className="size-10 rounded-md">
+                  <Avatar className="ring-border size-10 ring-2">
                     {gravatarUrl ? (
-                      <AvatarImage
-                        src={gravatarUrl}
-                        alt={username ?? 'User'}
-                        className="rounded-md object-cover"
-                      />
+                      <AvatarImage src={gravatarUrl} alt={username ?? 'User'} />
                     ) : null}
-                    <AvatarFallback className="rounded-md text-xs">
+                    <AvatarFallback className="text-lg font-medium">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
