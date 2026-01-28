@@ -177,17 +177,50 @@ const hasItem = items.indexOf(item) !== -1
 
 ### TSDoc Documentation
 
-Use TSDoc for exported functions:
+**REQUIRED** - Add TSDoc to all exported functions, hooks, and utilities.
+
+| Location                   | TSDoc Required                         |
+| -------------------------- | -------------------------------------- |
+| `src/hooks/**`             | Yes - all exported hooks               |
+| `src/lib/**`               | Yes - all exported functions           |
+| `src/providers/**`         | Yes - exported providers and functions |
+| `src/stores/**`            | Yes - exported actions and selectors   |
+| `src/components/ui/**`     | No - shadcn components (third-party)   |
+| Internal/private functions | No - only if logic is non-obvious      |
+
+**Required tags:**
+
+- `@param` - For each parameter (include type context if not obvious)
+- `@returns` - What the function returns (omit for void)
+- `@throws` - If the function throws specific errors
+- `@example` - For complex utilities (optional but helpful)
+
+**Format:**
 
 ```typescript
 /**
- * Validates and sanitizes a redirect URL to prevent open redirect attacks.
+ * Brief description of what the function does.
  *
  * @param redirectUrl - The URL to validate
  * @param defaultPath - Default path if validation fails
  * @returns The sanitized URL or default path
+ * @throws {OfflineNoCacheError} When offline with no cached data
  */
-export function getSafeRedirectUrl(...): string { ... }
+export function getSafeRedirectUrl(
+  redirectUrl: string | null,
+  defaultPath: string
+): string { ... }
+```
+
+**Hook example:**
+
+```typescript
+/**
+ * Tracks online/offline status with event listener cleanup.
+ *
+ * @returns Current online status from navigator.onLine
+ */
+export function useOnlineStatus(): boolean { ... }
 ```
 
 ## API Layer (tRPC)
