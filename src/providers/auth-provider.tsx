@@ -78,6 +78,12 @@ export function AuthProvider({
   // Track previous online state to detect offline→online transitions
   const wasOnlineRef = useRef(isOnline)
 
+  // Track current online status for use in async callbacks (avoids stale closure)
+  const isOnlineRef = useRef(isOnline)
+  useEffect(() => {
+    isOnlineRef.current = isOnline
+  }, [isOnline])
+
   const [state, setState] = useState<AuthState>({
     isAuthenticated: false,
     isLoading: true,
@@ -201,13 +207,13 @@ export function AuthProvider({
           if (isAuthError(error)) {
             disconnectStore()
             clearAllCaches()
-            setState({
+            setState((prev) => ({
+              ...prev,
               isAuthenticated: false,
               isLoading: false,
-              isOnline,
               hasStoredTokens: false,
               oauthTokens: null
-            })
+            }))
           }
           // Transient errors are silently ignored - user stays authenticated
           // and we'll retry on next opportunity (window focus, etc.)
@@ -220,8 +226,7 @@ export function AuthProvider({
       fetchProfile,
       setGravatarEmail,
       disconnectStore,
-      clearAllCaches,
-      isOnline
+      clearAllCaches
     ]
   )
 

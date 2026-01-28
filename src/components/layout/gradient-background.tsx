@@ -7,6 +7,10 @@ interface GradientBackgroundProps {
 /**
  * Full-screen background with radial gradient and floating orbs.
  * Used for standalone pages like login and error states.
+ *
+ * @param props - Component props
+ * @param props.children - Content to render inside the gradient container
+ * @returns The gradient background wrapper element
  */
 export function GradientBackground({
   children

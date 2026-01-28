@@ -32,6 +32,9 @@ interface AuthStore {
  * Two-tier auth system:
  * - signOut(): Ends session, keeps tokens for "welcome back"
  * - disconnect(): Clears everything, requires re-authorization
+ *
+ * @param selector - Zustand selector function to extract state
+ * @returns Selected state from the auth store
  */
 export const useAuthStore = create<AuthStore>()(
   persist(

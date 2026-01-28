@@ -132,7 +132,7 @@ function SettingsPage() {
   const initials = username
     ? username
         .split(/[\s_-]/)
-        .map((part: string) => part[0])
+        .map((part) => part[0])
         .join('')
         .toUpperCase()
         .slice(0, 2)

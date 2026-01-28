@@ -2,14 +2,29 @@ import { createContext } from 'react'
 
 import type { OAuthTokens } from '@/types/discogs'
 
+/**
+ * Authentication state managed by AuthProvider.
+ *
+ * @public
+ */
 export interface AuthState {
+  /** Whether the user is currently authenticated */
   isAuthenticated: boolean
+  /** Whether auth initialization or validation is in progress */
   isLoading: boolean
+  /** Whether the browser is currently online */
   isOnline: boolean
+  /** Whether OAuth tokens exist in storage (even if session inactive) */
   hasStoredTokens: boolean
+  /** Current OAuth tokens if authenticated, null otherwise */
   oauthTokens: OAuthTokens | null
 }
 
+/**
+ * Authentication context value providing state and auth methods.
+ *
+ * @public
+ */
 export interface AuthContextValue extends AuthState {
   /**
    * Validates OAuth tokens only (does not fetch profile).

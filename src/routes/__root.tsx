@@ -30,10 +30,15 @@ function NotFoundComponent() {
   return (
     <GradientBackground>
       <div className="animate-in fade-in zoom-in-95 flex min-h-screen flex-col items-center justify-center p-6 text-center duration-300">
-        <h1 className="text-8xl font-bold tracking-tighter opacity-20">404</h1>
-        <h2 className="mt-4 text-2xl font-semibold">
+        <span
+          className="text-8xl font-bold tracking-tighter opacity-20"
+          aria-hidden="true"
+        >
+          404
+        </span>
+        <h1 className="mt-4 text-2xl font-semibold">
           {t('errors.notFoundTitle')}
-        </h2>
+        </h1>
         <p className="text-muted-foreground mt-3 text-base whitespace-pre-line">
           {t('errors.notFoundDescription')}
         </p>
