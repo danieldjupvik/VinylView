@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.4.0-beta.1](https://github.com/danieldjupvik/VinylDeck/compare/vinyldeck-v0.3.1-beta.1...vinyldeck-v0.4.0-beta.1) (2026-01-28)
+
+
+### Features
+
+* add real logo support ([#64](https://github.com/danieldjupvik/VinylDeck/issues/64)) ([842e354](https://github.com/danieldjupvik/VinylDeck/commit/842e3549dd964f8ee1a2e19128f3b4609f9a2fcb))
+* consolidate storage from 11 keys to 4, add IndexedDB caching ([#61](https://github.com/danieldjupvik/VinylDeck/issues/61)) ([26292b4](https://github.com/danieldjupvik/VinylDeck/commit/26292b4d81bc3b29236887e2adcda742cbce1863))
+* fully support offline mode ([#67](https://github.com/danieldjupvik/VinylDeck/issues/67)) ([05b89e4](https://github.com/danieldjupvik/VinylDeck/commit/05b89e4006aace38afadf7a1be22fa198f7266ac))
+
+
+### Bug Fixes
+
+* improve UX on login page fixes ([#54](https://github.com/danieldjupvik/VinylDeck/issues/54)) ([7b661a7](https://github.com/danieldjupvik/VinylDeck/commit/7b661a7325cc17f04627f0c73e04a368ad8bbdfc))
+* resolve Vite build warnings ([#56](https://github.com/danieldjupvik/VinylDeck/issues/56)) ([d488084](https://github.com/danieldjupvik/VinylDeck/commit/d48808426a7f62113ed958f469b9a03cba3c1eb0))
+
 ## [0.3.1-beta.1](https://github.com/danieldjupvik/VinylDeck/compare/vinyldeck-v0.3.0-beta.1...vinyldeck-v0.3.1-beta.1) (2026-01-21)
 
 
